@@ -1,0 +1,35 @@
+# 测试设计助手系统 - AI服务依赖
+
+# Web框架
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.0
+pydantic-settings==2.5.0
+
+# 大模型调用
+# LangChain 核心包
+langchain-core==0.3.0
+langchain==0.3.0
+langchain-community==0.3.0
+langchain-openai==0.2.0
+openai==1.54.0
+
+# 数据库
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# HTTP客户端
+httpx==0.27.0
+requests==2.32.0
+
+# 工具类
+python-dotenv==1.0.1
+python-multipart==0.0.9
+
+# 文档解析
+python-docx==1.1.2
+PyPDF2==3.0.1
+
+# 日志
+loguru==0.7.2
+

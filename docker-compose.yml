@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:14
+    container_name: test-design-postgres
+    environment:
+      POSTGRES_DB: test_design_assistant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - test-design-network
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: test-design-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - test-design-network
+
+  # Java后端服务
+  backend-java:
+    build:
+      context: ./backend-java/test-design-assistant-core
+      dockerfile: Dockerfile
+    container_name: test-design-backend-java
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test_design_assistant
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - test-design-network
+
+  # Python AI服务
+  backend-python:
+    build:
+      context: ./backend-python/ai-service
+      dockerfile: Dockerfile
+    container_name: test-design-backend-python
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_design_assistant
+    depends_on:
+      - postgres
+    networks:
+      - test-design-network
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: test-design-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend-java
+    networks:
+      - test-design-network
+
+volumes:
+  postgres_data:
+
+networks:
+  test-design-network:
+    driver: bridge
+
