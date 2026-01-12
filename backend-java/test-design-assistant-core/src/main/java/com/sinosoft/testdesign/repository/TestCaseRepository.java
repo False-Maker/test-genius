@@ -27,5 +27,10 @@ public interface TestCaseRepository extends JpaRepository<TestCase, Long>,
      * 根据需求ID查询用例列表
      */
     List<TestCase> findByRequirementId(Long requirementId);
+    
+    /**
+     * 查询指定前缀的用例编码列表（用于编码生成优化）
+     */
+    List<TestCase> findByCaseCodeStartingWithOrderByIdDesc(String prefix);
 }
 

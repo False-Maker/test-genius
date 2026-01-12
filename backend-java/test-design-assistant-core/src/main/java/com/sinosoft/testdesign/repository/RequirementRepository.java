@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,5 +22,10 @@ public interface RequirementRepository extends JpaRepository<TestRequirement, Lo
      * 根据需求编码查询
      */
     Optional<TestRequirement> findByRequirementCode(String requirementCode);
+    
+    /**
+     * 查询指定前缀的需求编码列表（用于编码生成优化）
+     */
+    List<TestRequirement> findByRequirementCodeStartingWithOrderByIdDesc(String prefix);
 }
 

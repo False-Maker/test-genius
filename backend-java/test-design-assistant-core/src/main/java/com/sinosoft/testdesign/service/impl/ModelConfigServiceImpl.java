@@ -3,6 +3,7 @@ package com.sinosoft.testdesign.service.impl;
 import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.entity.ModelConfig;
 import com.sinosoft.testdesign.repository.ModelConfigRepository;
+import com.sinosoft.testdesign.service.CacheService;
 import com.sinosoft.testdesign.service.ModelConfigService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,13 @@ import java.util.List;
 public class ModelConfigServiceImpl implements ModelConfigService {
     
     private final ModelConfigRepository modelConfigRepository;
+    private final CacheService cacheService;
+    
+    // 缓存键前缀
+    private static final String CACHE_KEY_ACTIVE_MODELS = "cache:model:active";
+    private static final String CACHE_KEY_MODEL_BY_CODE = "cache:model:code:";
+    private static final String CACHE_KEY_MODEL_BY_ID = "cache:model:id:";
+    private static final String CACHE_KEY_MODEL_BY_TYPE = "cache:model:type:";
     
     @Override
     @Transactional
@@ -63,7 +71,12 @@ public class ModelConfigServiceImpl implements ModelConfigService {
         }
         
         log.info("创建模型配置成功，编码: {}", modelConfig.getModelCode());
-        return modelConfigRepository.save(modelConfig);
+        ModelConfig saved = modelConfigRepository.save(modelConfig);
+        
+        // 清除相关缓存
+        clearModelCache();
+        
+        return saved;
     }
     
     @Override
@@ -116,19 +129,52 @@ public class ModelConfigServiceImpl implements ModelConfigService {
         }
         
         log.info("更新模型配置成功，编码: {}", existing.getModelCode());
-        return modelConfigRepository.save(existing);
+        ModelConfig saved = modelConfigRepository.save(existing);
+        
+        // 清除相关缓存
+        clearModelCache();
+        cacheService.delete(CACHE_KEY_MODEL_BY_CODE + saved.getModelCode());
+        cacheService.delete(CACHE_KEY_MODEL_BY_ID + saved.getId());
+        
+        return saved;
     }
     
     @Override
     public ModelConfig getModelConfigById(Long id) {
-        return modelConfigRepository.findById(id)
+        // 尝试从缓存获取
+        String cacheKey = CACHE_KEY_MODEL_BY_ID + id;
+        ModelConfig cached = cacheService.get(cacheKey, ModelConfig.class);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // 从数据库查询
+        ModelConfig config = modelConfigRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("模型配置不存在"));
+        
+        // 存入缓存（1小时）
+        cacheService.set(cacheKey, config, 3600);
+        
+        return config;
     }
     
     @Override
     public ModelConfig getModelConfigByCode(String modelCode) {
-        return modelConfigRepository.findByModelCode(modelCode)
+        // 尝试从缓存获取
+        String cacheKey = CACHE_KEY_MODEL_BY_CODE + modelCode;
+        ModelConfig cached = cacheService.get(cacheKey, ModelConfig.class);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // 从数据库查询
+        ModelConfig config = modelConfigRepository.findByModelCode(modelCode)
                 .orElseThrow(() -> new BusinessException("模型配置不存在: " + modelCode));
+        
+        // 存入缓存（1小时）
+        cacheService.set(cacheKey, config, 3600);
+        
+        return config;
     }
     
     @Override
@@ -157,12 +203,37 @@ public class ModelConfigServiceImpl implements ModelConfigService {
     
     @Override
     public List<ModelConfig> getActiveModelConfigs() {
-        return modelConfigRepository.findByIsActiveOrderByPriorityAsc("1");
+        // 尝试从缓存获取
+        List<ModelConfig> cached = cacheService.getList(CACHE_KEY_ACTIVE_MODELS, ModelConfig.class);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // 从数据库查询
+        List<ModelConfig> configs = modelConfigRepository.findByIsActiveOrderByPriorityAsc("1");
+        
+        // 存入缓存（30分钟，因为这是热点数据）
+        cacheService.set(CACHE_KEY_ACTIVE_MODELS, configs, 1800);
+        
+        return configs;
     }
     
     @Override
     public List<ModelConfig> getActiveModelConfigsByType(String modelType) {
-        return modelConfigRepository.findByModelTypeAndIsActive(modelType, "1");
+        // 尝试从缓存获取
+        String cacheKey = CACHE_KEY_MODEL_BY_TYPE + modelType;
+        List<ModelConfig> cached = cacheService.getList(cacheKey, ModelConfig.class);
+        if (cached != null) {
+            return cached;
+        }
+        
+        // 从数据库查询
+        List<ModelConfig> configs = modelConfigRepository.findByModelTypeAndIsActive(modelType, "1");
+        
+        // 存入缓存（30分钟）
+        cacheService.set(cacheKey, configs, 1800);
+        
+        return configs;
     }
     
     @Override
@@ -174,6 +245,12 @@ public class ModelConfigServiceImpl implements ModelConfigService {
                 .orElseThrow(() -> new BusinessException("模型配置不存在"));
         
         modelConfigRepository.delete(modelConfig);
+        
+        // 清除相关缓存
+        clearModelCache();
+        cacheService.delete(CACHE_KEY_MODEL_BY_CODE + modelConfig.getModelCode());
+        cacheService.delete(CACHE_KEY_MODEL_BY_ID + modelConfig.getId());
+        
         log.info("删除模型配置成功，编码: {}", modelConfig.getModelCode());
     }
     
@@ -190,8 +267,23 @@ public class ModelConfigServiceImpl implements ModelConfigService {
         }
         
         modelConfig.setIsActive(isActive);
-        log.info("更新模型配置状态成功，编码: {}, 状态: {}", modelConfig.getModelCode(), isActive);
-        return modelConfigRepository.save(modelConfig);
+        ModelConfig saved = modelConfigRepository.save(modelConfig);
+        
+        // 清除相关缓存
+        clearModelCache();
+        cacheService.delete(CACHE_KEY_MODEL_BY_CODE + saved.getModelCode());
+        cacheService.delete(CACHE_KEY_MODEL_BY_ID + saved.getId());
+        
+        log.info("更新模型配置状态成功，编码: {}, 状态: {}", saved.getModelCode(), isActive);
+        return saved;
+    }
+    
+    /**
+     * 清除模型相关缓存
+     */
+    private void clearModelCache() {
+        cacheService.delete(CACHE_KEY_ACTIVE_MODELS);
+        cacheService.deleteByPattern(CACHE_KEY_MODEL_BY_TYPE + "*");
     }
     
     /**

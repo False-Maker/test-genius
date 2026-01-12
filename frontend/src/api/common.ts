@@ -22,6 +22,21 @@ export interface TestDesignMethod {
   isActive?: string
 }
 
+// 模型配置类型
+export interface ModelConfig {
+  id: number
+  modelCode: string
+  modelName: string
+  modelType?: string
+  apiEndpoint?: string
+  modelVersion?: string
+  maxTokens?: number
+  temperature?: number
+  isActive?: string
+  priority?: number
+  dailyLimit?: number
+}
+
 // 通用API
 export const commonApi = {
   // 获取测试分层列表
@@ -32,6 +47,11 @@ export const commonApi = {
   // 获取测试设计方法列表
   getTestDesignMethodList() {
     return request.get<TestDesignMethod[]>('/v1/common/test-design-methods')
+  },
+
+  // 获取模型配置列表
+  getModelConfigList() {
+    return request.get<ModelConfig[]>('/v1/common/model-configs')
   }
 }
 

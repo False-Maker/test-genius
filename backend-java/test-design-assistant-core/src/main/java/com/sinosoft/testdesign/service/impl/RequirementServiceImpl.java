@@ -206,11 +206,9 @@ public class RequirementServiceImpl implements RequirementService {
         String dateStr = LocalDate.now().format(DATE_FORMATTER);
         String prefix = REQUIREMENT_CODE_PREFIX + "-" + dateStr + "-";
         
-        // 查询当天已生成的最大序号
-        List<TestRequirement> todayRequirements = requirementRepository.findAll()
-                .stream()
-                .filter(req -> req.getRequirementCode() != null && req.getRequirementCode().startsWith(prefix))
-                .toList();
+        // 优化：只查询当天前缀的需求，避免全表扫描
+        List<TestRequirement> todayRequirements = requirementRepository
+                .findByRequirementCodeStartingWithOrderByIdDesc(prefix);
         
         int maxSequence = 0;
         for (TestRequirement req : todayRequirements) {

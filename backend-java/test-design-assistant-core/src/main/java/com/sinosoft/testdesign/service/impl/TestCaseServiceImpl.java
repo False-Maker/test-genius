@@ -280,11 +280,9 @@ public class TestCaseServiceImpl implements TestCaseService {
         String dateStr = LocalDate.now().format(DATE_FORMATTER);
         String prefix = CASE_CODE_PREFIX + "-" + dateStr + "-";
         
-        // 查询当天已生成的最大序号
-        List<TestCase> todayCases = testCaseRepository.findAll()
-                .stream()
-                .filter(c -> c.getCaseCode() != null && c.getCaseCode().startsWith(prefix))
-                .toList();
+        // 优化：只查询当天前缀的用例，避免全表扫描
+        List<TestCase> todayCases = testCaseRepository
+                .findByCaseCodeStartingWithOrderByIdDesc(prefix);
         
         int maxSequence = 0;
         for (TestCase c : todayCases) {

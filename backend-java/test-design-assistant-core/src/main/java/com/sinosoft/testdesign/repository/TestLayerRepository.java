@@ -25,5 +25,10 @@ public interface TestLayerRepository extends JpaRepository<TestLayer, Long> {
      * 查询所有启用的测试分层
      */
     List<TestLayer> findByIsActiveOrderByLayerOrder(String isActive);
+    
+    /**
+     * 根据分层名称查询
+     */
+    Optional<TestLayer> findByLayerName(String layerName);
 }
 

@@ -1,10 +1,18 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
+import com.sinosoft.testdesign.dto.BatchCaseGenerationRequest;
+import com.sinosoft.testdesign.dto.BatchCaseGenerationResult;
+import com.sinosoft.testdesign.dto.CaseGenerationRequest;
+import com.sinosoft.testdesign.dto.CaseGenerationResult;
+import com.sinosoft.testdesign.dto.GenerationTaskDTO;
+import com.sinosoft.testdesign.service.IntelligentCaseGenerationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用例生成控制器
@@ -18,25 +26,34 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CaseGenerationController {
     
-    @Operation(summary = "生成用例", description = "根据需求生成测试用例")
+    private final IntelligentCaseGenerationService caseGenerationService;
+    
+    @Operation(summary = "生成用例", description = "根据需求生成测试用例（异步）")
     @PostMapping("/generate")
-    public Result<Void> generateTestCases(@RequestBody Object request) {
-        // TODO: 实现用例生成功能
-        return Result.success();
+    public Result<CaseGenerationResult> generateTestCases(@RequestBody CaseGenerationRequest request) {
+        CaseGenerationResult result = caseGenerationService.generateTestCases(request);
+        return Result.success(result);
     }
     
-    @Operation(summary = "批量生成", description = "批量生成测试用例")
-    @PostMapping("/batch")
-    public Result<Void> batchGenerateTestCases(@RequestBody Object request) {
-        // TODO: 实现批量生成功能
-        return Result.success();
+    @Operation(summary = "批量生成用例", description = "根据多个需求批量生成测试用例（异步）")
+    @PostMapping("/batch-generate")
+    public Result<BatchCaseGenerationResult> batchGenerateTestCases(@RequestBody BatchCaseGenerationRequest request) {
+        BatchCaseGenerationResult result = caseGenerationService.batchGenerateTestCases(request);
+        return Result.success(result);
     }
     
     @Operation(summary = "查询生成任务", description = "查询用例生成任务状态")
     @GetMapping("/{id}")
-    public Result<Object> getGenerationTask(@PathVariable Long id) {
-        // TODO: 实现查询生成任务功能
-        return Result.success();
+    public Result<GenerationTaskDTO> getGenerationTask(@PathVariable Long id) {
+        GenerationTaskDTO task = caseGenerationService.getGenerationTask(id);
+        return Result.success(task);
+    }
+    
+    @Operation(summary = "批量查询生成任务", description = "批量查询用例生成任务状态")
+    @PostMapping("/batch-query")
+    public Result<List<GenerationTaskDTO>> getBatchGenerationTasks(@RequestBody List<Long> taskIds) {
+        List<GenerationTaskDTO> tasks = caseGenerationService.getBatchGenerationTasks(taskIds);
+        return Result.success(tasks);
     }
 }
 

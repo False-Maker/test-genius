@@ -239,11 +239,9 @@ public class PromptTemplateServiceImpl implements PromptTemplateService {
         String dateStr = LocalDate.now().format(DATE_FORMATTER);
         String prefix = TEMPLATE_CODE_PREFIX + "-" + dateStr + "-";
         
-        // 查询当天已生成的最大序号
-        List<PromptTemplate> todayTemplates = templateRepository.findAll()
-                .stream()
-                .filter(t -> t.getTemplateCode() != null && t.getTemplateCode().startsWith(prefix))
-                .toList();
+        // 优化：只查询当天前缀的模板，避免全表扫描
+        List<PromptTemplate> todayTemplates = templateRepository
+                .findByTemplateCodeStartingWithOrderByIdDesc(prefix);
         
         int maxSequence = 0;
         for (PromptTemplate t : todayTemplates) {

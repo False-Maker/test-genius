@@ -78,6 +78,24 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="模型配置">
+          <el-select
+            v-model="form.modelCode"
+            placeholder="请选择模型配置（可选，默认使用优先级最高的模型）"
+            filterable
+            clearable
+            style="width: 100%"
+            :loading="modelLoading"
+          >
+            <el-option
+              v-for="model in modelList"
+              :key="model.modelCode"
+              :label="model.modelName"
+              :value="model.modelCode"
+            />
+          </el-select>
+        </el-form-item>
+
         <el-form-item>
           <el-button type="primary" @click="handleGenerate" :loading="generateLoading">
             生成用例
@@ -112,6 +130,12 @@
             style="margin-bottom: 20px"
           >
             {{ generationResult.message || '用例生成成功' }}
+            <template v-if="generationResult.successCases !== undefined">
+              <br />成功生成 {{ generationResult.successCases }} 个用例
+              <template v-if="generationResult.failCases && generationResult.failCases > 0">
+                ，失败 {{ generationResult.failCases }} 个
+              </template>
+            </template>
           </el-alert>
           <el-button type="primary" @click="handleViewResults">查看生成的用例</el-button>
         </div>
@@ -132,9 +156,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { requirementApi, type TestRequirement } from '@/api/requirement'
-import { commonApi, type TestLayer, type TestDesignMethod } from '@/api/common'
+import { commonApi, type TestLayer, type TestDesignMethod, type ModelConfig } from '@/api/common'
 import { promptTemplateApi, type PromptTemplate } from '@/api/promptTemplate'
 import { caseGenerationApi, type CaseGenerationRequest, type GenerationTask } from '@/api/caseGeneration'
 
@@ -144,20 +169,24 @@ const requirementLoading = ref(false)
 const layerLoading = ref(false)
 const methodLoading = ref(false)
 const templateLoading = ref(false)
+const modelLoading = ref(false)
 const generateLoading = ref(false)
 
 const requirementList = ref<TestRequirement[]>([])
 const layerList = ref<TestLayer[]>([])
 const methodList = ref<TestDesignMethod[]>([])
 const templateList = ref<PromptTemplate[]>([])
+const modelList = ref<ModelConfig[]>([])
 
 const form = reactive<CaseGenerationRequest & { templateId?: number }>({
   requirementId: undefined,
   layerCode: '',
   methodCode: '',
-  templateId: undefined
+  templateId: undefined,
+  modelCode: undefined
 })
 
+const router = useRouter()
 const generationResult = ref<GenerationTask | null>(null)
 let pollTimer: number | null = null
 
@@ -253,6 +282,21 @@ const loadTemplateList = async () => {
   }
 }
 
+// 加载模型配置列表
+const loadModelList = async () => {
+  modelLoading.value = true
+  try {
+    const response = await commonApi.getModelConfigList()
+    if (response.data) {
+      modelList.value = response.data
+    }
+  } catch (error) {
+    console.error('加载模型配置列表失败:', error)
+  } finally {
+    modelLoading.value = false
+  }
+}
+
 // 轮询任务状态
 const pollTaskStatus = async (taskId: number) => {
   if (pollTimer) {
@@ -298,7 +342,8 @@ const handleGenerate = async () => {
           requirementId: form.requirementId!,
           layerCode: form.layerCode || undefined,
           methodCode: form.methodCode || undefined,
-          templateId: form.templateId
+          templateId: form.templateId,
+          modelCode: form.modelCode
         }
 
         const response = await caseGenerationApi.generateTestCases(request)
@@ -339,8 +384,18 @@ const handleReset = () => {
 
 // 查看生成结果
 const handleViewResults = () => {
-  // TODO: 跳转到用例列表页面，并筛选该需求相关的用例
-  ElMessage.info('功能开发中，请稍后查看用例列表')
+  if (generationResult.value && generationResult.value.requirementId) {
+    // 跳转到用例列表页面，并筛选该需求相关的用例
+    const router = useRouter()
+    router.push({
+      path: '/test-cases',
+      query: {
+        requirementId: generationResult.value.requirementId.toString()
+      }
+    })
+  } else {
+    ElMessage.warning('无法获取需求ID')
+  }
 }
 
 // 初始化
@@ -349,6 +404,7 @@ onMounted(() => {
   loadLayerList()
   loadMethodList()
   loadTemplateList()
+  loadModelList()
 })
 
 // 组件卸载时清理定时器

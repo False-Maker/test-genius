@@ -30,6 +30,9 @@ const hideLoading = () => {
   }
 }
 
+// 请求去重：防止重复请求
+const pendingRequests = new Map<string, AbortController>()
+
 // 创建axios实例
 const service: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
@@ -47,6 +50,26 @@ service.interceptors.request.use(
     // if (token && config.headers) {
     //   config.headers.Authorization = `Bearer ${token}`
     // }
+    
+    // 请求去重：如果存在相同的请求，取消之前的请求
+    const requestKey = `${config.method}-${config.url}-${JSON.stringify(config.params || config.data)}`
+    if (pendingRequests.has(requestKey)) {
+      const controller = pendingRequests.get(requestKey)!
+      controller.abort()
+      pendingRequests.delete(requestKey)
+    }
+    
+    // 创建新的AbortController
+    const controller = new AbortController()
+    config.signal = controller.signal
+    pendingRequests.set(requestKey, controller)
+    
+    // 请求完成后移除
+    if (config.signal) {
+      config.signal.addEventListener('abort', () => {
+        pendingRequests.delete(requestKey)
+      })
+    }
     
     // 显示加载状态（如果配置了showLoading）
     if (config.showLoading !== false) {
@@ -70,6 +93,10 @@ service.interceptors.response.use(
       hideLoading()
     }
     
+    // 移除已完成的请求
+    const requestKey = `${response.config.method}-${response.config.url}-${JSON.stringify(response.config.params || response.config.data)}`
+    pendingRequests.delete(requestKey)
+    
     const res = response.data
     
     // 如果返回的状态码不是200，则视为错误
@@ -83,6 +110,17 @@ service.interceptors.response.use(
   (error) => {
     // 隐藏加载状态
     hideLoading()
+    
+    // 移除已失败的请求
+    if (error.config) {
+      const requestKey = `${error.config.method}-${error.config.url}-${JSON.stringify(error.config.params || error.config.data)}`
+      pendingRequests.delete(requestKey)
+    }
+    
+    // 如果是取消的请求，不显示错误
+    if (axios.isCancel(error)) {
+      return Promise.reject(error)
+    }
     
     console.error('响应错误:', error)
     let message = '请求失败'

@@ -102,6 +102,14 @@ class CaseGenerationService:
             cases = self.parse_cases(content)
             logger.info(f"用例解析完成，共生成 {len(cases)} 个用例")
             
+            # 6. 用例去重和合并
+            cases = self._deduplicate_and_merge_cases(cases)
+            logger.info(f"用例去重后，剩余 {len(cases)} 个用例")
+            
+            # 7. 用例质量初步检查
+            cases = self._quality_check_cases(cases)
+            logger.info(f"用例质量检查后，剩余 {len(cases)} 个用例")
+            
             # 为每个用例添加关联信息
             for case in cases:
                 case["requirement_id"] = requirement_id
@@ -153,7 +161,13 @@ class CaseGenerationService:
         method_code: str
     ) -> Optional[Dict]:
         """
-        根据测试分层和方法选择适用的模板
+        根据测试分层和方法选择适用的模板（优化版）
+        
+        优化策略：
+        1. 优先选择同时匹配分层和方法的模板
+        2. 其次选择只匹配分层的模板
+        3. 再次选择只匹配方法的模板
+        4. 最后选择通用模板
         
         Args:
             layer_code: 测试分层代码
@@ -162,20 +176,42 @@ class CaseGenerationService:
         Returns:
             模板信息字典，如果未找到返回None
         """
+        # 1. 查找同时匹配分层和方法的模板
         templates = self.prompt_service.find_applicable_templates(
             layer_code=layer_code,
             method_code=method_code
         )
         
         if templates:
-            # 返回第一个适用的模板
+            # 优先返回第一个完全匹配的模板
+            logger.info(f"找到完全匹配的模板: {len(templates)}个")
             return templates[0]
         
-        # 如果没有找到适用的模板，返回第一个启用的模板
+        # 2. 查找只匹配分层的模板
+        if layer_code:
+            templates = self.prompt_service.find_applicable_templates(
+                layer_code=layer_code
+            )
+            if templates:
+                logger.info(f"找到匹配分层的模板: {len(templates)}个")
+                return templates[0]
+        
+        # 3. 查找只匹配方法的模板
+        if method_code:
+            templates = self.prompt_service.find_applicable_templates(
+                method_code=method_code
+            )
+            if templates:
+                logger.info(f"找到匹配方法的模板: {len(templates)}个")
+                return templates[0]
+        
+        # 4. 如果没有找到适用的模板，返回第一个启用的通用模板
         all_templates = self.prompt_service.find_applicable_templates()
         if all_templates:
+            logger.info(f"使用通用模板: {len(all_templates)}个")
             return all_templates[0]
         
+        logger.warning("未找到任何可用的模板")
         return None
     
     def _build_prompt_variables(
@@ -375,3 +411,111 @@ class CaseGenerationService:
             })
         
         return cases if cases else []
+    
+    def _deduplicate_and_merge_cases(self, cases: List[Dict]) -> List[Dict]:
+        """
+        用例去重和合并
+        
+        去重策略：
+        1. 用例名称相似度检查（使用简单字符串匹配）
+        2. 测试步骤相似度检查
+        3. 合并相似用例（保留更完整的用例）
+        
+        Args:
+            cases: 用例列表
+            
+        Returns:
+            去重后的用例列表
+        """
+        if not cases or len(cases) <= 1:
+            return cases
+        
+        # 去重：基于用例名称和测试步骤的相似度
+        unique_cases = []
+        seen_names = set()
+        
+        for case in cases:
+            case_name = case.get("case_name", "").strip().lower()
+            test_step = case.get("test_step", "").strip().lower()
+            
+            # 生成唯一标识（用例名称 + 测试步骤前50个字符）
+            identifier = case_name + "|" + test_step[:50]
+            
+            # 检查是否已存在相似用例
+            is_duplicate = False
+            for seen_id in seen_names:
+                # 简单的相似度检查：如果用例名称相同或测试步骤前50字符相同，认为是重复
+                if identifier == seen_id:
+                    is_duplicate = True
+                    break
+                # 如果用例名称完全相同，认为是重复
+                if case_name and case_name == seen_id.split("|")[0]:
+                    is_duplicate = True
+                    break
+            
+            if not is_duplicate:
+                seen_names.add(identifier)
+                unique_cases.append(case)
+            else:
+                logger.debug(f"发现重复用例，已跳过: {case.get('case_name')}")
+        
+        return unique_cases
+    
+    def _quality_check_cases(self, cases: List[Dict]) -> List[Dict]:
+        """
+        用例质量初步检查
+        
+        检查项：
+        1. 用例名称不能为空
+        2. 测试步骤不能为空
+        3. 预期结果不能为空（可选，但建议有）
+        4. 用例名称长度检查（不能太短或太长）
+        5. 测试步骤长度检查（不能太短）
+        
+        Args:
+            cases: 用例列表
+            
+        Returns:
+            通过质量检查的用例列表
+        """
+        if not cases:
+            return cases
+        
+        quality_cases = []
+        
+        for case in cases:
+            case_name = case.get("case_name", "").strip()
+            test_step = case.get("test_step", "").strip()
+            expected_result = case.get("expected_result", "").strip()
+            
+            # 1. 用例名称不能为空
+            if not case_name:
+                logger.warning("用例名称为空，跳过该用例")
+                continue
+            
+            # 2. 测试步骤不能为空
+            if not test_step:
+                logger.warning(f"用例测试步骤为空，跳过: {case_name}")
+                continue
+            
+            # 3. 用例名称长度检查（5-200字符）
+            if len(case_name) < 5:
+                logger.warning(f"用例名称过短（{len(case_name)}字符），跳过: {case_name}")
+                continue
+            if len(case_name) > 200:
+                logger.warning(f"用例名称过长（{len(case_name)}字符），截断: {case_name}")
+                case["case_name"] = case_name[:200]
+            
+            # 4. 测试步骤长度检查（至少10字符）
+            if len(test_step) < 10:
+                logger.warning(f"用例测试步骤过短（{len(test_step)}字符），跳过: {case_name}")
+                continue
+            
+            # 5. 预期结果检查（可选，但建议有）
+            if not expected_result:
+                logger.info(f"用例预期结果为空，建议补充: {case_name}")
+                # 不强制要求，但记录日志
+            
+            quality_cases.append(case)
+        
+        return quality_cases

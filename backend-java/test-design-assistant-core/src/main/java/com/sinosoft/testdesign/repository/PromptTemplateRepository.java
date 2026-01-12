@@ -27,5 +27,10 @@ public interface PromptTemplateRepository extends JpaRepository<PromptTemplate, 
      * 查询所有启用的模板
      */
     List<PromptTemplate> findByIsActive(String isActive);
+    
+    /**
+     * 查询指定前缀的模板编码列表（用于编码生成优化）
+     */
+    List<PromptTemplate> findByTemplateCodeStartingWithOrderByIdDesc(String prefix);
 }
 

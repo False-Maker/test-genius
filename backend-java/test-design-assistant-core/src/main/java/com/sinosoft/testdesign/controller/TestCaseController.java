@@ -2,14 +2,24 @@ package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
 import com.sinosoft.testdesign.entity.TestCase;
+import com.sinosoft.testdesign.service.TestCaseImportExportService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * 测试用例管理控制器
@@ -24,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 public class TestCaseController {
     
     private final TestCaseService testCaseService;
+    private final TestCaseImportExportService importExportService;
     
     @Operation(summary = "创建用例", description = "创建新的测试用例")
     @PostMapping
@@ -79,6 +90,51 @@ public class TestCaseController {
             @RequestParam String reviewResult,
             @RequestParam(required = false) String reviewComment) {
         return Result.success(testCaseService.reviewTestCase(id, reviewResult, reviewComment));
+    }
+    
+    @Operation(summary = "导出用例", description = "导出用例列表到Excel")
+    @GetMapping("/export")
+    public void exportTestCases(
+            @RequestParam(required = false) String caseName,
+            @RequestParam(required = false) String caseStatus,
+            @RequestParam(required = false) Long requirementId,
+            HttpServletResponse response) throws IOException {
+        // 查询所有符合条件的用例（不分页）
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        Page<TestCase> page = testCaseService.getTestCaseList(pageable, caseName, caseStatus, requirementId);
+        List<TestCase> testCases = page.getContent();
+        
+        // 设置响应头
+        String fileName = "测试用例_" + System.currentTimeMillis() + ".xlsx";
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, 
+                "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+        
+        // 导出到Excel
+        importExportService.exportToExcel(testCases, response.getOutputStream());
+    }
+    
+    @Operation(summary = "导出用例模板", description = "导出用例导入模板Excel")
+    @GetMapping("/export-template")
+    public void exportTemplate(HttpServletResponse response) throws IOException {
+        // 设置响应头
+        String fileName = "测试用例导入模板.xlsx";
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, 
+                "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
+        
+        // 导出模板
+        importExportService.exportTemplate(response.getOutputStream());
+    }
+    
+    @Operation(summary = "导入用例", description = "从Excel文件导入用例")
+    @PostMapping("/import")
+    public Result<TestCaseImportExportService.ImportResult> importTestCases(
+            @RequestParam("file") MultipartFile file) throws IOException {
+        TestCaseImportExportService.ImportResult result = importExportService.importFromExcel(file);
+        return Result.success(result);
     }
 }
 

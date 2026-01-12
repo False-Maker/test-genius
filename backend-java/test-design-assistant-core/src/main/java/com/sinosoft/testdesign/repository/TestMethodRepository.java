@@ -25,5 +25,10 @@ public interface TestMethodRepository extends JpaRepository<TestDesignMethod, Lo
      * 查询所有启用的测试方法
      */
     List<TestDesignMethod> findByIsActive(String isActive);
+    
+    /**
+     * 根据方法名称查询
+     */
+    Optional<TestDesignMethod> findByMethodName(String methodName);
 }
 

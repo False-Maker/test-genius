@@ -17,11 +17,25 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false  # 生产环境关闭SQL日志
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        # 性能优化配置
+        jdbc:
+          batch_size: 20  # 批量插入/更新大小
+        order_inserts: true  # 优化插入顺序
+        order_updates: true  # 优化更新顺序
+        jdbc.batch_versioned_data: true  # 批量版本化数据
+        # 查询优化
+        query:
+          plan_cache_max_size: 2048  # 查询计划缓存大小
+          plan_parameter_metadata_max_size: 128
+        # 二级缓存（可选，需要配置EhCache）
+        # cache:
+        #   use_second_level_cache: true
+        #   use_query_cache: true
   
   # Redis配置
   data:
@@ -68,6 +82,8 @@ app:
   upload:
     max-file-size: 100MB
     max-request-size: 100MB
+    base-path: ./uploads
+    url-prefix: /api/v1/files
 
 # Swagger配置
 springdoc:
@@ -76,4 +92,64 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+
+# Actuator配置（监控和健康检查）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+
+# Resilience4j配置（限流和熔断）
+resilience4j:
+  circuitbreaker:
+    instances:
+      aiService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+  ratelimiter:
+    instances:
+      api:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 5s
+      aiService:
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 3s
+  retry:
+    instances:
+      aiService:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - java.net.ConnectException
 

@@ -7,7 +7,8 @@ export interface CaseGenerationRequest {
   layerCode?: string
   methodCode?: string
   templateId?: number
-  additionalParams?: Record<string, any>
+  modelCode?: string
+  creatorId?: number
 }
 
 export interface CaseGenerationResult {

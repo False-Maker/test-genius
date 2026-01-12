@@ -2,7 +2,9 @@ package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
 import com.sinosoft.testdesign.entity.TestRequirement;
+import com.sinosoft.testdesign.service.RequirementAnalysisService;
 import com.sinosoft.testdesign.service.RequirementService;
+import com.sinosoft.testdesign.service.impl.RequirementAnalysisServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class RequirementController {
     
     private final RequirementService requirementService;
+    private final RequirementAnalysisService requirementAnalysisService;
     
     @Operation(summary = "创建需求", description = "创建新的测试需求")
     @PostMapping
@@ -71,11 +74,28 @@ public class RequirementController {
         return Result.success(requirementService.updateRequirementStatus(id, status));
     }
     
-    @Operation(summary = "分析需求", description = "分析需求文档，提取测试要点")
+    @Operation(summary = "分析需求", description = "分析需求文档，提取测试要点和业务规则")
     @PostMapping("/{id}/analyze")
-    public Result<Void> analyzeRequirement(@PathVariable Long id) {
-        // TODO: 实现需求分析功能
-        return Result.success();
+    public Result<RequirementAnalysisServiceImpl.RequirementAnalysisResult> analyzeRequirement(@PathVariable Long id) {
+        RequirementAnalysisServiceImpl.RequirementAnalysisResult result = 
+            requirementAnalysisService.analyzeRequirement(id);
+        return Result.success(result);
+    }
+    
+    @Operation(summary = "提取测试要点", description = "从需求中提取测试要点")
+    @GetMapping("/{id}/test-points")
+    public Result<java.util.List<RequirementAnalysisServiceImpl.TestPoint>> getTestPoints(@PathVariable Long id) {
+        java.util.List<RequirementAnalysisServiceImpl.TestPoint> testPoints = 
+            requirementAnalysisService.extractTestPoints(id);
+        return Result.success(testPoints);
+    }
+    
+    @Operation(summary = "提取业务规则", description = "从需求中提取业务规则")
+    @GetMapping("/{id}/business-rules")
+    public Result<java.util.List<RequirementAnalysisServiceImpl.BusinessRule>> getBusinessRules(@PathVariable Long id) {
+        java.util.List<RequirementAnalysisServiceImpl.BusinessRule> businessRules = 
+            requirementAnalysisService.extractBusinessRules(id);
+        return Result.success(businessRules);
     }
 }
 
