@@ -32,6 +32,7 @@ spring:
         query:
           plan_cache_max_size: 2048  # 查询计划缓存大小
           plan_parameter_metadata_max_size: 128
+        # 慢查询监控配置（通过日志级别控制，见logging配置）
         # 二级缓存（可选，需要配置EhCache）
         # cache:
         #   use_second_level_cache: true
@@ -68,8 +69,26 @@ logging:
   level:
     root: INFO
     com.sinosoft.testdesign: DEBUG
+    # 慢查询日志
+    org.hibernate.SQL_SLOW: WARN  # 慢查询警告级别
+    org.hibernate.stat: DEBUG  # Hibernate统计信息（开发环境）
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    # 控制台日志格式：包含traceId和userId
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [traceId=%X{traceId}] [userId=%X{userId}] %msg%n"
+    # 文件日志格式：包含traceId和userId
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [traceId=%X{traceId}] [userId=%X{userId}] %msg%n"
+  # 日志文件配置（生产环境建议启用）
+  file:
+    name: logs/test-design-assistant.log
+    max-size: 100MB
+    max-history: 30
+  # 慢查询日志文件（单独记录）
+  loggers:
+    org.hibernate.SQL_SLOW:
+      file:
+        name: logs/slow-query.log
+        max-size: 50MB
+        max-history: 7
 
 # 应用配置
 app:

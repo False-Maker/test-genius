@@ -4,6 +4,7 @@ import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.enums.RequirementStatus;
 import com.sinosoft.testdesign.repository.RequirementRepository;
+import com.sinosoft.testdesign.service.CacheService;
 import com.sinosoft.testdesign.service.RequirementService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,16 @@ import java.util.List;
 public class RequirementServiceImpl implements RequirementService {
     
     private final RequirementRepository requirementRepository;
+    private final CacheService cacheService;
     
     private static final String REQUIREMENT_CODE_PREFIX = "REQ";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    
+    // 缓存键前缀
+    private static final String CACHE_KEY_REQ_LIST = "cache:requirement:list:";
+    private static final String CACHE_KEY_REQ_BY_ID = "cache:requirement:id:";
+    private static final long CACHE_TIMEOUT_LIST = 300; // 列表缓存5分钟
+    private static final long CACHE_TIMEOUT_DETAIL = 3600; // 详情缓存1小时
     
     @Override
     @Transactional
@@ -65,7 +73,12 @@ public class RequirementServiceImpl implements RequirementService {
         }
         
         log.info("创建需求成功，编码: {}", requirement.getRequirementCode());
-        return requirementRepository.save(requirement);
+        TestRequirement saved = requirementRepository.save(requirement);
+        
+        // 清除相关缓存
+        clearRequirementCache();
+        
+        return saved;
     }
     
     @Override
@@ -121,37 +134,44 @@ public class RequirementServiceImpl implements RequirementService {
         existing.setVersion(existing.getVersion() + 1);
         
         log.info("更新需求成功，编码: {}", existing.getRequirementCode());
-        return requirementRepository.save(existing);
+        TestRequirement saved = requirementRepository.save(existing);
+        
+        // 清除相关缓存
+        clearRequirementCache();
+        cacheService.delete(CACHE_KEY_REQ_BY_ID + saved.getId());
+        
+        return saved;
     }
     
     @Override
     public TestRequirement getRequirementById(Long id) {
-        return requirementRepository.findById(id)
+        // 尝试从缓存获取
+        String cacheKey = CACHE_KEY_REQ_BY_ID + id;
+        TestRequirement cached = cacheService.get(cacheKey, TestRequirement.class);
+        if (cached != null) {
+            log.debug("从缓存获取需求详情: id={}", id);
+            return cached;
+        }
+        
+        // 从数据库查询
+        TestRequirement requirement = requirementRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("需求不存在"));
+        
+        // 存入缓存
+        cacheService.set(cacheKey, requirement, CACHE_TIMEOUT_DETAIL);
+        
+        return requirement;
     }
     
     @Override
     public Page<TestRequirement> getRequirementList(Pageable pageable, String requirementName, String requirementStatus) {
-        Specification<TestRequirement> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            
-            // 需求名称模糊搜索
-            if (StringUtils.hasText(requirementName)) {
-                predicates.add(cb.like(
-                    cb.lower(root.get("requirementName")),
-                    "%" + requirementName.toLowerCase() + "%"
-                ));
-            }
-            
-            // 需求状态精确匹配
-            if (StringUtils.hasText(requirementStatus)) {
-                predicates.add(cb.equal(root.get("requirementStatus"), requirementStatus));
-            }
-            
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        
-        return requirementRepository.findAll(spec, pageable);
+        // 使用优化的查询方法（使用@Query注解，优化COUNT查询）
+        // 注意：分页查询结果不缓存，因为Page接口序列化复杂且缓存失效频繁
+        // 详情查询已单独缓存，可以有效减少数据库查询
+        return requirementRepository.findWithFilters(
+                StringUtils.hasText(requirementName) ? requirementName : null,
+                StringUtils.hasText(requirementStatus) ? requirementStatus : null,
+                pageable);
     }
     
     @Override
@@ -169,6 +189,11 @@ public class RequirementServiceImpl implements RequirementService {
         }
         
         requirementRepository.deleteById(id);
+        
+        // 清除相关缓存
+        clearRequirementCache();
+        cacheService.delete(CACHE_KEY_REQ_BY_ID + id);
+        
         log.info("删除需求成功，编码: {}", requirement.getRequirementCode());
     }
     
@@ -265,6 +290,14 @@ public class RequirementServiceImpl implements RequirementService {
                 throw new BusinessException("业务模块长度不能超过100个字符");
             }
         }
+    }
+    
+    /**
+     * 清除需求列表缓存（预留，当前分页查询不缓存）
+     */
+    private void clearRequirementCache() {
+        // 分页查询不缓存，此方法预留用于未来扩展
+        // cacheService.deleteByPattern(CACHE_KEY_REQ_LIST + "*");
     }
 }
 

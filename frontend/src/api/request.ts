@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { ElMessage, ElLoading } from 'element-plus'
 import type { LoadingInstance } from 'element-plus/es/components/loading/src/loading'
+import { useUserStore } from '@/store/user'
 
 // 加载状态管理
 let loadingInstance: LoadingInstance | null = null
@@ -45,11 +46,11 @@ const service: AxiosInstance = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 可以在这里添加token等认证信息
-    // const token = localStorage.getItem('token')
-    // if (token && config.headers) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    // 从store获取token并添加到请求头
+    const userStore = useUserStore()
+    if (userStore.token && config.headers) {
+      config.headers.Authorization = `Bearer ${userStore.token}`
+    }
     
     // 请求去重：如果存在相同的请求，取消之前的请求
     const requestKey = `${config.method}-${config.url}-${JSON.stringify(config.params || config.data)}`

@@ -1,0 +1,318 @@
+# GitLab CI/CD 配置文件
+# 测试设计助手系统 - CI/CD Pipeline
+
+stages:
+  - build
+  - test
+  - quality
+  - package
+  - deploy
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  # Docker镜像仓库地址（需要根据实际情况配置）
+  DOCKER_REGISTRY: "${CI_REGISTRY}"
+  IMAGE_TAG: "${CI_COMMIT_SHORT_SHA}"
+
+# 缓存配置
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository/
+    - frontend/node_modules/
+    - backend-python/ai-service/.venv/
+
+# ==================== 构建阶段 ====================
+
+# Java后端构建
+build:java:
+  stage: build
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - cd backend-java
+    - mvn clean compile -DskipTests
+  artifacts:
+    paths:
+      - backend-java/test-design-assistant-core/target/
+    expire_in: 1 hour
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+
+# Python后端构建
+build:python:
+  stage: build
+  image: python:3.10-slim
+  script:
+    - cd backend-python/ai-service
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - python -m py_compile app/**/*.py
+  artifacts:
+    paths:
+      - backend-python/ai-service/
+    expire_in: 1 hour
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+
+# 前端构建
+build:frontend:
+  stage: build
+  image: node:18-alpine
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 1 hour
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+
+# ==================== 测试阶段 ====================
+
+# Java单元测试
+test:java:
+  stage: test
+  image: maven:3.9-eclipse-temurin-17
+  services:
+    - postgres:14
+    - redis:7-alpine
+  variables:
+    POSTGRES_DB: test_design_assistant
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test_design_assistant
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: postgres
+    SPRING_REDIS_HOST: redis
+    SPRING_REDIS_PORT: 6379
+  script:
+    - cd backend-java
+    - mvn test
+    - mvn jacoco:report
+  artifacts:
+    reports:
+      junit:
+        - backend-java/test-design-assistant-core/target/surefire-reports/TEST-*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: backend-java/test-design-assistant-core/target/site/jacoco/jacoco.xml
+    paths:
+      - backend-java/test-design-assistant-core/target/site/jacoco/
+    expire_in: 1 week
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+
+# Python单元测试
+test:python:
+  stage: test
+  image: python:3.10-slim
+  script:
+    - cd backend-python/ai-service
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install pytest pytest-cov
+    - pytest tests/ --cov=app --cov-report=xml --cov-report=html
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: backend-python/ai-service/coverage.xml
+    paths:
+      - backend-python/ai-service/htmlcov/
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+
+# 前端Lint检查
+test:frontend:
+  stage: test
+  image: node:18-alpine
+  script:
+    - cd frontend
+    - npm ci
+    - npm run lint
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+
+# ==================== 代码质量检查阶段 ====================
+
+# SonarQube代码质量检查（Java）
+quality:java:
+  stage: quality
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - cd backend-java
+    - mvn sonar:sonar
+        -Dsonar.projectKey=test-design-assistant
+        -Dsonar.sources=src
+        -Dsonar.host.url=${SONARQUBE_URL}
+        -Dsonar.login=${SONARQUBE_TOKEN}
+  only:
+    - develop
+    - main
+    - master
+  when: manual
+  allow_failure: true
+
+# Python代码质量检查
+quality:python:
+  stage: quality
+  image: python:3.10-slim
+  script:
+    - cd backend-python/ai-service
+    - pip install pylint black flake8
+    - pylint app/ --exit-zero || true
+    - black --check app/ || true
+    - flake8 app/ --max-line-length=120 || true
+  artifacts:
+    paths:
+      - backend-python/ai-service/pylint-report.txt
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - develop
+    - main
+    - master
+  allow_failure: true
+
+# ==================== 打包阶段 ====================
+
+# 构建Java后端Docker镜像
+package:java:
+  stage: package
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd backend-java/test-design-assistant-core
+    - docker build -t $CI_REGISTRY_IMAGE/backend-java:$IMAGE_TAG .
+    - docker build -t $CI_REGISTRY_IMAGE/backend-java:latest .
+    - docker push $CI_REGISTRY_IMAGE/backend-java:$IMAGE_TAG
+    - docker push $CI_REGISTRY_IMAGE/backend-java:latest
+  only:
+    - develop
+    - main
+    - master
+
+# 构建Python后端Docker镜像
+package:python:
+  stage: package
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd backend-python/ai-service
+    - docker build -t $CI_REGISTRY_IMAGE/backend-python:$IMAGE_TAG .
+    - docker build -t $CI_REGISTRY_IMAGE/backend-python:latest .
+    - docker push $CI_REGISTRY_IMAGE/backend-python:$IMAGE_TAG
+    - docker push $CI_REGISTRY_IMAGE/backend-python:latest
+  only:
+    - develop
+    - main
+    - master
+
+# 构建前端Docker镜像
+package:frontend:
+  stage: package
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - cd frontend
+    - docker build -t $CI_REGISTRY_IMAGE/frontend:$IMAGE_TAG .
+    - docker build -t $CI_REGISTRY_IMAGE/frontend:latest .
+    - docker push $CI_REGISTRY_IMAGE/frontend:$IMAGE_TAG
+    - docker push $CI_REGISTRY_IMAGE/frontend:latest
+  only:
+    - develop
+    - main
+    - master
+
+# ==================== 部署阶段 ====================
+
+# 部署到开发环境
+deploy:dev:
+  stage: deploy
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - echo "部署到开发环境"
+    - |
+      docker-compose -f docker-compose.yml -f docker-compose.dev.yml pull
+      docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+  environment:
+    name: development
+    url: https://dev.test-design-assistant.example.com
+  only:
+    - develop
+  when: manual
+
+# 部署到测试环境
+deploy:test:
+  stage: deploy
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - echo "部署到测试环境"
+    - |
+      docker-compose -f docker-compose.yml -f docker-compose.test.yml pull
+      docker-compose -f docker-compose.yml -f docker-compose.test.yml up -d
+  environment:
+    name: test
+    url: https://test.test-design-assistant.example.com
+  only:
+    - develop
+  when: manual
+
+# 部署到生产环境
+deploy:prod:
+  stage: deploy
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - echo "部署到生产环境"
+    - |
+      docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull
+      docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+  environment:
+    name: production
+    url: https://test-design-assistant.example.com
+  only:
+    - main
+    - master
+  when: manual
+  only:
+    - tags
+

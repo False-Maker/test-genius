@@ -6,6 +6,7 @@ import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.enums.CaseStatus;
 import com.sinosoft.testdesign.repository.RequirementRepository;
 import com.sinosoft.testdesign.repository.TestCaseRepository;
+import com.sinosoft.testdesign.service.CacheService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,24 @@ public class TestCaseServiceImpl implements TestCaseService {
     
     private final TestCaseRepository testCaseRepository;
     private final RequirementRepository requirementRepository;
+    private final CacheService cacheService;
     
     private static final String CASE_CODE_PREFIX = "CASE";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     
+    // 缓存键前缀
+    private static final String CACHE_KEY_CASE_LIST = "cache:testcase:list:";
+    private static final String CACHE_KEY_CASE_BY_ID = "cache:testcase:id:";
+    private static final long CACHE_TIMEOUT_LIST = 300; // 列表缓存5分钟
+    private static final long CACHE_TIMEOUT_DETAIL = 3600; // 详情缓存1小时
+    
+    /**
+     * 创建测试用例
+     * 
+     * @param testCase 测试用例实体（包含用例名称、需求ID、测试分层、测试方法等信息）
+     * @return 创建成功的测试用例（包含自动生成的用例编码）
+     * @throws BusinessException 如果用例编码已存在、关联的需求不存在或数据验证失败
+     */
     @Override
     @Transactional
     public TestCase createTestCase(TestCase testCase) {
@@ -74,9 +89,22 @@ public class TestCaseServiceImpl implements TestCaseService {
         }
         
         log.info("创建用例成功，编码: {}", testCase.getCaseCode());
-        return testCaseRepository.save(testCase);
+        TestCase saved = testCaseRepository.save(testCase);
+        
+        // 清除相关缓存
+        clearTestCaseCache();
+        
+        return saved;
     }
     
+    /**
+     * 更新测试用例
+     * 
+     * @param id 用例ID
+     * @param testCase 更新的用例信息
+     * @return 更新后的测试用例
+     * @throws BusinessException 如果用例不存在、用例编码被修改、状态流转不合法或数据验证失败
+     */
     @Override
     @Transactional
     public TestCase updateTestCase(Long id, TestCase testCase) {
@@ -154,44 +182,69 @@ public class TestCaseServiceImpl implements TestCaseService {
         }
         
         log.info("更新用例成功，编码: {}", existing.getCaseCode());
-        return testCaseRepository.save(existing);
+        TestCase saved = testCaseRepository.save(existing);
+        
+        // 清除相关缓存
+        clearTestCaseCache();
+        cacheService.delete(CACHE_KEY_CASE_BY_ID + saved.getId());
+        
+        return saved;
     }
     
+    /**
+     * 根据ID获取测试用例详情
+     * 
+     * @param id 用例ID
+     * @return 测试用例实体
+     * @throws BusinessException 如果用例不存在
+     */
     @Override
     public TestCase getTestCaseById(Long id) {
-        return testCaseRepository.findById(id)
+        // 尝试从缓存获取
+        String cacheKey = CACHE_KEY_CASE_BY_ID + id;
+        TestCase cached = cacheService.get(cacheKey, TestCase.class);
+        if (cached != null) {
+            log.debug("从缓存获取用例详情: id={}", id);
+            return cached;
+        }
+        
+        // 从数据库查询
+        TestCase testCase = testCaseRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("测试用例不存在"));
+        
+        // 存入缓存
+        cacheService.set(cacheKey, testCase, CACHE_TIMEOUT_DETAIL);
+        
+        return testCase;
     }
     
+    /**
+     * 分页查询测试用例列表
+     * 
+     * @param pageable 分页参数（页码、每页大小）
+     * @param caseName 用例名称（模糊匹配，可选）
+     * @param caseStatus 用例状态（精确匹配，可选）
+     * @param requirementId 需求ID（精确匹配，可选）
+     * @return 分页的测试用例列表
+     */
     @Override
     public Page<TestCase> getTestCaseList(Pageable pageable, String caseName, String caseStatus, Long requirementId) {
-        Specification<TestCase> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            
-            // 用例名称模糊搜索
-            if (StringUtils.hasText(caseName)) {
-                predicates.add(cb.like(
-                    cb.lower(root.get("caseName")),
-                    "%" + caseName.toLowerCase() + "%"
-                ));
-            }
-            
-            // 用例状态精确匹配
-            if (StringUtils.hasText(caseStatus)) {
-                predicates.add(cb.equal(root.get("caseStatus"), caseStatus));
-            }
-            
-            // 需求ID精确匹配
-            if (requirementId != null) {
-                predicates.add(cb.equal(root.get("requirementId"), requirementId));
-            }
-            
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        
-        return testCaseRepository.findAll(spec, pageable);
+        // 使用优化的查询方法（使用@Query注解，优化COUNT查询）
+        // 注意：分页查询结果不缓存，因为Page接口序列化复杂且缓存失效频繁
+        // 详情查询已单独缓存，可以有效减少数据库查询
+        return testCaseRepository.findWithFilters(
+                StringUtils.hasText(caseName) ? caseName : null,
+                StringUtils.hasText(caseStatus) ? caseStatus : null,
+                requirementId,
+                pageable);
     }
     
+    /**
+     * 删除测试用例
+     * 
+     * @param id 用例ID
+     * @throws BusinessException 如果用例不存在或用例已审核（已审核的用例不能直接删除，需要先废弃）
+     */
     @Override
     @Transactional
     public void deleteTestCase(Long id) {
@@ -207,11 +260,21 @@ public class TestCaseServiceImpl implements TestCaseService {
         }
         
         testCaseRepository.deleteById(id);
+        
+        // 清除相关缓存
+        clearTestCaseCache();
+        cacheService.delete(CACHE_KEY_CASE_BY_ID + id);
+        
         log.info("删除用例成功，编码: {}", testCase.getCaseCode());
     }
     
     /**
-     * 更新用例状态
+     * 更新用例状态（状态流转）
+     * 
+     * @param id 用例ID
+     * @param status 新状态（DRAFT/PENDING_REVIEW/REVIEWED/DEPRECATED）
+     * @return 更新后的测试用例
+     * @throws BusinessException 如果用例不存在或状态流转不合法
      */
     @Transactional
     public TestCase updateCaseStatus(Long id, String status) {
@@ -238,7 +301,13 @@ public class TestCaseServiceImpl implements TestCaseService {
     }
     
     /**
-     * 审核用例
+     * 审核测试用例
+     * 
+     * @param id 用例ID
+     * @param reviewResult 审核结果（PASS：通过，REJECT：不通过）
+     * @param reviewComment 审核意见（可选）
+     * @return 审核后的测试用例
+     * @throws BusinessException 如果用例不存在、用例状态不是待审核或审核结果格式不正确
      */
     @Transactional
     public TestCase reviewTestCase(Long id, String reviewResult, String reviewComment) {
@@ -275,6 +344,8 @@ public class TestCaseServiceImpl implements TestCaseService {
     /**
      * 生成用例编码
      * 格式：CASE-YYYYMMDD-序号（如 CASE-20240101-001）
+     * 
+     * @return 生成的用例编码
      */
     private String generateCaseCode() {
         String dateStr = LocalDate.now().format(DATE_FORMATTER);
@@ -371,6 +442,14 @@ public class TestCaseServiceImpl implements TestCaseService {
         if (a == null && b == null) return true;
         if (a == null || b == null) return false;
         return a.equals(b);
+    }
+    
+    /**
+     * 清除用例列表缓存（预留，当前分页查询不缓存）
+     */
+    private void clearTestCaseCache() {
+        // 分页查询不缓存，此方法预留用于未来扩展
+        // cacheService.deleteByPattern(CACHE_KEY_CASE_LIST + "*");
     }
 }
 

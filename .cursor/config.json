@@ -1,0 +1,12 @@
+{
+  "workspaceStorage": {
+    "enabled": true,
+    "path": ".cursor/workspaceStorage",
+    "description": "Cursor 工作区存储配置，用于保存 Agent 对话历史"
+  },
+  "agentHistory": {
+    "saveToProject": true,
+    "description": "将 Agent 对话历史保存到项目目录"
+  }
+}
+

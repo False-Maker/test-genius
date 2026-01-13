@@ -155,28 +155,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { requirementApi, type TestRequirement } from '@/api/requirement'
-import { commonApi, type TestLayer, type TestDesignMethod, type ModelConfig } from '@/api/common'
-import { promptTemplateApi, type PromptTemplate } from '@/api/promptTemplate'
 import { caseGenerationApi, type CaseGenerationRequest, type GenerationTask } from '@/api/caseGeneration'
+import { useCacheStore } from '@/store/cache'
+
+// 使用缓存store
+const cacheStore = useCacheStore()
 
 // 响应式数据
 const formRef = ref<FormInstance>()
-const requirementLoading = ref(false)
-const layerLoading = ref(false)
-const methodLoading = ref(false)
-const templateLoading = ref(false)
-const modelLoading = ref(false)
 const generateLoading = ref(false)
 
-const requirementList = ref<TestRequirement[]>([])
-const layerList = ref<TestLayer[]>([])
-const methodList = ref<TestDesignMethod[]>([])
-const templateList = ref<PromptTemplate[]>([])
-const modelList = ref<ModelConfig[]>([])
+// 从store获取数据
+const requirementList = computed(() => cacheStore.requirementList)
+const layerList = computed(() => cacheStore.activeLayers)
+const methodList = computed(() => cacheStore.activeMethods)
+const templateList = computed(() => cacheStore.templateList)
+const modelList = computed(() => cacheStore.activeModels)
+
+// 加载状态
+const requirementLoading = computed(() => cacheStore.loading.requirementList)
+const layerLoading = computed(() => cacheStore.loading.layerList)
+const methodLoading = computed(() => cacheStore.loading.methodList)
+const templateLoading = computed(() => cacheStore.loading.templateList)
+const modelLoading = computed(() => cacheStore.loading.modelList)
 
 const form = reactive<CaseGenerationRequest & { templateId?: number }>({
   requirementId: undefined,
@@ -219,81 +223,19 @@ const getStatusType = (status?: string) => {
   return typeMap[status || ''] || ''
 }
 
-// 加载需求列表
-const loadRequirementList = async () => {
-  requirementLoading.value = true
+// 加载所有数据（使用store的缓存机制）
+const loadAllData = async () => {
   try {
-    const response = await requirementApi.getRequirementList({ page: 0, size: 100 })
-    if (response.data) {
-      requirementList.value = response.data.content || []
-    }
+    await Promise.all([
+      cacheStore.loadRequirementList(),
+      cacheStore.loadLayerList(),
+      cacheStore.loadMethodList(),
+      cacheStore.loadTemplateList(),
+      cacheStore.loadModelList()
+    ])
   } catch (error) {
-    console.error('加载需求列表失败:', error)
-  } finally {
-    requirementLoading.value = false
-  }
-}
-
-// 加载测试分层列表
-const loadLayerList = async () => {
-  layerLoading.value = true
-  try {
-    const response = await commonApi.getTestLayerList()
-    if (response.data) {
-      layerList.value = response.data
-    }
-  } catch (error) {
-    console.error('加载测试分层列表失败:', error)
-  } finally {
-    layerLoading.value = false
-  }
-}
-
-// 加载测试方法列表
-const loadMethodList = async () => {
-  methodLoading.value = true
-  try {
-    const response = await commonApi.getTestDesignMethodList()
-    if (response.data) {
-      methodList.value = response.data
-    }
-  } catch (error) {
-    console.error('加载测试方法列表失败:', error)
-  } finally {
-    methodLoading.value = false
-  }
-}
-
-// 加载提示词模板列表
-const loadTemplateList = async () => {
-  templateLoading.value = true
-  try {
-    const response = await promptTemplateApi.getTemplateList({ page: 0, size: 100 })
-    if (response.data) {
-      // 只显示启用的模板
-      templateList.value = (response.data.content || []).filter(
-        (t: PromptTemplate) => t.isActive === '1'
-      )
-    }
-  } catch (error) {
-    console.error('加载提示词模板列表失败:', error)
-  } finally {
-    templateLoading.value = false
-  }
-}
-
-// 加载模型配置列表
-const loadModelList = async () => {
-  modelLoading.value = true
-  try {
-    const response = await commonApi.getModelConfigList()
-    if (response.data) {
-      modelList.value = response.data
-    }
-  } catch (error) {
-    console.error('加载模型配置列表失败:', error)
-  } finally {
-    modelLoading.value = false
+    console.error('加载数据失败:', error)
+    ElMessage.error('加载数据失败，请稍后重试')
   }
 }
 
@@ -400,11 +342,7 @@ const handleViewResults = () => {
 
 // 初始化
 onMounted(() => {
-  loadRequirementList()
-  loadLayerList()
-  loadMethodList()
-  loadTemplateList()
-  loadModelList()
+  loadAllData()
 })
 
 // 组件卸载时清理定时器
