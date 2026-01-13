@@ -1,10 +1,14 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
+import com.sinosoft.testdesign.dto.PromptTemplateRequestDTO;
+import com.sinosoft.testdesign.dto.PromptTemplateResponseDTO;
 import com.sinosoft.testdesign.entity.PromptTemplate;
+import com.sinosoft.testdesign.mapper.EntityDTOMapper;
 import com.sinosoft.testdesign.service.PromptTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,34 +30,45 @@ import java.util.Map;
 public class PromptTemplateController {
     
     private final PromptTemplateService templateService;
+    private final EntityDTOMapper entityDTOMapper;
     
     @Operation(summary = "创建模板", description = "创建新的提示词模板")
     @PostMapping
-    public Result<PromptTemplate> createTemplate(@RequestBody PromptTemplate template) {
-        return Result.success(templateService.createTemplate(template));
+    public Result<PromptTemplateResponseDTO> createTemplate(@Valid @RequestBody PromptTemplateRequestDTO dto) {
+        PromptTemplate template = entityDTOMapper.toPromptTemplateEntity(dto);
+        PromptTemplate saved = templateService.createTemplate(template);
+        return Result.success(entityDTOMapper.toPromptTemplateResponseDTO(saved));
     }
     
     @Operation(summary = "查询模板列表", description = "分页查询提示词模板列表")
     @GetMapping
-    public Result<Page<PromptTemplate>> getTemplateList(
+    public Result<Page<PromptTemplateResponseDTO>> getTemplateList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return Result.success(templateService.getTemplateList(pageable));
+        Page<PromptTemplate> templatePage = templateService.getTemplateList(pageable);
+        
+        // 转换为DTO分页
+        Page<PromptTemplateResponseDTO> dtoPage = templatePage.map(entityDTOMapper::toPromptTemplateResponseDTO);
+        return Result.success(dtoPage);
     }
     
     @Operation(summary = "获取模板详情", description = "根据ID获取模板详情")
     @GetMapping("/{id}")
-    public Result<PromptTemplate> getTemplateById(@PathVariable Long id) {
-        return Result.success(templateService.getTemplateById(id));
+    public Result<PromptTemplateResponseDTO> getTemplateById(@PathVariable Long id) {
+        PromptTemplate template = templateService.getTemplateById(id);
+        return Result.success(entityDTOMapper.toPromptTemplateResponseDTO(template));
     }
     
     @Operation(summary = "更新模板", description = "更新提示词模板")
     @PutMapping("/{id}")
-    public Result<PromptTemplate> updateTemplate(
+    public Result<PromptTemplateResponseDTO> updateTemplate(
             @PathVariable Long id,
-            @RequestBody PromptTemplate template) {
-        return Result.success(templateService.updateTemplate(id, template));
+            @Valid @RequestBody PromptTemplateRequestDTO dto) {
+        PromptTemplate template = templateService.getTemplateById(id);
+        entityDTOMapper.updatePromptTemplateFromDTO(dto, template);
+        PromptTemplate updated = templateService.updateTemplate(id, template);
+        return Result.success(entityDTOMapper.toPromptTemplateResponseDTO(updated));
     }
     
     @Operation(summary = "删除模板", description = "删除指定模板")
@@ -65,10 +80,11 @@ public class PromptTemplateController {
     
     @Operation(summary = "启用/禁用模板", description = "切换模板的启用状态")
     @PutMapping("/{id}/status")
-    public Result<PromptTemplate> toggleTemplateStatus(
+    public Result<PromptTemplateResponseDTO> toggleTemplateStatus(
             @PathVariable Long id,
             @RequestParam String isActive) {
-        return Result.success(templateService.toggleTemplateStatus(id, isActive));
+        PromptTemplate updated = templateService.toggleTemplateStatus(id, isActive);
+        return Result.success(entityDTOMapper.toPromptTemplateResponseDTO(updated));
     }
     
     @Operation(summary = "生成提示词", description = "根据模板ID和变量生成提示词")

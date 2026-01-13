@@ -1,9 +1,13 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
+import com.sinosoft.testdesign.dto.ModelConfigResponseDTO;
+import com.sinosoft.testdesign.dto.TestDesignMethodResponseDTO;
+import com.sinosoft.testdesign.dto.TestLayerResponseDTO;
 import com.sinosoft.testdesign.entity.ModelConfig;
 import com.sinosoft.testdesign.entity.TestDesignMethod;
 import com.sinosoft.testdesign.entity.TestLayer;
+import com.sinosoft.testdesign.mapper.EntityDTOMapper;
 import com.sinosoft.testdesign.repository.ModelConfigRepository;
 import com.sinosoft.testdesign.repository.TestLayerRepository;
 import com.sinosoft.testdesign.repository.TestMethodRepository;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 通用数据控制器
@@ -34,6 +39,7 @@ public class CommonController {
     private final TestMethodRepository testMethodRepository;
     private final ModelConfigRepository modelConfigRepository;
     private final CacheService cacheService;
+    private final EntityDTOMapper entityDTOMapper;
     
     // 缓存键
     private static final String CACHE_KEY_TEST_LAYERS = "cache:common:test-layers";
@@ -42,11 +48,14 @@ public class CommonController {
     
     @Operation(summary = "获取测试分层列表", description = "获取所有启用的测试分层列表")
     @GetMapping("/test-layers")
-    public Result<List<TestLayer>> getTestLayerList() {
+    public Result<List<TestLayerResponseDTO>> getTestLayerList() {
         // 尝试从缓存获取
         List<TestLayer> cached = cacheService.getList(CACHE_KEY_TEST_LAYERS, TestLayer.class);
         if (cached != null) {
-            return Result.success(cached);
+            List<TestLayerResponseDTO> dtoList = cached.stream()
+                    .map(entityDTOMapper::toTestLayerResponseDTO)
+                    .collect(Collectors.toList());
+            return Result.success(dtoList);
         }
         
         // 从数据库查询
@@ -55,16 +64,24 @@ public class CommonController {
         // 存入缓存（1小时）
         cacheService.set(CACHE_KEY_TEST_LAYERS, layers, 3600);
         
-        return Result.success(layers);
+        // 转换为DTO
+        List<TestLayerResponseDTO> dtoList = layers.stream()
+                .map(entityDTOMapper::toTestLayerResponseDTO)
+                .collect(Collectors.toList());
+        
+        return Result.success(dtoList);
     }
     
     @Operation(summary = "获取测试设计方法列表", description = "获取所有启用的测试设计方法列表")
     @GetMapping("/test-design-methods")
-    public Result<List<TestDesignMethod>> getTestDesignMethodList() {
+    public Result<List<TestDesignMethodResponseDTO>> getTestDesignMethodList() {
         // 尝试从缓存获取
         List<TestDesignMethod> cached = cacheService.getList(CACHE_KEY_TEST_METHODS, TestDesignMethod.class);
         if (cached != null) {
-            return Result.success(cached);
+            List<TestDesignMethodResponseDTO> dtoList = cached.stream()
+                    .map(entityDTOMapper::toTestDesignMethodResponseDTO)
+                    .collect(Collectors.toList());
+            return Result.success(dtoList);
         }
         
         // 从数据库查询
@@ -73,16 +90,24 @@ public class CommonController {
         // 存入缓存（1小时）
         cacheService.set(CACHE_KEY_TEST_METHODS, methods, 3600);
         
-        return Result.success(methods);
+        // 转换为DTO
+        List<TestDesignMethodResponseDTO> dtoList = methods.stream()
+                .map(entityDTOMapper::toTestDesignMethodResponseDTO)
+                .collect(Collectors.toList());
+        
+        return Result.success(dtoList);
     }
     
     @Operation(summary = "获取模型配置列表", description = "获取所有启用的模型配置列表")
     @GetMapping("/model-configs")
-    public Result<List<ModelConfig>> getModelConfigList() {
+    public Result<List<ModelConfigResponseDTO>> getModelConfigList() {
         // 尝试从缓存获取
         List<ModelConfig> cached = cacheService.getList(CACHE_KEY_MODEL_CONFIGS, ModelConfig.class);
         if (cached != null) {
-            return Result.success(cached);
+            List<ModelConfigResponseDTO> dtoList = cached.stream()
+                    .map(entityDTOMapper::toModelConfigResponseDTO)
+                    .collect(Collectors.toList());
+            return Result.success(dtoList);
         }
         
         // 从数据库查询
@@ -91,7 +116,12 @@ public class CommonController {
         // 存入缓存（30分钟）
         cacheService.set(CACHE_KEY_MODEL_CONFIGS, models, 1800);
         
-        return Result.success(models);
+        // 转换为DTO
+        List<ModelConfigResponseDTO> dtoList = models.stream()
+                .map(entityDTOMapper::toModelConfigResponseDTO)
+                .collect(Collectors.toList());
+        
+        return Result.success(dtoList);
     }
 }
 

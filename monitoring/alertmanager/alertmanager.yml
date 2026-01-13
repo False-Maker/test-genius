@@ -1,0 +1,83 @@
+global:
+  # 告警解析时间
+  resolve_timeout: 5m
+  # 默认通知渠道（可根据实际情况配置）
+  # smtp_smarthost: 'smtp.example.com:587'
+  # smtp_from: 'alertmanager@example.com'
+  # smtp_auth_username: 'alertmanager@example.com'
+  # smtp_auth_password: 'password'
+
+# 告警路由配置
+route:
+  # 默认接收者
+  receiver: 'default-receiver'
+  # 分组等待时间
+  group_wait: 10s
+  # 分组间隔时间
+  group_interval: 10s
+  # 重复告警间隔
+  repeat_interval: 12h
+  # 路由规则
+  routes:
+    # 严重告警路由
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      continue: true
+    # 警告告警路由
+    - match:
+        severity: warning
+      receiver: 'warning-receiver'
+
+# 抑制规则（减少重复告警）
+inhibit_rules:
+  # 如果服务完全宕机，抑制其他相关告警
+  - source_match:
+      severity: 'critical'
+      alertname: 'ServiceHealthCheckFailed'
+    target_match:
+      severity: 'warning'
+    equal: ['application']
+
+# 接收者配置
+receivers:
+  # 默认接收者（控制台输出，实际使用时需要配置真实通知渠道）
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # 严重告警接收者
+  - name: 'critical-receiver'
+    # 邮件通知（需要配置SMTP）
+    # email_configs:
+    #   - to: 'ops-team@example.com'
+    #     subject: '严重告警: {{ .GroupLabels.alertname }}'
+    #     html: '{{ range .Alerts }}{{ .Annotations.description }}<br>{{ end }}'
+    # 企业微信通知（需要配置Webhook URL）
+    # wechat_configs:
+    #   - api_url: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY'
+    #     message: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    # 钉钉通知（需要配置Webhook URL）
+    # webhook_configs:
+    #   - url: 'https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN'
+    #     send_resolved: true
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+  # 警告告警接收者
+  - name: 'warning-receiver'
+    # 邮件通知（需要配置SMTP）
+    # email_configs:
+    #   - to: 'dev-team@example.com'
+    #     subject: '警告: {{ .GroupLabels.alertname }}'
+    #     html: '{{ range .Alerts }}{{ .Annotations.description }}<br>{{ end }}'
+    webhook_configs:
+      - url: 'http://localhost:9093/api/v1/alerts'
+        send_resolved: true
+
+# 模板配置（告警消息模板）
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+

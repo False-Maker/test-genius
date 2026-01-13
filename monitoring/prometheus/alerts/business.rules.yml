@@ -1,0 +1,110 @@
+groups:
+  - name: business_alerts
+    interval: 30s
+    rules:
+      # 用例生成失败率告警
+      - alert: HighCaseGenerationFailureRate
+        expr: |
+          (
+            sum(increase(case_generation_task_total{status="failed"}[5m])) by (application)
+            /
+            sum(increase(case_generation_task_total[5m])) by (application)
+          ) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "用例生成失败率过高"
+          description: "应用 {{ $labels.application }} 的用例生成失败率为 {{ $value | humanizePercentage }}，超过10%阈值"
+
+      - alert: CriticalCaseGenerationFailureRate
+        expr: |
+          (
+            sum(increase(case_generation_task_total{status="failed"}[5m])) by (application)
+            /
+            sum(increase(case_generation_task_total[5m])) by (application)
+          ) * 100 > 20
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "用例生成失败率严重过高"
+          description: "应用 {{ $labels.application }} 的用例生成失败率为 {{ $value | humanizePercentage }}，超过20%阈值"
+
+      # 用例生成任务积压告警
+      - alert: HighCaseGenerationTaskBacklog
+        expr: |
+          sum(case_generation_task_total{status="pending"}) by (application) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "用例生成任务积压过多"
+          description: "应用 {{ $labels.application }} 的待处理用例生成任务数为 {{ $value }}，超过100个阈值"
+
+      # 用例生成平均耗时告警
+      - alert: HighCaseGenerationDuration
+        expr: |
+          avg(case_generation_task_duration_seconds) by (application) > 60
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "用例生成平均耗时过长"
+          description: "应用 {{ $labels.application }} 的用例生成平均耗时为 {{ $value }} 秒，超过60秒阈值"
+
+      # 模型调用失败率告警
+      - alert: HighLLMCallFailureRate
+        expr: |
+          (
+            sum(increase(llm_call_total{status="failed"}[5m])) by (application, model_code)
+            /
+            sum(increase(llm_call_total[5m])) by (application, model_code)
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "模型调用失败率过高"
+          description: "应用 {{ $labels.application }} 的模型 {{ $labels.model_code }} 调用失败率为 {{ $value | humanizePercentage }}，超过5%阈值"
+
+      - alert: CriticalLLMCallFailureRate
+        expr: |
+          (
+            sum(increase(llm_call_total{status="failed"}[5m])) by (application, model_code)
+            /
+            sum(increase(llm_call_total[5m])) by (application, model_code)
+          ) * 100 > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "模型调用失败率严重过高"
+          description: "应用 {{ $labels.application }} 的模型 {{ $labels.model_code }} 调用失败率为 {{ $value | humanizePercentage }}，超过10%阈值"
+
+      # 模型调用超时告警
+      - alert: HighLLMCallTimeout
+        expr: |
+          sum(increase(llm_call_total{status="timeout"}[1h])) by (application, model_code) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "模型调用超时次数过多"
+          description: "应用 {{ $labels.application }} 的模型 {{ $labels.model_code }} 在过去1小时内超时 {{ $value }} 次，超过10次阈值"
+
+      # 模型调用Token使用量突增告警
+      - alert: LLMTokenUsageSurge
+        expr: |
+          (
+            sum(rate(llm_tokens_used_total[5m])) by (application, model_code)
+            /
+            sum(rate(llm_tokens_used_total[15m] offset 10m)) by (application, model_code)
+          ) > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "模型调用Token使用量突增"
+          description: "应用 {{ $labels.application }} 的模型 {{ $labels.model_code }} 的Token使用量突增 {{ $value | humanize }} 倍，超过200%阈值"
+

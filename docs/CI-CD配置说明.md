@@ -58,7 +58,7 @@
 #### 测试阶段（test）
 - `test:java` - Java单元测试和代码覆盖率
 - `test:python` - Python单元测试和代码覆盖率
-- `test:frontend` - 前端Lint检查
+- `test:frontend` - 前端Lint检查和单元测试（Vitest）
 
 #### 代码质量检查阶段（quality）
 - `quality:java` - SonarQube代码质量分析（手动触发）
@@ -117,7 +117,7 @@ docker build -f test-design-assistant-core/Dockerfile -t backend-java:latest .
 #### 测试作业
 - `test-java` - Java单元测试和代码覆盖率（使用PostgreSQL和Redis服务）
 - `test-python` - Python单元测试和代码覆盖率
-- `test-frontend` - 前端Lint检查
+- `test-frontend` - 前端Lint检查和单元测试（Vitest）
 
 #### 代码质量检查作业
 - `quality-java` - SonarQube代码质量分析（仅develop/main/master分支）

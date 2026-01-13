@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'test-design-assistant'
+    environment: 'production'
+
+# Alertmanager配置
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# 告警规则文件
+rule_files:
+  - "alerts/*.rules.yml"
+
+# 抓取配置
+scrape_configs:
+  # Spring Boot应用指标
+  - job_name: 'backend-java'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['backend-java:8080']
+        labels:
+          service: 'backend-java'
+          application: 'test-design-assistant'
+
+  # Python AI服务指标（如果后续添加Prometheus支持）
+  - job_name: 'backend-python'
+    static_configs:
+      - targets: ['backend-python:8000']
+        labels:
+          service: 'backend-python'
+          application: 'test-design-assistant'
+
+  # Prometheus自身指标
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+

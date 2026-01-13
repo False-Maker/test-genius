@@ -1,0 +1,90 @@
+groups:
+  - name: system_alerts
+    interval: 30s
+    rules:
+      # JVM堆内存告警
+      - alert: HighJVMHeapMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM堆内存使用率过高"
+          description: "应用 {{ $labels.application }} 的JVM堆内存使用率为 {{ $value | humanizePercentage }}，超过80%阈值"
+
+      - alert: CriticalJVMHeapMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "JVM堆内存使用率严重过高"
+          description: "应用 {{ $labels.application }} 的JVM堆内存使用率为 {{ $value | humanizePercentage }}，超过90%阈值，需要立即处理"
+
+      # GC耗时告警
+      - alert: HighGCDuration
+        expr: rate(jvm_gc_pause_seconds_sum[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GC耗时过长"
+          description: "应用 {{ $labels.application }} 的GC平均耗时 {{ $value }} 秒，超过1秒阈值"
+
+      - alert: CriticalGCDuration
+        expr: rate(jvm_gc_pause_seconds_sum[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GC耗时严重过长"
+          description: "应用 {{ $labels.application }} 的GC平均耗时 {{ $value }} 秒，超过5秒阈值"
+
+      # 线程数告警
+      - alert: HighThreadCount
+        expr: jvm_threads_live_threads > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "线程数过多"
+          description: "应用 {{ $labels.application }} 的线程数为 {{ $value }}，超过500阈值"
+
+      # CPU使用率告警
+      - alert: HighCPUUsage
+        expr: system_cpu_usage * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU使用率过高"
+          description: "应用 {{ $labels.application }} 的CPU使用率为 {{ $value | humanizePercentage }}，超过80%阈值"
+
+      - alert: CriticalCPUUsage
+        expr: system_cpu_usage * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU使用率严重过高"
+          description: "应用 {{ $labels.application }} 的CPU使用率为 {{ $value | humanizePercentage }}，超过90%阈值"
+
+      # 内存使用率告警
+      - alert: HighMemoryUsage
+        expr: (jvm_memory_used_bytes / jvm_memory_max_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "内存使用率过高"
+          description: "应用 {{ $labels.application }} 的内存使用率为 {{ $value | humanizePercentage }}，超过85%阈值"
+
+      - alert: CriticalMemoryUsage
+        expr: (jvm_memory_used_bytes / jvm_memory_max_bytes) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "内存使用率严重过高"
+          description: "应用 {{ $labels.application }} 的内存使用率为 {{ $value | humanizePercentage }}，超过95%阈值"
+

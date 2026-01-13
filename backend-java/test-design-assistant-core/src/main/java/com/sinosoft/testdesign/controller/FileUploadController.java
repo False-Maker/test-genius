@@ -29,18 +29,18 @@ public class FileUploadController {
     
     @Operation(summary = "上传文件", description = "上传Word、PDF等文档文件")
     @PostMapping("/upload")
-    public Result<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+    public Result<com.sinosoft.testdesign.dto.FileUploadResponseDTO> uploadFile(@RequestParam("file") MultipartFile file) {
         log.info("收到文件上传请求: 文件名={}, 文件大小={}字节, 文件类型={}", 
             file.getOriginalFilename(), file.getSize(), file.getContentType());
         
         String filePath = fileUploadService.uploadFile(file);
         String fileUrl = fileUploadService.getFileUrl(filePath);
         
-        Map<String, String> result = new HashMap<>();
-        result.put("filePath", filePath);
-        result.put("fileUrl", fileUrl);
-        result.put("fileName", file.getOriginalFilename());
-        result.put("fileSize", String.valueOf(file.getSize()));
+        com.sinosoft.testdesign.dto.FileUploadResponseDTO result = new com.sinosoft.testdesign.dto.FileUploadResponseDTO();
+        result.setFilePath(filePath);
+        result.setFileUrl(fileUrl);
+        result.setFileName(file.getOriginalFilename());
+        result.setFileSize(String.valueOf(file.getSize()));
         
         return Result.success(result);
     }

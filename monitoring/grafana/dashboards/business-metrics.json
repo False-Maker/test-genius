@@ -1,0 +1,160 @@
+{
+  "dashboard": {
+    "title": "业务监控",
+    "tags": ["business", "metrics"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "用例生成任务总数",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(case_generation_task_total[1h]))",
+            "legendFormat": "任务总数"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "用例生成成功率",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(sum(increase(case_generation_task_total{status=\"success\"}[1h])) / sum(increase(case_generation_task_total[1h]))) * 100",
+            "legendFormat": "成功率"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 80, "color": "yellow"},
+                {"value": 90, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "用例生成平均耗时",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(case_generation_task_duration_seconds) by (application)",
+            "legendFormat": "{{application}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 60, "color": "yellow"},
+                {"value": 120, "color": "red"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "用例生成失败原因分布",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(increase(case_generation_task_total{status=\"failed\"}[1h])) by (error_reason)",
+            "legendFormat": "{{error_reason}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "模型调用次数",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(increase(llm_call_total[5m])) by (model_code)",
+            "legendFormat": "{{model_code}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 9, "x": 6, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "模型调用成功率",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(sum(increase(llm_call_total{status=\"success\"}[1h])) / sum(increase(llm_call_total[1h]))) * 100",
+            "legendFormat": "成功率"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 95, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 3, "x": 15, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "模型调用平均耗时",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(llm_call_duration_seconds) by (model_code)",
+            "legendFormat": "{{model_code}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "模型调用Token使用量",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(increase(llm_tokens_used_total[5m])) by (model_code)",
+            "legendFormat": "{{model_code}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 9,
+        "title": "各模型调用分布",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum(increase(llm_call_total[1h])) by (model_code)",
+            "legendFormat": "{{model_code}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 24}
+      }
+    ]
+  }
+}
+

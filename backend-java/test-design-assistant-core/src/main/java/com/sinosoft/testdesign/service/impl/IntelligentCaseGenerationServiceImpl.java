@@ -11,6 +11,7 @@ import com.sinosoft.testdesign.dto.GenerationTaskDTO;
 import com.sinosoft.testdesign.entity.*;
 import com.sinosoft.testdesign.enums.CaseStatus;
 import com.sinosoft.testdesign.repository.*;
+import com.sinosoft.testdesign.metrics.BusinessMetricsCollector;
 import com.sinosoft.testdesign.service.IntelligentCaseGenerationService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
     private final TestCaseService testCaseService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final BusinessMetricsCollector metricsCollector;
     
     @Value("${app.ai-service.url:http://localhost:8000}")
     private String aiServiceUrl;
@@ -112,6 +114,9 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
         long elapsedTime = System.currentTimeMillis() - startTime;
         log.info("用例生成任务创建成功，任务ID: {}, 任务编码: {}, 耗时: {}ms", 
                 task.getId(), task.getTaskCode(), elapsedTime);
+        
+        // 记录指标：任务创建
+        metricsCollector.recordCaseGenerationTaskCreated();
         
         // 异步执行任务
         executeGenerationTask(task.getId());
@@ -355,17 +360,25 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
             task = taskRepository.save(task);
             
             long elapsedTime = System.currentTimeMillis() - startTime;
+            double durationSeconds = elapsedTime / 1000.0;
             log.info("用例生成任务完成，任务ID: {}, 成功: {}, 失败: {}, 总耗时: {}ms", 
                     taskId, successCount, failCount, elapsedTime);
             
+            // 记录指标：任务成功
+            metricsCollector.recordCaseGenerationTaskSuccess(durationSeconds);
+            
         } catch (Exception e) {
             long elapsedTime = System.currentTimeMillis() - startTime;
+            double durationSeconds = elapsedTime / 1000.0;
             log.error("执行用例生成任务失败，任务ID: {}, 耗时: {}ms", taskId, elapsedTime, e);
             
             task.setTaskStatus("FAILED");
             task.setErrorMessage(e.getMessage());
             task.setCompleteTime(LocalDateTime.now());
             taskRepository.save(task);
+            
+            // 记录指标：任务失败
+            metricsCollector.recordCaseGenerationTaskFailed(durationSeconds, e.getClass().getSimpleName());
         }
     }
     

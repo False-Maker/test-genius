@@ -1,0 +1,47 @@
+groups:
+  - name: health_alerts
+    interval: 30s
+    rules:
+      # 服务健康检查失败告警
+      - alert: ServiceHealthCheckFailed
+        expr: up{job="backend-java"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务健康检查失败"
+          description: "应用 {{ $labels.application }} 的健康检查失败，服务可能已停止"
+
+      # 数据库连接失败告警
+      - alert: DatabaseConnectionFailure
+        expr: |
+          spring_health_db_status{status="DOWN"} == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "数据库连接失败"
+          description: "应用 {{ $labels.application }} 无法连接到数据库，连接状态为DOWN"
+
+      # Redis连接失败告警
+      - alert: RedisHealthCheckFailed
+        expr: |
+          spring_health_redis_status{status="DOWN"} == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis健康检查失败"
+          description: "应用 {{ $labels.application }} 无法连接到Redis，连接状态为DOWN"
+
+      # AI服务连接失败告警
+      - alert: AIServiceConnectionFailure
+        expr: |
+          spring_health_aiService_status{status="DOWN"} == 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI服务连接失败"
+          description: "应用 {{ $labels.application }} 无法连接到AI服务，连接状态为DOWN"
+

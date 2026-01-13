@@ -17,12 +17,12 @@ variables:
   IMAGE_TAG: "${CI_COMMIT_SHORT_SHA}"
 
 # 缓存配置
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .m2/repository/
-    - frontend/node_modules/
-    - backend-python/ai-service/.venv/
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .m2/repository/
+      - frontend/node_modules/
+      - backend-python/ai-service/.venv/
 
 # ==================== 构建阶段 ====================
 
@@ -143,7 +143,7 @@ test:python:
     - main
     - master
 
-# 前端Lint检查
+# 前端测试和Lint检查
 test:frontend:
   stage: test
   image: node:18-alpine
@@ -151,6 +151,16 @@ test:frontend:
     - cd frontend
     - npm ci
     - npm run lint
+    - npm run test:run -- --coverage
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: frontend/coverage/cobertura-coverage.xml
+    paths:
+      - frontend/coverage/
+    expire_in: 1 week
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
   only:
     - merge_requests
     - develop

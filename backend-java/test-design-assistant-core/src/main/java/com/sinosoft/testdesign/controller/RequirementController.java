@@ -1,17 +1,24 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
+import com.sinosoft.testdesign.dto.TestRequirementRequestDTO;
+import com.sinosoft.testdesign.dto.TestRequirementResponseDTO;
 import com.sinosoft.testdesign.entity.TestRequirement;
+import com.sinosoft.testdesign.mapper.EntityDTOMapper;
 import com.sinosoft.testdesign.service.RequirementAnalysisService;
 import com.sinosoft.testdesign.service.RequirementService;
 import com.sinosoft.testdesign.service.impl.RequirementAnalysisServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
 
 /**
  * 需求管理控制器
@@ -27,36 +34,47 @@ public class RequirementController {
     
     private final RequirementService requirementService;
     private final RequirementAnalysisService requirementAnalysisService;
+    private final EntityDTOMapper entityDTOMapper;
     
     @Operation(summary = "创建需求", description = "创建新的测试需求")
     @PostMapping
-    public Result<TestRequirement> createRequirement(@RequestBody TestRequirement requirement) {
-        return Result.success(requirementService.createRequirement(requirement));
+    public Result<TestRequirementResponseDTO> createRequirement(@Valid @RequestBody TestRequirementRequestDTO dto) {
+        TestRequirement requirement = entityDTOMapper.toRequirementEntity(dto);
+        TestRequirement saved = requirementService.createRequirement(requirement);
+        return Result.success(entityDTOMapper.toRequirementResponseDTO(saved));
     }
     
     @Operation(summary = "查询需求列表", description = "分页查询需求列表，支持按需求名称和状态搜索")
     @GetMapping
-    public Result<Page<TestRequirement>> getRequirementList(
+    public Result<Page<TestRequirementResponseDTO>> getRequirementList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String requirementName,
             @RequestParam(required = false) String requirementStatus) {
         Pageable pageable = PageRequest.of(page, size);
-        return Result.success(requirementService.getRequirementList(pageable, requirementName, requirementStatus));
+        Page<TestRequirement> requirementPage = requirementService.getRequirementList(pageable, requirementName, requirementStatus);
+        
+        // 转换为DTO分页
+        Page<TestRequirementResponseDTO> dtoPage = requirementPage.map(entityDTOMapper::toRequirementResponseDTO);
+        return Result.success(dtoPage);
     }
     
     @Operation(summary = "获取需求详情", description = "根据ID获取需求详情")
     @GetMapping("/{id}")
-    public Result<TestRequirement> getRequirementById(@PathVariable Long id) {
-        return Result.success(requirementService.getRequirementById(id));
+    public Result<TestRequirementResponseDTO> getRequirementById(@PathVariable Long id) {
+        TestRequirement requirement = requirementService.getRequirementById(id);
+        return Result.success(entityDTOMapper.toRequirementResponseDTO(requirement));
     }
     
     @Operation(summary = "更新需求", description = "更新需求信息")
     @PutMapping("/{id}")
-    public Result<TestRequirement> updateRequirement(
+    public Result<TestRequirementResponseDTO> updateRequirement(
             @PathVariable Long id,
-            @RequestBody TestRequirement requirement) {
-        return Result.success(requirementService.updateRequirement(id, requirement));
+            @Valid @RequestBody TestRequirementRequestDTO dto) {
+        TestRequirement requirement = requirementService.getRequirementById(id);
+        entityDTOMapper.updateRequirementFromDTO(dto, requirement);
+        TestRequirement updated = requirementService.updateRequirement(id, requirement);
+        return Result.success(entityDTOMapper.toRequirementResponseDTO(updated));
     }
     
     @Operation(summary = "删除需求", description = "删除指定需求")
@@ -68,10 +86,11 @@ public class RequirementController {
     
     @Operation(summary = "更新需求状态", description = "更新需求状态（状态流转）")
     @PutMapping("/{id}/status")
-    public Result<TestRequirement> updateRequirementStatus(
+    public Result<TestRequirementResponseDTO> updateRequirementStatus(
             @PathVariable Long id,
             @RequestParam String status) {
-        return Result.success(requirementService.updateRequirementStatus(id, status));
+        TestRequirement updated = requirementService.updateRequirementStatus(id, status);
+        return Result.success(entityDTOMapper.toRequirementResponseDTO(updated));
     }
     
     @Operation(summary = "分析需求", description = "分析需求文档，提取测试要点和业务规则")

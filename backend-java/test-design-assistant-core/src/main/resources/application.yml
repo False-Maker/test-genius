@@ -103,6 +103,16 @@ app:
     max-request-size: 100MB
     base-path: ./uploads
     url-prefix: /api/v1/files
+  
+  # 功能开关配置
+  feature-flag:
+    model-fallback-enabled: true  # 是否启用模型降级策略
+    case-generation-enabled: true  # 是否启用用例生成功能
+    case-quality-assessment-enabled: true  # 是否启用用例质量评估功能
+    case-reuse-enabled: true  # 是否启用用例复用功能
+    knowledge-base-enabled: true  # 是否启用知识库功能
+    system-load-threshold: 80  # 系统负载阈值（CPU使用率百分比）
+    auto-degrade-enabled: false  # 是否启用自动降级
 
 # Swagger配置
 springdoc:
@@ -171,4 +181,13 @@ resilience4j:
         retryExceptions:
           - org.springframework.web.client.ResourceAccessException
           - java.net.ConnectException
+
+# Spring Cloud Sleuth配置（链路追踪）
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # 采样率：100%（生产环境建议根据实际情况调整）
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans  # Zipkin服务地址
 
