@@ -124,6 +124,21 @@ Cursor IDE 的 Agent 对话历史默认存储在系统应用数据目录中，�
 tar -czf cursor-backup-$(date +%Y%m%d).tar.gz .cursor/
 ```
 
+## 快速配置（已复制文件到项目）
+
+如果你已经将 Cursor 历史对话文件复制到项目目录（`.cursor/workspaceStorage/`），可以使用以下脚本快速链接：
+
+```powershell
+# 以管理员身份运行 PowerShell
+cd D:\Sinosoft\test-genius
+.\scripts\link-cursor-history.ps1
+```
+
+这个脚本会：
+1. 自动检测项目目录中的工作区 ID
+2. 创建从系统路径到项目路径的符号链接
+3. 让 Cursor 能够加载项目目录中的对话历史
+
 ## 验证配置
 
 配置完成后，可以通过以下方式验证：
@@ -131,6 +146,7 @@ tar -czf cursor-backup-$(date +%Y%m%d).tar.gz .cursor/
 1. 在 Cursor 中进行一次 Agent 对话
 2. 检查 `.cursor/workspaceStorage/` 目录是否有新文件生成
 3. 重启 Cursor，确认对话历史仍然存在
+4. 检查系统路径是否已正确链接到项目路径
 
 ## 故障排除
 
