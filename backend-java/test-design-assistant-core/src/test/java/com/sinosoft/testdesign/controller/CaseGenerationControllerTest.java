@@ -38,13 +38,13 @@ class CaseGenerationControllerTest extends BaseControllerTest {
         // Given
         CaseGenerationRequest request = new CaseGenerationRequest();
         request.setRequirementId(1L);
-        request.setLayerId(1L);
-        request.setMethodId(1L);
+        request.setLayerCode("LAYER-001");
+        request.setMethodCode("METHOD-001");
         
         CaseGenerationResult result = new CaseGenerationResult();
         result.setTaskId(1L);
-        result.setTaskCode("TASK-20240101-001");
         result.setStatus("PENDING");
+        result.setMessage("任务已创建");
         
         when(caseGenerationService.generateTestCases(any(CaseGenerationRequest.class)))
             .thenReturn(result);
@@ -56,7 +56,6 @@ class CaseGenerationControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.taskId").value(1L))
-                .andExpect(jsonPath("$.data.taskCode").value("TASK-20240101-001"))
                 .andExpect(jsonPath("$.data.status").value("PENDING"));
     }
     
@@ -69,8 +68,8 @@ class CaseGenerationControllerTest extends BaseControllerTest {
         requirementIds.add(1L);
         requirementIds.add(2L);
         request.setRequirementIds(requirementIds);
-        request.setLayerId(1L);
-        request.setMethodId(1L);
+        request.setLayerCode("LAYER-001");
+        request.setMethodCode("METHOD-001");
         
         BatchCaseGenerationResult result = new BatchCaseGenerationResult();
         List<Long> taskIds = new ArrayList<>();

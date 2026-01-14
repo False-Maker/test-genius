@@ -121,9 +121,8 @@ public interface EntityDTOMapper {
     
     /**
      * ModelConfig Entity -> ModelConfigResponseDTO
-     * 注意：不包含apiKey敏感信息
+     * 注意：不包含apiKey敏感信息（ModelConfigResponseDTO中没有apiKey字段，MapStruct会自动忽略）
      */
-    @Mapping(target = "apiKey", ignore = true)
     ModelConfigResponseDTO toModelConfigResponseDTO(ModelConfig modelConfig);
     
     /**

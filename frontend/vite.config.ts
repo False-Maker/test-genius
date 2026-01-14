@@ -32,10 +32,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // 将Element Plus单独打包
-          'element-plus': ['element-plus'],
           // 将Vue相关库单独打包
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          // 将Element Plus单独打包
+          'element-plus': ['element-plus'],
           // 将工具库单独打包
           'utils': ['axios']
         },

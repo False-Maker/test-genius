@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -326,7 +327,7 @@ class ModelConfigServiceImplTest {
         configs.add(modelConfig);
         Page<ModelConfig> page = new PageImpl<>(configs, pageable, 1);
         
-        when(modelConfigRepository.findAll(any(), eq(pageable)))
+        when(modelConfigRepository.findAll(any(Specification.class), eq(pageable)))
             .thenReturn(page);
         
         // When
@@ -335,7 +336,7 @@ class ModelConfigServiceImplTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(modelConfigRepository, times(1)).findAll(any(), eq(pageable));
+        verify(modelConfigRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
     
     @Test

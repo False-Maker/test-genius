@@ -42,14 +42,14 @@ class TestCaseControllerTest extends BaseControllerTest {
         // Given
         TestCase testCase = new TestCase();
         testCase.setCaseName("测试用例");
-        testCase.setTestSteps("1. 步骤一\n2. 步骤二");
+        testCase.setTestStep("1. 步骤一\n2. 步骤二");
         testCase.setExpectedResult("预期结果");
         
         TestCase savedCase = new TestCase();
         savedCase.setId(1L);
         savedCase.setCaseCode("CASE-20240101-001");
         savedCase.setCaseName("测试用例");
-        savedCase.setTestSteps("1. 步骤一\n2. 步骤二");
+        savedCase.setTestStep("1. 步骤一\n2. 步骤二");
         savedCase.setExpectedResult("预期结果");
         savedCase.setCaseStatus(CaseStatus.DRAFT.name());
         

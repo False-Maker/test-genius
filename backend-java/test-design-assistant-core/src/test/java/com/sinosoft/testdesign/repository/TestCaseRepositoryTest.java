@@ -59,7 +59,7 @@ class TestCaseRepositoryTest {
         testCase.setCaseCode("CASE-20240101-001");
         testCase.setCaseName("测试用例");
         testCase.setRequirementId(requirement.getId());
-        testCase.setTestSteps("1. 步骤一\n2. 步骤二");
+        testCase.setTestStep("1. 步骤一\n2. 步骤二");
         testCase.setExpectedResult("预期结果");
         testCase.setCaseStatus(CaseStatus.DRAFT.name());
         testCase.setCreateTime(LocalDateTime.now());

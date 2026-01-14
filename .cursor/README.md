@@ -4,6 +4,20 @@
 
 此目录用于存储 Cursor IDE 在当前项目中的 Agent 对话历史和相关配置。
 
+## 快速配置（推荐）
+
+**一键自动配置，让对话自动保存到项目目录：**
+
+```powershell
+# 以管理员身份运行 PowerShell
+cd D:\Demo\test-genius
+.\scripts\auto-setup-cursor.ps1
+```
+
+配置完成后，重启 Cursor，每次对话都会自动保存到项目的 `.cursor` 目录中。
+
+详细配置说明请查看：`docs/Cursor自动保存配置指南.md`
+
 ## Agent 文件位置
 
 Cursor 的 Agent 对话历史默认存储在以下位置：
@@ -78,4 +92,6 @@ if (Test-Path $sourcePath) {
 
 - `.gitignore` - 已配置忽略 `.cursor` 目录
 - `.cursorrules` - Cursor 项目规则配置
+- `docs/Cursor自动保存配置指南.md` - 详细配置指南
+- `scripts/auto-setup-cursor.ps1` - 自动配置脚本
 

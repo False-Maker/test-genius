@@ -3,11 +3,13 @@ package com.sinosoft.testdesign.metrics;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -113,7 +115,7 @@ public class BusinessMetricsCollector {
      */
     public void recordCaseGenerationTaskSuccess(double durationSeconds) {
         caseGenerationTaskSuccess.increment();
-        caseGenerationTaskDuration.record(durationSeconds);
+        caseGenerationTaskDuration.record(Duration.ofMillis((long)(durationSeconds * 1000)));
         taskQueueLength.decrementAndGet();
         log.debug("记录用例生成任务成功指标，耗时: {}秒", durationSeconds);
     }
@@ -125,10 +127,9 @@ public class BusinessMetricsCollector {
      * @param reason 失败原因
      */
     public void recordCaseGenerationTaskFailed(double durationSeconds, String reason) {
-        caseGenerationTaskFailed.increment(
-                io.micrometer.core.instrument.Tags.of("reason", reason != null ? reason : "unknown")
-        );
-        caseGenerationTaskDuration.record(durationSeconds);
+        meterRegistry.counter("case_generation_task_failed", 
+                Tags.of("reason", reason != null ? reason : "unknown")).increment();
+        caseGenerationTaskDuration.record(Duration.ofMillis((long)(durationSeconds * 1000)));
         taskQueueLength.decrementAndGet();
         log.debug("记录用例生成任务失败指标，耗时: {}秒，原因: {}", durationSeconds, reason);
     }
@@ -139,9 +140,8 @@ public class BusinessMetricsCollector {
      * @param modelCode 模型代码
      */
     public void recordLlmCallStart(String modelCode) {
-        llmCallTotal.increment(
-                io.micrometer.core.instrument.Tags.of("model", modelCode != null ? modelCode : "unknown")
-        );
+        meterRegistry.counter("llm_call_total", 
+                Tags.of("model", modelCode != null ? modelCode : "unknown")).increment();
         log.debug("记录模型调用开始指标，模型: {}", modelCode);
     }
     
@@ -153,14 +153,12 @@ public class BusinessMetricsCollector {
      * @param tokensUsed Token使用量
      */
     public void recordLlmCallSuccess(String modelCode, double durationSeconds, Long tokensUsed) {
-        llmCallSuccess.increment(
-                io.micrometer.core.instrument.Tags.of("model", modelCode != null ? modelCode : "unknown")
-        );
-        llmCallDuration.record(durationSeconds);
+        meterRegistry.counter("llm_call_success", 
+                Tags.of("model", modelCode != null ? modelCode : "unknown")).increment();
+        llmCallDuration.record(Duration.ofMillis((long)(durationSeconds * 1000)));
         if (tokensUsed != null && tokensUsed > 0) {
-            llmTokensUsed.increment(tokensUsed,
-                    io.micrometer.core.instrument.Tags.of("model", modelCode != null ? modelCode : "unknown")
-            );
+            meterRegistry.counter("llm_tokens_used_total", 
+                    Tags.of("model", modelCode != null ? modelCode : "unknown")).increment(tokensUsed);
         }
         log.debug("记录模型调用成功指标，模型: {}，耗时: {}秒，Token: {}", modelCode, durationSeconds, tokensUsed);
     }
@@ -173,13 +171,12 @@ public class BusinessMetricsCollector {
      * @param reason 失败原因
      */
     public void recordLlmCallFailed(String modelCode, double durationSeconds, String reason) {
-        llmCallFailed.increment(
-                io.micrometer.core.instrument.Tags.of(
+        meterRegistry.counter("llm_call_failed", 
+                Tags.of(
                         "model", modelCode != null ? modelCode : "unknown",
                         "reason", reason != null ? reason : "unknown"
-                )
-        );
-        llmCallDuration.record(durationSeconds);
+                )).increment();
+        llmCallDuration.record(Duration.ofMillis((long)(durationSeconds * 1000)));
         log.debug("记录模型调用失败指标，模型: {}，耗时: {}秒，原因: {}", modelCode, durationSeconds, reason);
     }
     
