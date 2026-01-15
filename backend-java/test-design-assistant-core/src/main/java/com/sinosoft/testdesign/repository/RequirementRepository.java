@@ -35,13 +35,15 @@ public interface RequirementRepository extends JpaRepository<TestRequirement, Lo
     /**
      * 优化的分页查询：使用索引提示和投影查询优化COUNT
      * 只查询必要的字段，减少数据传输量
+     * 注意：使用原生SQL和PostgreSQL的ILIKE避免类型推断问题
      */
-    @Query(value = "SELECT tr FROM TestRequirement tr WHERE " +
-            "(:requirementName IS NULL OR LOWER(tr.requirementName) LIKE LOWER(CONCAT('%', :requirementName, '%'))) AND " +
-            "(:requirementStatus IS NULL OR tr.requirementStatus = :requirementStatus)",
-            countQuery = "SELECT COUNT(tr.id) FROM TestRequirement tr WHERE " +
-            "(:requirementName IS NULL OR LOWER(tr.requirementName) LIKE LOWER(CONCAT('%', :requirementName, '%'))) AND " +
-            "(:requirementStatus IS NULL OR tr.requirementStatus = :requirementStatus)")
+    @Query(value = "SELECT * FROM test_requirement tr WHERE " +
+            "(:requirementName IS NULL OR tr.requirement_name ILIKE '%' || :requirementName || '%') AND " +
+            "(:requirementStatus IS NULL OR tr.requirement_status = :requirementStatus)",
+            countQuery = "SELECT COUNT(tr.id) FROM test_requirement tr WHERE " +
+            "(:requirementName IS NULL OR tr.requirement_name ILIKE '%' || :requirementName || '%') AND " +
+            "(:requirementStatus IS NULL OR tr.requirement_status = :requirementStatus)",
+            nativeQuery = true)
     Page<TestRequirement> findWithFilters(
             @Param("requirementName") String requirementName,
             @Param("requirementStatus") String requirementStatus,

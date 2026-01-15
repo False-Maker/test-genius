@@ -76,7 +76,7 @@ class CaseGenerationControllerTest extends BaseControllerTest {
         taskIds.add(1L);
         taskIds.add(2L);
         result.setTaskIds(taskIds);
-        result.setTotalCount(2);
+        result.setTotalTasks(2);
         
         when(caseGenerationService.batchGenerateTestCases(any(BatchCaseGenerationRequest.class)))
             .thenReturn(result);

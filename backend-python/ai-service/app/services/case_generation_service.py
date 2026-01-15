@@ -5,7 +5,7 @@
 import re
 import json
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from sqlalchemy.orm import Session
 from app.services.prompt_service import PromptService
 from app.services.llm_service import LLMService
@@ -220,7 +220,7 @@ class CaseGenerationService:
         requirement_info: Dict,
         layer_code: str,
         method_code: str
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         构建提示词变量
         

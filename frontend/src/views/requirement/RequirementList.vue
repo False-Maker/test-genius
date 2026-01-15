@@ -1,11 +1,16 @@
 <template>
   <div class="requirement-list">
-    <div class="header">
-      <h2>需求管理</h2>
-      <el-button type="primary" @click="handleCreate">
-        <el-icon><Plus /></el-icon>
-        新建需求
-      </el-button>
+    <div class="page-header">
+      <div class="header-left">
+        <h2 class="page-title">需求管理</h2>
+        <p class="page-subtitle">管理和维护所有的测试需求文档</p>
+      </div>
+      <div class="header-right">
+        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
+          <el-icon><Plus /></el-icon>
+          新建需求
+        </el-button>
+      </div>
     </div>
 
     <!-- 搜索栏 -->
@@ -14,17 +19,20 @@
         <el-form-item label="需求名称">
           <el-input
             v-model="searchForm.requirementName"
-            placeholder="请输入需求名称"
+            placeholder="搜索需求名称..."
             clearable
+            prefix-icon="Search"
             @clear="handleSearch"
             @keyup.enter="handleSearch"
+            style="width: 240px"
           />
         </el-form-item>
         <el-form-item label="需求状态">
           <el-select
             v-model="searchForm.requirementStatus"
-            placeholder="请选择状态"
+            placeholder="全部状态"
             clearable
+            style="width: 160px"
             @change="handleSearch"
           >
             <el-option label="草稿" value="DRAFT" />
@@ -34,7 +42,7 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button type="primary" plain @click="handleSearch">查询</el-button>
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
@@ -45,14 +53,22 @@
       <el-table
         v-loading="loading"
         :data="requirementList"
-        stripe
+        :header-cell-style="{ background: '#f9fafb' }"
         style="width: 100%"
       >
-        <el-table-column prop="requirementCode" label="需求编码" width="180" />
-        <el-table-column prop="requirementName" label="需求名称" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="requirementCode" label="需求编码" width="160">
+           <template #default="scope">
+            <span class="code-text">{{ scope.row.requirementCode }}</span>
+           </template>
+        </el-table-column>
+        <el-table-column prop="requirementName" label="需求名称" min-width="200" show-overflow-tooltip>
+          <template #default="scope">
+            <span class="name-text">{{ scope.row.requirementName }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="requirementType" label="需求类型" width="120">
           <template #default="scope">
-            {{ scope.row.requirementType || '-' }}
+            <el-tag effect="light" round>{{ scope.row.requirementType || '-' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="businessModule" label="业务模块" width="120">
@@ -62,50 +78,57 @@
         </el-table-column>
         <el-table-column prop="requirementStatus" label="状态" width="100">
           <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.requirementStatus)">
-              {{ getStatusText(scope.row.requirementStatus) }}
-            </el-tag>
+            <div class="status-indicator">
+              <span :class="['dot', getStatusType(scope.row.requirementStatus)]"></span>
+              <span>{{ getStatusText(scope.row.requirementStatus) }}</span>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="creatorName" label="创建人" width="120">
-          <template #default="scope">
-            {{ scope.row.creatorName || '-' }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="creatorName" label="创建人" width="120" />
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" width="280" fixed="right">
           <template #default="scope">
-            <el-button size="small" link type="primary" @click="handleView(scope.row)">
-              查看
-            </el-button>
-            <el-button size="small" link type="primary" @click="handleEdit(scope.row)">
-              编辑
-            </el-button>
-            <el-dropdown @command="(cmd) => handleStatusChange(scope.row, cmd)">
-              <el-button size="small" link type="primary">
-                状态流转 <el-icon><ArrowDown /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-for="status in getAvailableStatuses(scope.row.requirementStatus)"
-                    :key="status.value"
-                    :command="status.value"
-                  >
-                    {{ status.label }}
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-            <el-button
-              size="small"
-              link
-              type="danger"
-              :disabled="!canDelete(scope.row.requirementStatus)"
-              @click="handleDelete(scope.row)"
-            >
-              删除
-            </el-button>
+            <div class="action-buttons">
+              <el-tooltip content="查看详情" placement="top">
+                <el-button circle size="small" type="info" plain @click="handleView(scope.row)">
+                  <el-icon><View /></el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="编辑需求" placement="top">
+                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
+                  <el-icon><Edit /></el-icon>
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="智能分析" placement="top">
+                <el-button circle size="small" type="success" plain @click="handleAnalyze(scope.row)">
+                  <el-icon><MagicStick /></el-icon>
+                </el-button>
+              </el-tooltip>
+              
+              <el-dropdown trigger="click" @command="(cmd) => handleStatusChange(scope.row, cmd)">
+                <el-button circle size="small" type="warning" plain class="more-btn">
+                  <el-icon><More /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      v-for="status in getAvailableStatuses(scope.row.requirementStatus)"
+                      :key="status.value"
+                      :command="status.value"
+                    >
+                      {{ status.label }}
+                    </el-dropdown-item>
+                    <el-dropdown-item divided 
+                      :disabled="!canDelete(scope.row.requirementStatus)"
+                      @click="handleDelete(scope.row)"
+                      style="color: var(--el-color-danger)"
+                    >
+                      删除需求
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -117,6 +140,7 @@
           v-model:page-size="pagination.size"
           :total="pagination.total"
           :page-sizes="[10, 20, 50, 100]"
+          background
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handlePageChange"
@@ -124,6 +148,7 @@
       </div>
     </el-card>
 
+    <!-- Keeping Dialogs unchanged but they will inherit global styles -->
     <!-- 创建/编辑对话框 -->
     <el-dialog
       v-model="dialogVisible"
@@ -146,7 +171,7 @@
           />
         </el-form-item>
         <el-form-item label="需求类型" prop="requirementType">
-          <el-select v-model="formData.requirementType" placeholder="请选择需求类型">
+          <el-select v-model="formData.requirementType" placeholder="请选择需求类型" style="width: 100%">
             <el-option label="新功能" value="新功能" />
             <el-option label="优化" value="优化" />
             <el-option label="缺陷修复" value="缺陷修复" />
@@ -168,14 +193,17 @@
           />
         </el-form-item>
         <el-form-item label="需求文档" prop="requirementDocUrl">
-          <el-input
+          <FileUpload
             v-model="formData.requirementDocUrl"
-            placeholder="请输入需求文档URL"
-            maxlength="1000"
+            :limit="1"
+            :disabled="false"
+            :auto-upload="true"
+            tip-text="支持上传Word文档（.doc, .docx）和PDF文档（.pdf），单个文件不超过100MB"
+            @success="handleFileUploadSuccess"
           />
         </el-form-item>
         <el-form-item v-if="isEdit" label="需求状态" prop="requirementStatus">
-          <el-select v-model="formData.requirementStatus" placeholder="请选择状态">
+          <el-select v-model="formData.requirementStatus" placeholder="请选择状态" style="width: 100%">
             <el-option label="草稿" value="DRAFT" />
             <el-option label="审核中" value="REVIEWING" />
             <el-option label="已通过" value="APPROVED" />
@@ -231,12 +259,84 @@
           <div style="white-space: pre-wrap">{{ viewData.requirementDescription || '-' }}</div>
         </el-descriptions-item>
         <el-descriptions-item label="需求文档" :span="2">
-          <el-link v-if="viewData.requirementDocUrl" :href="viewData.requirementDocUrl" target="_blank">
+          <el-link v-if="viewData.requirementDocUrl" :href="viewData.requirementDocUrl" target="_blank" type="primary">
             {{ viewData.requirementDocUrl }}
           </el-link>
           <span v-else>-</span>
         </el-descriptions-item>
       </el-descriptions>
+    </el-dialog>
+
+    <!-- 需求分析对话框 -->
+    <el-dialog
+      v-model="analysisDialogVisible"
+      title="需求分析"
+      width="900px"
+    >
+      <div v-if="analysisLoading" style="text-align: center; padding: 40px">
+        <el-icon class="is-loading" style="font-size: 32px; color: var(--el-color-primary)"><Loading /></el-icon>
+        <p style="margin-top: 10px; color: #909399">正在智能分析需求...</p>
+      </div>
+      <div v-else-if="analysisResult">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="需求名称">
+            {{ analysisResult.requirementName }}
+          </el-descriptions-item>
+          <el-descriptions-item label="分析时间">
+            {{ analysisResult.analysisTime }}
+          </el-descriptions-item>
+          <el-descriptions-item label="关键词" :span="2">
+            <el-tag
+              v-for="(keyword, index) in analysisResult.keywords"
+              :key="index"
+              effect="plain"
+              style="margin-right: 8px; margin-bottom: 8px"
+            >
+              {{ keyword }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="内容长度">
+            {{ analysisResult.contentLength }} 字符
+          </el-descriptions-item>
+          <el-descriptions-item label="句子数量">
+            {{ analysisResult.sentenceCount }} 句
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider>测试要点</el-divider>
+        <div v-if="analysisResult.testPoints && analysisResult.testPoints.length > 0">
+          <el-table :data="analysisResult.testPoints" border stripe>
+            <el-table-column prop="point" label="测试要点" min-width="200" />
+            <el-table-column prop="description" label="描述" min-width="300" />
+            <el-table-column prop="priority" label="优先级" width="100">
+              <template #default="scope">
+                <el-tag v-if="scope.row.priority" :type="getPriorityType(scope.row.priority)" effect="dark">
+                  {{ scope.row.priority }}
+                </el-tag>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <el-empty v-else description="暂无测试要点" />
+
+        <el-divider>业务规则</el-divider>
+        <div v-if="analysisResult.businessRules && analysisResult.businessRules.length > 0">
+          <el-table :data="analysisResult.businessRules" border stripe>
+            <el-table-column prop="rule" label="业务规则" min-width="200" />
+            <el-table-column prop="description" label="描述" min-width="300" />
+            <el-table-column prop="type" label="类型" width="120">
+               <template #default="scope">
+                <el-tag type="info" effect="plain">{{ scope.row.type }}</el-tag>
+               </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <el-empty v-else description="暂无业务规则" />
+      </div>
+      <template #footer>
+        <el-button @click="analysisDialogVisible = false">关闭</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -244,15 +344,21 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Plus, ArrowDown } from '@element-plus/icons-vue'
+import { Plus, ArrowDown, Loading, View, Edit, MagicStick, More, Search } from '@element-plus/icons-vue'
 import { requirementApi, type TestRequirement } from '@/api/requirement'
 import type { PageResult } from '@/api/types'
+import FileUpload from '@/components/FileUpload.vue'
+import type { FileUploadResponse } from '@/api/fileUpload'
+import { requirementAnalysisApi, type RequirementAnalysisResult } from '@/api/requirementAnalysis'
 
 // 响应式数据
 const loading = ref(false)
 const submitLoading = ref(false)
 const dialogVisible = ref(false)
 const viewDialogVisible = ref(false)
+const analysisDialogVisible = ref(false)
+const analysisLoading = ref(false)
+const analysisResult = ref<RequirementAnalysisResult | null>(null)
 const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 
@@ -303,7 +409,7 @@ const getStatusText = (status?: string) => {
   return statusMap[status || ''] || status || '-'
 }
 
-// 获取状态类型
+// 获取状态类型 (Used for dot color)
 const getStatusType = (status?: string) => {
   const typeMap: Record<string, string> = {
     DRAFT: 'info',
@@ -481,6 +587,41 @@ const handleSubmit = async () => {
   })
 }
 
+// 文件上传成功
+const handleFileUploadSuccess = (response: FileUploadResponse) => {
+  formData.requirementDocUrl = response.fileUrl
+  ElMessage.success('文件上传成功')
+}
+
+// 需求分析
+const handleAnalyze = async (row: TestRequirement) => {
+  analysisDialogVisible.value = true
+  analysisLoading.value = true
+  analysisResult.value = null
+  
+  try {
+    const response = await requirementAnalysisApi.analyzeRequirement(row.id!)
+    if (response.data) {
+      analysisResult.value = response.data
+    }
+  } catch (error) {
+    console.error('需求分析失败:', error)
+    ElMessage.error('需求分析失败')
+  } finally {
+    analysisLoading.value = false
+  }
+}
+
+// 获取优先级类型
+const getPriorityType = (priority: string) => {
+  const typeMap: Record<string, string> = {
+    '高': 'danger',
+    '中': 'warning',
+    '低': 'info'
+  }
+  return typeMap[priority] || 'info'
+}
+
 // 重置表单
 const resetForm = () => {
   Object.assign(formData, {
@@ -509,30 +650,102 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .requirement-list {
-  padding: 20px;
-
-  .header {
+  // Container padding is now handled by App.vue (if verified), but App.view set overflow on el-main.
+  // Actually, App.vue el-main has padding: 24px. So we don't need padding here.
+  // But we want a little gap between elements.
+  
+  .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-
-    h2 {
-      margin: 0;
+    margin-bottom: 24px;
+    
+    .header-left {
+      .page-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--el-text-color-primary);
+      }
+      
+      .page-subtitle {
+        margin: 4px 0 0;
+        color: var(--el-text-color-secondary);
+        font-size: 14px;
+      }
     }
   }
 
   .search-card {
     margin-bottom: 20px;
+    border: none;
+    
+    :deep(.el-card__body) {
+      padding: 20px;
+    }
 
     .search-form {
-      margin: 0;
+      .el-form-item {
+        margin-bottom: 0;
+        margin-right: 24px;
+        
+        &:last-child {
+          margin-right: 0;
+        }
+      }
     }
   }
 
   .table-card {
+    border: none;
+    position: relative;
+    
+    .code-text {
+      font-family: monospace;
+      color: var(--el-text-color-regular);
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    
+    .name-text {
+      font-weight: 500;
+      color: var(--el-color-primary);
+      cursor: pointer;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        
+        &.info { background-color: var(--el-color-info); }
+        &.warning { background-color: var(--el-color-warning); }
+        &.success { background-color: var(--el-color-success); }
+        &.danger { background-color: var(--el-color-danger); }
+      }
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      
+      .more-btn {
+        margin-left: 0;
+      }
+    }
+    
     .pagination {
-      margin-top: 20px;
+      margin-top: 24px;
       display: flex;
       justify-content: flex-end;
     }

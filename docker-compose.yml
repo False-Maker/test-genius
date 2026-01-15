@@ -47,15 +47,16 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test_design_assistant
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_AI_SERVICE_URL: http://backend-python:8000
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health/liveness"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/actuator/health/liveness"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -92,7 +93,7 @@ services:
       dockerfile: Dockerfile
     container_name: test-design-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       backend-java:
         condition: service_healthy

@@ -1,6 +1,8 @@
 package com.sinosoft.testdesign.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sinosoft.testdesign.metrics.BusinessMetricsCollector;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +32,14 @@ public class AppConfig {
     
     /**
      * ObjectMapper Bean
+     * 配置支持 Java 8 时间类型序列化
      */
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
     }
     
     /**

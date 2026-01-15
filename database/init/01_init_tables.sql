@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS test_layer (
     layer_name VARCHAR(100) NOT NULL,
     layer_description TEXT,
     layer_order INT,
-    is_active CHAR(1) DEFAULT '1'
+    is_active VARCHAR(1) DEFAULT '1'
 );
 
 -- 测试设计方法表
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS test_design_method (
     method_description TEXT,
     applicable_layers VARCHAR(500),
     example TEXT,
-    is_active CHAR(1) DEFAULT '1'
+    is_active VARCHAR(1) DEFAULT '1'
 );
 
 -- 提示词模板表
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS prompt_template (
     applicable_modules VARCHAR(500),
     template_description TEXT,
     version INT DEFAULT 1,
-    is_active CHAR(1) DEFAULT '1',
+    is_active VARCHAR(1) DEFAULT '1',
     creator_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS model_config (
     model_version VARCHAR(50),
     max_tokens INT,
     temperature DECIMAL(3,2),
-    is_active CHAR(1) DEFAULT '1',
+    is_active VARCHAR(1) DEFAULT '1',
     priority INT,
     daily_limit INT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -167,7 +167,16 @@ CREATE INDEX IF NOT EXISTS idx_task_create_time ON case_generation_task(create_t
 CREATE INDEX IF NOT EXISTS idx_task_status_time ON case_generation_task(task_status, create_time);
 
 -- 知识库文档表（如果使用pgvector扩展）
--- 注意：需要先安装pgvector扩展：CREATE EXTENSION IF NOT EXISTS vector;
+-- 尝试安装pgvector扩展（如果可用）
+DO $$
+BEGIN
+    CREATE EXTENSION IF NOT EXISTS vector;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'pgvector extension not available, using TEXT for embedding column';
+END $$;
+
+-- 创建知识库文档表（如果pgvector可用则使用vector类型，否则使用TEXT）
 CREATE TABLE IF NOT EXISTS knowledge_document (
     id BIGSERIAL PRIMARY KEY,
     doc_code VARCHAR(100) UNIQUE NOT NULL,
@@ -176,8 +185,8 @@ CREATE TABLE IF NOT EXISTS knowledge_document (
     doc_category VARCHAR(100), -- 文档分类
     doc_content TEXT, -- 文档内容
     doc_url VARCHAR(1000), -- 文档URL
-    embedding vector(1536), -- 向量列（使用pgvector，可选）
-    is_active CHAR(1) DEFAULT '1',
+    embedding TEXT, -- 向量列（如果pgvector可用，后续可以ALTER TABLE修改为vector类型）
+    is_active VARCHAR(1) DEFAULT '1',
     creator_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP

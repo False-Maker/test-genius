@@ -26,6 +26,21 @@ const router = createRouter({
       path: '/prompt-template',
       name: 'PromptTemplate',
       component: () => import('../views/prompt-template/PromptTemplateList.vue')
+    },
+    {
+      path: '/model-config',
+      name: 'ModelConfig',
+      component: () => import('../views/model-config/ModelConfigList.vue')
+    },
+    {
+      path: '/knowledge-base',
+      name: 'KnowledgeBase',
+      component: () => import('../views/knowledge-base/KnowledgeBaseList.vue')
+    },
+    {
+      path: '/case-reuse',
+      name: 'CaseReuse',
+      component: () => import('../views/case-reuse/CaseReuse.vue')
     }
   ]
 })

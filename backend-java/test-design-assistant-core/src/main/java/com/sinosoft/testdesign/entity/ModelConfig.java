@@ -74,7 +74,7 @@ public class ModelConfig {
     /**
      * 是否启用：1-启用，0-禁用
      */
-    @Column(name = "is_active", length = 1)
+    @Column(name = "is_active", columnDefinition = "CHAR(1)")
     private String isActive = "1";
     
     /**

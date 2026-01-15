@@ -69,6 +69,40 @@ export const testCaseApi = {
     return request.post<TestCase>(`/v1/test-cases/${id}/review`, null, {
       params: { reviewResult, reviewComment }
     })
+  },
+
+  // 导出用例
+  exportTestCases(params?: {
+    caseName?: string
+    caseStatus?: string
+    requirementId?: number
+  }) {
+    return request.get('/v1/test-cases/export', {
+      params,
+      responseType: 'blob'
+    })
+  },
+
+  // 导出用例模板
+  exportTemplate() {
+    return request.get('/v1/test-cases/export-template', {
+      responseType: 'blob'
+    })
+  },
+
+  // 导入用例
+  importTestCases(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request.post<{
+      successCount: number
+      failCount: number
+      errors: Array<{ row: number; message: string }>
+    }>('/v1/test-cases/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 }
 

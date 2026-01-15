@@ -2,10 +2,24 @@
   <div class="test-case-list">
     <div class="header">
       <h2>用例管理</h2>
-      <el-button type="primary" @click="handleCreate">
-        <el-icon><Plus /></el-icon>
-        新建用例
-      </el-button>
+      <div class="header-actions">
+        <el-button @click="handleExport">
+          <el-icon><Download /></el-icon>
+          导出用例
+        </el-button>
+        <el-button @click="handleExportTemplate">
+          <el-icon><Document /></el-icon>
+          下载模板
+        </el-button>
+        <el-button @click="handleImport">
+          <el-icon><Upload /></el-icon>
+          导入用例
+        </el-button>
+        <el-button type="primary" @click="handleCreate">
+          <el-icon><Plus /></el-icon>
+          新建用例
+        </el-button>
+      </div>
     </div>
 
     <!-- 搜索栏 -->
@@ -84,6 +98,9 @@
             </el-button>
             <el-button size="small" link type="primary" @click="handleEdit(scope.row)">
               编辑
+            </el-button>
+            <el-button size="small" link type="success" @click="handleQualityAssess(scope.row)">
+              质量评估
             </el-button>
             <el-dropdown v-if="getAvailableStatuses(scope.row.caseStatus).length > 0" @command="(cmd) => handleStatusChange(scope.row, cmd)">
               <el-button size="small" link type="primary">
@@ -321,15 +338,164 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 导入用例对话框 -->
+    <el-dialog
+      v-model="importDialogVisible"
+      title="导入用例"
+      width="600px"
+    >
+      <el-upload
+        ref="importUploadRef"
+        :http-request="handleImportUpload"
+        :before-upload="beforeImportUpload"
+        :on-success="handleImportSuccess"
+        :on-error="handleImportError"
+        :file-list="importFileList"
+        :limit="1"
+        accept=".xlsx,.xls"
+        :auto-upload="false"
+        drag
+      >
+        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+        <div class="el-upload__text">
+          将Excel文件拖到此处，或<em>点击上传</em>
+        </div>
+        <template #tip>
+          <div class="el-upload__tip">
+            支持上传Excel文件（.xlsx, .xls），请先下载模板文件
+          </div>
+        </template>
+      </el-upload>
+
+      <!-- 导入结果 -->
+      <div v-if="importResult" class="import-result" style="margin-top: 20px">
+        <el-alert
+          :type="importResult.failCount > 0 ? 'warning' : 'success'"
+          :closable="false"
+          show-icon
+        >
+          <template #title>
+            <div>
+              <p>导入完成！成功：{{ importResult.successCount }} 个，失败：{{ importResult.failCount }} 个</p>
+              <div v-if="importResult.errors && importResult.errors.length > 0" style="margin-top: 10px">
+                <p><strong>错误详情：</strong></p>
+                <ul style="margin: 5px 0; padding-left: 20px">
+                  <li v-for="(error, index) in importResult.errors" :key="index">
+                    第{{ error.row }}行：{{ error.message }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </template>
+        </el-alert>
+      </div>
+
+      <template #footer>
+        <el-button @click="importDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="importLoading" @click="submitImport">
+          开始导入
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 质量评估对话框 -->
+    <el-dialog
+      v-model="qualityDialogVisible"
+      title="用例质量评估"
+      width="800px"
+    >
+      <div v-if="qualityLoading" style="text-align: center; padding: 40px">
+        <el-icon class="is-loading" style="font-size: 32px"><Loading /></el-icon>
+        <p style="margin-top: 10px">正在评估用例质量...</p>
+      </div>
+      <div v-else-if="qualityResult">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="综合评分" :span="2">
+            <el-tag :type="getQualityLevelType(qualityResult.qualityLevel)" size="large">
+              {{ qualityResult.totalScore }} 分 - {{ qualityResult.qualityLevel }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="完整性评分">
+            {{ qualityResult.completenessScore }} 分
+          </el-descriptions-item>
+          <el-descriptions-item label="规范性评分">
+            {{ qualityResult.standardizationScore }} 分
+          </el-descriptions-item>
+          <el-descriptions-item label="可执行性评分">
+            {{ qualityResult.executabilityScore }} 分
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-divider>详细评分</el-divider>
+
+        <el-collapse v-model="activeCollapse">
+          <el-collapse-item title="完整性评分详情" name="completeness">
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="前置条件">
+                {{ qualityResult.details.completeness.preConditionScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="测试步骤">
+                {{ qualityResult.details.completeness.testStepScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="预期结果">
+                {{ qualityResult.details.completeness.expectedResultScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="基本信息">
+                {{ qualityResult.details.completeness.basicInfoScore }} 分
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-collapse-item>
+          <el-collapse-item title="规范性评分详情" name="standardization">
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="命名规范性">
+                {{ qualityResult.details.standardization.namingScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="格式规范性">
+                {{ qualityResult.details.standardization.formatScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="内容规范性">
+                {{ qualityResult.details.standardization.contentScore }} 分
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-collapse-item>
+          <el-collapse-item title="可执行性评分详情" name="executability">
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="步骤清晰度">
+                {{ qualityResult.details.executability.stepClarityScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="数据准备难度">
+                {{ qualityResult.details.executability.dataPreparationScore }} 分
+              </el-descriptions-item>
+              <el-descriptions-item label="环境依赖">
+                {{ qualityResult.details.executability.environmentDependencyScore }} 分
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-collapse-item>
+          <el-collapse-item title="优化建议" name="suggestions">
+            <ul v-if="qualityResult.suggestions && qualityResult.suggestions.length > 0" style="margin: 0; padding-left: 20px">
+              <li v-for="(suggestion, index) in qualityResult.suggestions" :key="index">
+                {{ suggestion }}
+              </li>
+            </ul>
+            <p v-else style="color: #909399">暂无优化建议</p>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+      <template #footer>
+        <el-button @click="qualityDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Plus, ArrowDown } from '@element-plus/icons-vue'
+import { Plus, ArrowDown, Download, Upload, Document, UploadFilled, Loading } from '@element-plus/icons-vue'
 import { testCaseApi, type TestCase } from '@/api/testCase'
 import type { PageResult } from '@/api/types'
+import { testCaseQualityApi, type QualityScore } from '@/api/testCaseQuality'
 
 // 响应式数据
 const loading = ref(false)
@@ -338,6 +504,19 @@ const reviewLoading = ref(false)
 const dialogVisible = ref(false)
 const viewDialogVisible = ref(false)
 const reviewDialogVisible = ref(false)
+const importDialogVisible = ref(false)
+const importLoading = ref(false)
+const importUploadRef = ref()
+const importFileList = ref<any[]>([])
+const importResult = ref<{
+  successCount: number
+  failCount: number
+  errors: Array<{ row: number; message: string }>
+} | null>(null)
+const qualityDialogVisible = ref(false)
+const qualityLoading = ref(false)
+const qualityResult = ref<QualityScore | null>(null)
+const activeCollapse = ref<string[]>([])
 const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 const reviewFormRef = ref<FormInstance>()
@@ -627,6 +806,163 @@ const handleSubmit = async () => {
       }
     }
   })
+}
+
+// 导出用例
+const handleExport = async () => {
+  try {
+    const response = await testCaseApi.exportTestCases({
+      caseName: searchForm.caseName || undefined,
+      caseStatus: searchForm.caseStatus || undefined
+    })
+    
+    // 创建下载链接
+    const blob = new Blob([response.data as Blob], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `测试用例_${new Date().getTime()}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
+}
+
+// 导出模板
+const handleExportTemplate = async () => {
+  try {
+    const response = await testCaseApi.exportTemplate()
+    
+    // 创建下载链接
+    const blob = new Blob([response.data as Blob], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = '测试用例导入模板.xlsx'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+    ElMessage.error('下载模板失败')
+  }
+}
+
+// 导入用例
+const handleImport = () => {
+  importDialogVisible.value = true
+  importFileList.value = []
+  importResult.value = null
+}
+
+// 导入前验证
+const beforeImportUpload = (file: File) => {
+  const validTypes = ['.xlsx', '.xls']
+  const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
+  
+  if (!validTypes.includes(fileExtension)) {
+    ElMessage.error('只能上传Excel文件（.xlsx, .xls）')
+    return false
+  }
+
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    ElMessage.error('文件大小不能超过10MB')
+    return false
+  }
+
+  return true
+}
+
+// 自定义上传
+const handleImportUpload = async (options: any) => {
+  const file = options.file
+  importLoading.value = true
+  importResult.value = null
+  
+  try {
+    const response = await testCaseApi.importTestCases(file)
+    if (response.data) {
+      importResult.value = response.data
+      if (response.data.failCount === 0) {
+        ElMessage.success(`导入成功，共导入 ${response.data.successCount} 个用例`)
+        loadTestCaseList()
+      } else {
+        ElMessage.warning(`导入完成，成功 ${response.data.successCount} 个，失败 ${response.data.failCount} 个`)
+      }
+    }
+  } catch (error: any) {
+    console.error('导入失败:', error)
+    ElMessage.error('导入失败：' + (error.message || '未知错误'))
+  } finally {
+    importLoading.value = false
+  }
+}
+
+// 导入成功
+const handleImportSuccess = () => {
+  // 已在handleImportUpload中处理
+}
+
+// 导入失败
+const handleImportError = (error: Error) => {
+  console.error('导入失败:', error)
+  ElMessage.error('导入失败：' + error.message)
+  importLoading.value = false
+}
+
+// 提交导入
+const submitImport = () => {
+  if (importFileList.value.length === 0) {
+    ElMessage.warning('请先选择要导入的文件')
+    return
+  }
+  importUploadRef.value?.submit()
+}
+
+// 质量评估
+const handleQualityAssess = async (row: TestCase) => {
+  qualityDialogVisible.value = true
+  qualityLoading.value = true
+  qualityResult.value = null
+  activeCollapse.value = []
+  
+  try {
+    const response = await testCaseQualityApi.assessQuality(row.id!)
+    if (response.data) {
+      qualityResult.value = response.data
+      activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']
+    }
+  } catch (error) {
+    console.error('质量评估失败:', error)
+    ElMessage.error('质量评估失败')
+  } finally {
+    qualityLoading.value = false
+  }
+}
+
+// 获取质量等级类型
+const getQualityLevelType = (level: string) => {
+  const typeMap: Record<string, string> = {
+    '优秀': 'success',
+    '良好': 'success',
+    '一般': 'warning',
+    '需改进': 'danger'
+  }
+  return typeMap[level] || 'info'
 }
 
 // 重置表单

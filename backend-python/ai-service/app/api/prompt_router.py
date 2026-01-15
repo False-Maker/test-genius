@@ -3,7 +3,7 @@
 """
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.prompt_service import PromptService
@@ -14,7 +14,7 @@ router = APIRouter()
 class PromptGenerateRequest(BaseModel):
     """提示词生成请求"""
     template_id: int
-    variables: Dict[str, any] = {}
+    variables: Dict[str, Any] = {}
 
 
 class PromptGenerateResponse(BaseModel):
@@ -27,7 +27,7 @@ class PromptGenerateResponse(BaseModel):
 class TemplateVariablesResponse(BaseModel):
     """模板变量定义响应"""
     template_id: int
-    variables: Dict[str, any]
+    variables: Dict[str, Any]
 
 
 @router.post("/generate", response_model=PromptGenerateResponse)

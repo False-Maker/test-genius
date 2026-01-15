@@ -2,6 +2,13 @@ spring:
   application:
     name: test-design-assistant-core
   
+  # Jackson配置（支持Java 8时间类型）
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      read-date-timestamps-as-nanoseconds: false
+  
   # 数据源配置
   datasource:
     url: jdbc:postgresql://localhost:5432/test_design_assistant
@@ -97,10 +104,10 @@ app:
     url: http://localhost:8000
     timeout: 60000
   
-  # 文件上传配置
+  # 文件上传配置（单位：字节，100MB = 104857600）
   upload:
-    max-file-size: 100MB
-    max-request-size: 100MB
+    max-file-size: 104857600
+    max-request-size: 104857600
     base-path: ./uploads
     url-prefix: /api/v1/files
   
@@ -149,6 +156,13 @@ management:
       enabled: true
     redis:
       enabled: true
+  # Spring Cloud Sleuth配置（链路追踪）
+  tracing:
+    sampling:
+      probability: 1.0  # 采样率：100%（生产环境建议根据实际情况调整）
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans  # Zipkin服务地址
 
 # Resilience4j配置（限流和熔断）
 resilience4j:
@@ -181,13 +195,4 @@ resilience4j:
         retryExceptions:
           - org.springframework.web.client.ResourceAccessException
           - java.net.ConnectException
-
-# Spring Cloud Sleuth配置（链路追踪）
-management:
-  tracing:
-    sampling:
-      probability: 1.0  # 采样率：100%（生产环境建议根据实际情况调整）
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans  # Zipkin服务地址
 

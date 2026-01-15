@@ -37,16 +37,19 @@ RUN mvn dependency:go-offline -B || true
 # 复制源代码
 COPY test-design-assistant-core/src ./test-design-assistant-core/src
 
-# 构建应用（跳过测试，使用批处理模式减少输出）
-RUN mvn clean package -DskipTests -B
+# 构建应用（跳过测试，使用批处理模式减少输出，确保 Spring Boot 插件执行 repackage）
+RUN mvn clean package -DskipTests -B && \
+    ls -la /app/test-design-assistant-core/target/ && \
+    echo "JAR files:" && \
+    find /app/test-design-assistant-core/target -name "*.jar" -type f
 
 # 运行阶段
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# 从构建阶段复制JAR文件
-COPY --from=build /app/test-design-assistant-core/target/*.jar app.jar
+# 从构建阶段复制JAR文件（Spring Boot打包的可执行JAR）
+COPY --from=build /app/test-design-assistant-core/target/test-design-assistant-core-*.jar app.jar
 
 # 创建非root用户
 RUN addgroup -S spring && adduser -S spring -G spring

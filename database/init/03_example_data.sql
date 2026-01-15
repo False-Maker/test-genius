@@ -2,7 +2,7 @@
 -- 用于演示和测试系统功能
 
 -- 插入示例需求数据
-INSERT INTO test_requirement (requirement_code, requirement_name, requirement_description, requirement_type, priority, requirement_status, creator_id, create_time, update_time) VALUES
+INSERT INTO test_requirement (requirement_code, requirement_name, requirement_description, requirement_type, requirement_status, creator_id, create_time, update_time) VALUES
 ('REQ-EXAMPLE-001', '投保功能需求', 
 '需求描述：
 1. 用户可以通过APP或Web端进行投保操作
@@ -22,7 +22,7 @@ INSERT INTO test_requirement (requirement_code, requirement_name, requirement_de
 - 保额超限时提示错误
 - 必填信息缺失时提示错误
 - 支付失败时回滚投保信息', 
-'功能需求', '高', 'APPROVED', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+'功能需求', 'APPROVED', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('REQ-EXAMPLE-002', '理赔申请功能需求',
 '需求描述：
 1. 用户可以通过APP或Web端提交理赔申请
@@ -42,7 +42,7 @@ INSERT INTO test_requirement (requirement_code, requirement_name, requirement_de
 - 理赔金额超限时提示错误
 - 材料不完整时提示错误
 - 审核不通过时通知用户并说明原因',
-'功能需求', '高', 'APPROVED', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+'功能需求', 'APPROVED', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('REQ-EXAMPLE-003', '保单查询接口',
 '需求描述：
 1. 提供RESTful API接口供外部系统调用
@@ -67,7 +67,7 @@ INSERT INTO test_requirement (requirement_code, requirement_name, requirement_de
 - 保单不存在时返回404错误
 - 无权限查询时返回403错误
 - 系统异常时返回500错误',
-'接口需求', '中', 'APPROVED', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+'接口需求', 'APPROVED', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (requirement_code) DO NOTHING;
 
 -- 插入示例用例数据（基于需求REQ-EXAMPLE-001）

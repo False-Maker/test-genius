@@ -20,7 +20,7 @@ export interface SystemConfig {
 export const useConfigStore = defineStore('config', () => {
   // 默认配置
   const defaultConfig: SystemConfig = {
-    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
     timeout: 30000,
     pageSize: 10,
     pageSizes: [10, 20, 50, 100],

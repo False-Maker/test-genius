@@ -104,14 +104,12 @@ public class TestDataBuilder {
         }
         
         public TestCaseBuilder withRequirementId(Long requirementId) {
-            TestRequirement requirement = new TestRequirement();
-            requirement.setId(requirementId);
-            testCase.setRequirement(requirement);
+            testCase.setRequirementId(requirementId);
             return this;
         }
         
         public TestCaseBuilder withSteps(String steps) {
-            testCase.setTestSteps(steps);
+            testCase.setTestStep(steps);
             return this;
         }
         

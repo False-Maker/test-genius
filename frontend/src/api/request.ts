@@ -35,8 +35,18 @@ const hideLoading = () => {
 const pendingRequests = new Map<string, AbortController>()
 
 // 创建axios实例
+// 统一使用相对路径，由Vite代理（开发环境）或Nginx代理（生产环境）处理
+const getBaseURL = () => {
+  // 如果设置了环境变量，使用环境变量
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL
+  }
+  // 否则使用相对路径，由代理处理（开发环境Vite代理，生产环境Nginx代理）
+  return '/api'
+}
+
 const service: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  baseURL: getBaseURL(),
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'

@@ -1,0 +1,136 @@
+@import './variables.scss';
+
+// Element Plus Variable Overrides
+// Note: Some Element Plus variables need to be set via CSS variables in :root
+:root {
+  --el-color-primary: #{$primary};
+  --el-color-primary-light-3: #{$primary-light};
+  --el-color-primary-dark-2: #{$primary-dark};
+  --el-color-success: #{$success};
+  --el-color-warning: #{$warning};
+  --el-color-danger: #{$danger};
+  --el-color-info: #{$info};
+
+  --el-border-radius-base: #{$radius-small};
+  --el-text-color-primary: #{$text-main};
+  --el-text-color-regular: #{$text-regular};
+  --el-text-color-secondary: #{$text-secondary};
+
+  --el-bg-color-page: #{$bg-body};
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: $font-family;
+  background-color: $bg-body;
+  color: $text-main;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Global Transition
+.fade-transform-enter-active,
+.fade-transform-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-transform-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+// Card Improvements
+.el-card {
+  border: none !important;
+  border-radius: $radius-base !important;
+  box-shadow: $shadow-card !important;
+  transition: all 0.3s ease;
+  background: $bg-white;
+
+  &:hover {
+    box-shadow: $shadow-hover !important;
+    transform: translateY(-2px);
+  }
+
+  .el-card__header {
+    border-bottom: 1px solid $border-light;
+    padding: 16px 20px;
+    font-weight: 600;
+    color: $text-main;
+  }
+}
+
+// Button Styling
+.el-button {
+  border-radius: $radius-small;
+  font-weight: 500;
+  padding: 10px 20px;
+  transition: all 0.2s;
+
+  &--primary {
+    background-color: $primary;
+    border-color: $primary;
+    box-shadow: 0 4px 6px -1px rgba($primary, 0.3);
+
+    &:hover,
+    &:focus {
+      background-color: $primary-light;
+      border-color: $primary-light;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Table Styling
+.el-table {
+  --el-table-header-bg-color: #f9fafb;
+  border-radius: $radius-base;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+
+  th.el-table__cell {
+    font-weight: 600;
+    color: $text-regular;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    padding: 12px 0;
+  }
+
+  td.el-table__cell {
+    padding: 12px 0;
+  }
+}
+
+// Tag Styling
+.el-tag {
+  border-radius: 4px;
+  font-weight: 500;
+  border: none;
+  padding: 0 10px;
+}
+
+// Dialog Styling
+.el-dialog {
+  border-radius: $radius-large !important;
+  overflow: hidden;
+  box-shadow: $shadow-hover !important;
+
+  .el-dialog__header {
+    margin-right: 0;
+    padding: 20px;
+    border-bottom: 1px solid $border-light;
+    background-color: #fafafa;
+  }
+
+  .el-dialog__footer {
+    padding: 20px;
+    border-top: 1px solid $border-light;
+    background-color: #fafafa;
+  }
+}

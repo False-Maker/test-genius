@@ -5,7 +5,7 @@
 import re
 import json
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 from sqlalchemy.orm import Session
 from app.models.prompt_template import PromptTemplate
 
@@ -54,7 +54,7 @@ class PromptService:
     def generate_prompt(
         self,
         template_id: int,
-        variables: Dict[str, any]
+        variables: Dict[str, Any]
     ) -> str:
         """
         根据模板和变量生成提示词
@@ -85,7 +85,7 @@ class PromptService:
     def replace_variables(
         self,
         template_content: str,
-        variables: Dict[str, any]
+        variables: Dict[str, Any]
     ) -> str:
         """
         替换模板中的变量占位符

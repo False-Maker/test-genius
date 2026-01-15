@@ -40,15 +40,17 @@ public interface TestCaseRepository extends JpaRepository<TestCase, Long>,
     /**
      * 优化的分页查询：使用索引提示和投影查询优化COUNT
      * 只查询必要的字段，减少数据传输量
+     * 注意：使用原生SQL和PostgreSQL的ILIKE避免类型推断问题
      */
-    @Query(value = "SELECT tc FROM TestCase tc WHERE " +
-            "(:caseName IS NULL OR LOWER(tc.caseName) LIKE LOWER(CONCAT('%', :caseName, '%'))) AND " +
-            "(:caseStatus IS NULL OR tc.caseStatus = :caseStatus) AND " +
-            "(:requirementId IS NULL OR tc.requirementId = :requirementId)",
-            countQuery = "SELECT COUNT(tc.id) FROM TestCase tc WHERE " +
-            "(:caseName IS NULL OR LOWER(tc.caseName) LIKE LOWER(CONCAT('%', :caseName, '%'))) AND " +
-            "(:caseStatus IS NULL OR tc.caseStatus = :caseStatus) AND " +
-            "(:requirementId IS NULL OR tc.requirementId = :requirementId)")
+    @Query(value = "SELECT * FROM test_case tc WHERE " +
+            "(:caseName IS NULL OR tc.case_name ILIKE '%' || :caseName || '%') AND " +
+            "(:caseStatus IS NULL OR tc.case_status = :caseStatus) AND " +
+            "(:requirementId IS NULL OR tc.requirement_id = :requirementId)",
+            countQuery = "SELECT COUNT(tc.id) FROM test_case tc WHERE " +
+            "(:caseName IS NULL OR tc.case_name ILIKE '%' || :caseName || '%') AND " +
+            "(:caseStatus IS NULL OR tc.case_status = :caseStatus) AND " +
+            "(:requirementId IS NULL OR tc.requirement_id = :requirementId)",
+            nativeQuery = true)
     Page<TestCase> findWithFilters(
             @Param("caseName") String caseName,
             @Param("caseStatus") String caseStatus,
