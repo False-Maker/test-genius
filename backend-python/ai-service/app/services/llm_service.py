@@ -153,7 +153,7 @@ class LLMService:
     
     def call_model(
         self,
-        model_code: str,
+        model_code: Optional[str],
         prompt: str,
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None
@@ -162,7 +162,7 @@ class LLMService:
         调用大模型生成内容
         
         Args:
-            model_code: 模型代码
+            model_code: 模型代码（可选，如果为None则使用默认模型）
             prompt: 提示词
             max_tokens: 最大token数（可选，覆盖配置）
             temperature: 温度参数（可选，覆盖配置）
@@ -177,6 +177,14 @@ class LLMService:
         start_time = time.time()
         
         try:
+            # 如果未提供model_code，使用默认模型
+            if not model_code:
+                default_config = self.model_config_service.get_default_config()
+                if not default_config:
+                    raise ValueError("没有可用的模型配置，请先配置模型")
+                model_code = default_config.model_code
+                logger.info(f"使用默认模型: {model_code}")
+            
             # 获取LLM实例
             llm = self._get_llm_instance(model_code, max_tokens, temperature)
             

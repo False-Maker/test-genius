@@ -371,7 +371,7 @@
       <!-- 导入结果 -->
       <div v-if="importResult" class="import-result" style="margin-top: 20px">
         <el-alert
-          :type="importResult.failCount > 0 ? 'warning' : 'success'"
+          :type="importResult.failCount > 0 ? warning : success"
           :closable="false"
           show-icon
         >
@@ -494,8 +494,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, ArrowDown, Download, Upload, Document, UploadFilled, Loading } from '@element-plus/icons-vue'
 import { testCaseApi, type TestCase } from '@/api/testCase'
-import type { PageResult } from '@/api/types'
-import { testCaseQualityApi, type QualityScore } from '@/api/testCaseQuality'
+  import type { PageResult } from '@/api/types'
+  import { testCaseQualityApi, type QualityScore } from '@/api/testCaseQuality'
 
 // 响应式数据
 const loading = ref(false)
@@ -511,7 +511,7 @@ const importFileList = ref<any[]>([])
 const importResult = ref<{
   successCount: number
   failCount: number
-  errors: Array<{ row: number; message: string }>
+  errors: Array<{ row: number; message: 'string '}>
 } | null>(null)
 const qualityDialogVisible = ref(false)
 const qualityLoading = ref(false)
@@ -752,8 +752,8 @@ const handleStatusChange = async (row: TestCase, status: string) => {
 // 审核用例
 const handleReview = (row: TestCase) => {
   currentReviewCase.value = row
-  reviewForm.reviewResult = ''
-  reviewForm.reviewComment = ''
+  reviewForm.reviewResult = 
+  reviewForm.reviewComment = 
   reviewDialogVisible.value = true
 }
 
@@ -957,10 +957,10 @@ const handleQualityAssess = async (row: TestCase) => {
 // 获取质量等级类型
 const getQualityLevelType = (level: string) => {
   const typeMap: Record<string, string> = {
-    '优秀': 'success',
-    '良好': 'success',
-    '一般': 'warning',
-    '需改进': 'danger'
+    优秀: 'success',
+    良好: 'success',
+    一般: 'warning',
+    需改进: 'danger'
   }
   return typeMap[level] || 'info'
 }

@@ -92,7 +92,7 @@ class CommonControllerTest extends BaseControllerTest {
         
         // 验证查询了数据库并存入缓存
         verify(testLayerRepository, times(1)).findByIsActiveOrderByLayerOrder("1");
-        verify(cacheService, times(1)).set(anyString(), any(), eq(3600));
+        verify(cacheService, times(1)).set(anyString(), any(), eq(3600L));
     }
     
     @Test
@@ -146,7 +146,7 @@ class CommonControllerTest extends BaseControllerTest {
         
         // 验证查询了数据库并存入缓存
         verify(testMethodRepository, times(1)).findByIsActive("1");
-        verify(cacheService, times(1)).set(anyString(), any(), eq(3600));
+        verify(cacheService, times(1)).set(anyString(), any(), eq(3600L));
     }
     
     @Test
@@ -191,7 +191,7 @@ class CommonControllerTest extends BaseControllerTest {
             .thenReturn(null);
         when(modelConfigRepository.findByIsActiveOrderByPriorityAsc("1"))
             .thenReturn(configs);
-        doNothing().when(cacheService).set(anyString(), any(), anyInt());
+        doNothing().when(cacheService).set(anyString(), any(), anyLong());
         
         // When & Then
         mockMvc.perform(get("/v1/common/model-configs"))
@@ -202,7 +202,7 @@ class CommonControllerTest extends BaseControllerTest {
         
         // 验证查询了数据库并存入缓存
         verify(modelConfigRepository, times(1)).findByIsActiveOrderByPriorityAsc("1");
-        verify(cacheService, times(1)).set(anyString(), any(), eq(1800));
+        verify(cacheService, times(1)).set(anyString(), any(), eq(1800L));
     }
 }
 

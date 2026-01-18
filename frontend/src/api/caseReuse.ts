@@ -1,5 +1,4 @@
 import request from './request'
-import type { ApiResult } from './types'
 
 // 相似用例类型
 export interface SimilarCase {

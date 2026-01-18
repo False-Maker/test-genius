@@ -1,34 +1,64 @@
-// Modern Color Palette
-$primary: #6366f1; // Indigo 500
-$primary-light: #818cf8;
-$primary-dark: #4f46e5;
-$primary-bg: #eef2ff; // Very light indigo for backgrounds
+@use "sass:color";
 
-$success: #10b981; // Emerald 500
-$warning: #f59e0b; // Amber 500
-$danger: #ef4444; // Red 500
-$info: #3b82f6; // Blue 500
+// Aurora Dark Mode Color Palette
+// Deep space blacks
+$bg-deep: #0a0a0f;
+$bg-card: #1a1a2e;
+$bg-sidebar: #0d0d14;
+$bg-header: rgba(13, 13, 20, 0.85);
 
-$text-main: #111827; // Gray 900
-$text-regular: #4b5563; // Gray 600
-$text-secondary: #9ca3af; // Gray 400
-$text-placeholder: #d1d5db; // Gray 300
+// Neon accent colors
+$neon-cyan: #00d4ff;
+$neon-magenta: #ff00ff;
+$neon-purple: #8b5cf6;
+$neon-lime: #84cc16;
 
-$bg-body: #f3f4f6; // Gray 100
-$bg-white: #ffffff;
-$bg-sidebar: #1f2937; // Gray 800 - Dark sidebar
+// Gradients
+$gradient-aurora: linear-gradient(135deg, $neon-cyan 0%, $neon-purple 50%, $neon-magenta 100%);
+$gradient-sidebar: linear-gradient(180deg, rgba($neon-cyan, 0.1) 0%, rgba($neon-purple, 0.05) 100%);
+$gradient-button: linear-gradient(90deg, $neon-cyan 0%, $neon-purple 100%);
 
-$border-color: #e5e7eb; // Gray 200
-$border-light: #f3f4f6;
+// Primary (using cyan as primary)
+$primary: $neon-cyan;
+$primary-light: color.scale($neon-cyan, $lightness: 10%);
+$primary-dark: color.scale($neon-cyan, $lightness: -10%);
+$primary-bg: rgba($neon-cyan, 0.1);
 
+// Status colors with neon glow
+$success: #10b981;
+$warning: #f59e0b;
+$danger: #ef4444;
+$info: $neon-cyan;
+
+// Text colors (high contrast on dark)
+$text-main: #ffffff;
+$text-regular: #e5e7eb;
+$text-secondary: #9ca3af;
+$text-placeholder: #6b7280;
+$text-muted: #4b5563;
+
+// Borders with glow potential
+$border-color: rgba(255, 255, 255, 0.1);
+$border-glow: rgba($neon-cyan, 0.3);
+$border-light: rgba(255, 255, 255, 0.05);
+
+// Border radius
 $radius-base: 12px;
 $radius-small: 8px;
 $radius-large: 16px;
 
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-$shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+// Shadows - soft ambient
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+$shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+$shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+$shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+// Glow effects
+$glow-cyan: 0 0 20px rgba($neon-cyan, 0.4), 0 0 40px rgba($neon-cyan, 0.2);
+$glow-purple: 0 0 20px rgba($neon-purple, 0.4), 0 0 40px rgba($neon-purple, 0.2);
+$glow-magenta: 0 0 20px rgba($neon-magenta, 0.4), 0 0 40px rgba($neon-magenta, 0.2);
+$glow-button: 0 0 15px rgba($neon-cyan, 0.5), 0 4px 15px rgba($neon-purple, 0.3);
+$glow-subtle: 0 0 10px rgba($neon-cyan, 0.15);
 
 // Typography
 $font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

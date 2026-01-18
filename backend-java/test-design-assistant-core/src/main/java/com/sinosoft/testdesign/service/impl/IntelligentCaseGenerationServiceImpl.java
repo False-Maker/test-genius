@@ -13,6 +13,7 @@ import com.sinosoft.testdesign.enums.CaseStatus;
 import com.sinosoft.testdesign.repository.*;
 import com.sinosoft.testdesign.metrics.BusinessMetricsCollector;
 import com.sinosoft.testdesign.service.IntelligentCaseGenerationService;
+import com.sinosoft.testdesign.service.SpecificationCheckService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
     private final ModelConfigRepository modelConfigRepository;
     private final TestCaseRepository testCaseRepository;
     private final TestCaseService testCaseService;
+    private final SpecificationCheckService specificationCheckService;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final BusinessMetricsCollector metricsCollector;
@@ -340,6 +342,25 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
                 try {
                     TestCase testCase = convertToTestCase(caseData, requirement.getId(), 
                             task.getLayerId(), task.getMethodId());
+                    
+                    // 在保存用例之前应用规约（注入规约内容）
+                    try {
+                        SpecificationCheckService.SpecificationInjectionResult injectionResult = 
+                                specificationCheckService.injectSpecification(testCase, null);
+                        if (injectionResult.getEnhancedTestCase() != null) {
+                            TestCase enhanced = injectionResult.getEnhancedTestCase();
+                            // 使用增强后的用例内容
+                            testCase.setPreCondition(enhanced.getPreCondition());
+                            testCase.setTestStep(enhanced.getTestStep());
+                            testCase.setExpectedResult(enhanced.getExpectedResult());
+                            log.debug("已应用规约到用例: {}, 注入内容数: {}", 
+                                    testCase.getCaseCode(), injectionResult.getInjectedContents().size());
+                        }
+                    } catch (Exception e) {
+                        // 规约注入失败不影响用例生成，仅记录日志
+                        log.warn("规约注入失败，继续保存用例: {}", e.getMessage());
+                    }
+                    
                     testCase = testCaseService.createTestCase(testCase);
                     savedCases.add(createCaseMap(testCase));
                     successCount++;

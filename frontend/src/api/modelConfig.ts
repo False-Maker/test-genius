@@ -1,5 +1,5 @@
 import request from './request'
-import type { PageResult, ApiResult } from './types'
+import type { PageResult } from './types'
 
 // 模型配置类型
 export interface ModelConfig {

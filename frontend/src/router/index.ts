@@ -41,6 +41,76 @@ const router = createRouter({
       path: '/case-reuse',
       name: 'CaseReuse',
       component: () => import('../views/case-reuse/CaseReuse.vue')
+    },
+    {
+      path: '/ui-script-generation',
+      name: 'UIScriptGeneration',
+      component: () => import('../views/test-execution/UIScriptGeneration.vue')
+    },
+    {
+      path: '/ui-script-repair',
+      name: 'UIScriptRepair',
+      component: () => import('../views/test-execution/UIScriptRepair.vue')
+    },
+    {
+      path: '/test-execution',
+      name: 'TestExecutionManagement',
+      component: () => import('../views/test-execution/TestExecutionManagement.vue')
+    },
+    {
+      path: '/test-report',
+      name: 'TestReport',
+      component: () => import('../views/test-report/TestReportList.vue')
+    },
+    {
+      path: '/test-report-template',
+      name: 'TestReportTemplate',
+      component: () => import('../views/test-report-template/TestReportTemplateList.vue')
+    },
+    {
+      path: '/test-coverage',
+      name: 'TestCoverageAnalysis',
+      component: () => import('../views/test-coverage/TestCoverageAnalysis.vue')
+    },
+    {
+      path: '/test-risk-assessment',
+      name: 'TestRiskAssessment',
+      component: () => import('../views/test-risk-assessment/TestRiskAssessment.vue')
+    },
+    {
+      path: '/page-element',
+      name: 'PageElementList',
+      component: () => import('../views/page-element/PageElementList.vue')
+    },
+    {
+      path: '/ui-script-template',
+      name: 'UIScriptTemplateList',
+      component: () => import('../views/ui-script-template/UIScriptTemplateList.vue')
+    },
+    {
+      path: '/test-specification',
+      name: 'TestSpecificationList',
+      component: () => import('../views/test-specification/TestSpecificationList.vue')
+    },
+    {
+      path: '/specification-check',
+      name: 'SpecificationCheck',
+      component: () => import('../views/specification-check/SpecificationCheck.vue')
+    },
+    {
+      path: '/test-case-quality',
+      name: 'TestCaseQuality',
+      component: () => import('../views/test-case-quality/TestCaseQuality.vue')
+    },
+    {
+      path: '/flow-document',
+      name: 'FlowDocumentGeneration',
+      component: () => import('../views/flow-document/FlowDocumentGeneration.vue')
+    },
+    {
+      path: '/data-document',
+      name: 'DataDocumentGeneration',
+      component: () => import('../views/data-document/DataDocumentGeneration.vue')
     }
   ]
 })

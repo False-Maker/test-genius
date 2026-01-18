@@ -87,7 +87,7 @@ class CaseGenerationControllerTest extends BaseControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data.totalCount").value(2))
+                .andExpect(jsonPath("$.data.totalTasks").value(2))
                 .andExpect(jsonPath("$.data.taskIds").isArray())
                 .andExpect(jsonPath("$.data.taskIds.length()").value(2));
     }

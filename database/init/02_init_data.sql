@@ -91,6 +91,7 @@ INSERT INTO model_config (model_code, model_name, model_type, api_endpoint, api_
 ('DEEPSEEK-001', 'DeepSeek Chat', 'DEEPSEEK', 'https://api.deepseek.com/v1/chat/completions', '', 'deepseek-chat', 4096, 0.7, '1', 1, 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('DOUBAO-001', '豆包大模型', 'DOUBAO', 'https://ark.cn-beijing.volces.com/api/v3/chat/completions', '', 'doubao-pro-4k', 4096, 0.7, '1', 2, 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('KIMI-001', 'Kimi Chat', 'KIMI', 'https://api.moonshot.cn/v1/chat/completions', '', 'moonshot-v1-8k', 8192, 0.7, '1', 3, 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('QIANWEN-001', '通义千问', 'QIANWEN', 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', '', 'qwen-turbo', 2000, 0.7, '1', 4, 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+('QIANWEN-001', '通义千问', 'QIANWEN', 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', '', 'qwen-turbo', 2000, 0.7, '1', 4, 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('ZHIPU-001', '智谱GLM-4', '智谱', 'https://open.bigmodel.cn/api/paas/v4/chat/completions', '', 'glm-4', 8192, 0.7, '1', 5, 1000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (model_code) DO NOTHING;
 

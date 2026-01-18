@@ -49,7 +49,17 @@ public class FileUploadController {
     @DeleteMapping("/{filePath:.*}")
     public Result<Void> deleteFile(@PathVariable String filePath) {
         log.info("收到文件删除请求: 文件路径={}", filePath);
-        fileUploadService.deleteFile(filePath);
+        
+        // URL解码路径变量，因为路径可能包含编码的斜杠（%2F）
+        try {
+            String decodedPath = java.net.URLDecoder.decode(filePath, java.nio.charset.StandardCharsets.UTF_8);
+            fileUploadService.deleteFile(decodedPath);
+        } catch (Exception e) {
+            // 如果解码失败，使用原始路径
+            log.warn("路径解码失败，使用原始路径: {}", filePath, e);
+            fileUploadService.deleteFile(filePath);
+        }
+        
         return Result.success();
     }
 }

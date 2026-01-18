@@ -7,6 +7,7 @@ import com.sinosoft.testdesign.enums.CaseStatus;
 import com.sinosoft.testdesign.repository.RequirementRepository;
 import com.sinosoft.testdesign.repository.TestCaseRepository;
 import com.sinosoft.testdesign.service.CacheService;
+import com.sinosoft.testdesign.service.SpecificationCheckService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 测试用例管理服务实现
@@ -37,6 +39,7 @@ public class TestCaseServiceImpl implements TestCaseService {
     private final TestCaseRepository testCaseRepository;
     private final RequirementRepository requirementRepository;
     private final CacheService cacheService;
+    private final SpecificationCheckService specificationCheckService;
     
     private static final String CASE_CODE_PREFIX = "CASE";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -321,6 +324,28 @@ public class TestCaseServiceImpl implements TestCaseService {
         // 只有待审核状态的用例才能审核
         if (currentStatus != CaseStatus.PENDING_REVIEW) {
             throw new BusinessException("只有待审核状态的用例才能进行审核");
+        }
+        
+        // 在审核之前检查规约符合性（仅记录日志，不阻塞审核流程）
+        try {
+            SpecificationCheckService.SpecificationComplianceResult complianceResult = 
+                    specificationCheckService.checkCompliance(testCase, null);
+            
+            log.info("用例规约符合性检查结果，用例ID: {}, 符合度评分: {}, 是否符合: {}, 问题数: {}", 
+                    id, complianceResult.getComplianceScore(), 
+                    complianceResult.isCompliant(), complianceResult.getFailedChecks());
+            
+            // 如果不符合规约，在日志中记录警告
+            if (!complianceResult.isCompliant()) {
+                        log.warn("用例不符合规约要求，用例ID: {}, 符合度评分: {}, 问题列表: {}", 
+                        id, complianceResult.getComplianceScore(), 
+                        complianceResult.getIssues().stream()
+                                .map(SpecificationCheckService.ComplianceIssue::getIssueDescription)
+                                .collect(Collectors.toList()));
+            }
+        } catch (Exception e) {
+            // 规约检查失败不影响审核流程，仅记录日志
+            log.warn("规约符合性检查失败，继续审核流程: {}", e.getMessage());
         }
         
         // 审核通过

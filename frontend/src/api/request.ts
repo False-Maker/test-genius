@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { ElMessage, ElLoading } from 'element-plus'
 import type { LoadingInstance } from 'element-plus/es/components/loading/src/loading'
 import { useUserStore } from '@/store/user'
@@ -76,11 +76,9 @@ service.interceptors.request.use(
     pendingRequests.set(requestKey, controller)
     
     // 请求完成后移除
-    if (config.signal) {
-      config.signal.addEventListener('abort', () => {
-        pendingRequests.delete(requestKey)
-      })
-    }
+    controller.signal.addEventListener('abort', () => {
+      pendingRequests.delete(requestKey)
+    })
     
     // 显示加载状态（如果配置了showLoading）
     if (config.showLoading !== false) {

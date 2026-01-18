@@ -11,10 +11,18 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
+    
+    /* 严格类型检查选项 - strict: true 已包含以下选项 */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    
+    /* 增强的语法校验选项 - 这些是 strict 模式的子选项，显式声明以增强检查 */
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    
+    /* 模块解析 */
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

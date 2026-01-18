@@ -6,6 +6,8 @@ import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.enums.CaseStatus;
 import com.sinosoft.testdesign.repository.RequirementRepository;
 import com.sinosoft.testdesign.repository.TestCaseRepository;
+import com.sinosoft.testdesign.service.CacheService;
+import com.sinosoft.testdesign.service.SpecificationCheckService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,12 @@ class TestCaseServiceImplTest {
     
     @Mock
     private RequirementRepository requirementRepository;
+    
+    @Mock
+    private CacheService cacheService;
+    
+    @Mock
+    private SpecificationCheckService specificationCheckService;
     
     @InjectMocks
     private TestCaseServiceImpl testCaseService;
@@ -158,6 +166,7 @@ class TestCaseServiceImplTest {
         assertEquals("更新后的用例名称", result.getCaseName());
         verify(testCaseRepository, times(1)).findById(id);
         verify(testCaseRepository, times(1)).save(any(TestCase.class));
+        verify(cacheService, atLeastOnce()).delete(anyString());
     }
     
     @Test
@@ -294,7 +303,7 @@ class TestCaseServiceImplTest {
         testCases.add(testCase);
         Page<TestCase> page = new PageImpl<>(testCases, pageable, 1);
         
-        when(testCaseRepository.findAll(any(Specification.class), eq(pageable)))
+        when(testCaseRepository.findWithFilters(eq((String) null), eq((String) null), eq((Long) null), eq(pageable)))
             .thenReturn(page);
         
         // When
@@ -303,7 +312,7 @@ class TestCaseServiceImplTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(testCaseRepository, times(1)).findAll(any(Specification.class), eq(pageable));
+        verify(testCaseRepository, times(1)).findWithFilters(eq((String) null), eq((String) null), eq((Long) null), eq(pageable));
     }
 }
 

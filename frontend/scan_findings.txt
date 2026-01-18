@@ -1,0 +1,49 @@
+File: .\eslint_errors.json
+  - Git Merge Conflict Middle
+  - Suspected corrupted ternary operator or string (quote missing)
+
+File: .\src\api\testExecution.ts
+  - Git Merge Conflict Middle
+
+File: .\src\views\case-reuse\CaseReuse.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\data-document\DataDocumentGeneration.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\knowledge-base\KnowledgeBaseList.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\model-config\ModelConfigList.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\page-element\PageElementList.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\specification-check\SpecificationCheck.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-case-quality\TestCaseQuality.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-execution\UIScriptGeneration.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-execution\UIScriptRepair.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-report\TestReportList.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-report-template\TestReportTemplateList.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-risk-assessment\TestRiskAssessment.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\test-specification\TestSpecificationList.vue
+  - Replacement Character (Encoding Issue)
+
+File: .\src\views\ui-script-template\UIScriptTemplateList.vue
+  - Replacement Character (Encoding Issue)
+

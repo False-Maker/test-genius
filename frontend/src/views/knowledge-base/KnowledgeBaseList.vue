@@ -1,7 +1,7 @@
 <template>
   <div class="knowledge-base-list">
     <div class="header">
-      <h2>知识库管理</h2>
+      <h2>知识库管�?管理</h2>
       <div class="header-actions">
         <el-button @click="handleInit">初始化知识库</el-button>
         <el-button type="primary" @click="handleAdd">
@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <!-- 搜索栏 -->
+    <!-- 搜索�?-->
     <el-card class="search-card" shadow="never">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="检索方式">
@@ -23,7 +23,7 @@
         <el-form-item label="检索内容">
           <el-input
             v-model="searchForm.queryText"
-            placeholder="请输入检索内容"
+            placeholder="请输入检索内容�"
             clearable
             style="width: 300px"
             @keyup.enter="handleSearch"
@@ -60,7 +60,7 @@
         <el-table-column prop="docName" label="文档名称" min-width="200" />
         <el-table-column prop="docType" label="文档类型" width="120" />
         <el-table-column prop="docCategory" label="分类" width="120" />
-        <el-table-column prop="similarity" label="相似度" width="100" v-if="searchType === 'semantic'">
+        <el-table-column prop="similarity" label="相似�" width="100" v-if="searchType === 'semantic'">
           <template #default="scope">
             <span v-if="scope.row.similarity !== undefined">
               {{ (scope.row.similarity * 100).toFixed(1) }}%
@@ -95,7 +95,7 @@
         <el-form-item label="文档编码" prop="docCode">
           <el-input
             v-model="formData.docCode"
-            placeholder="请输入文档编码"
+            placeholder="请输入文档编码�"
             maxlength="100"
           />
         </el-form-item>
@@ -125,7 +125,7 @@
             v-model="formData.docContent"
             type="textarea"
             :rows="8"
-            placeholder="请输入文档内容"
+            placeholder="请输入文档内�"
           />
         </el-form-item>
         <el-form-item label="文档URL" prop="docUrl">
@@ -144,7 +144,7 @@
       </template>
     </el-dialog>
 
-    <!-- 查看文档对话框 -->
+    <!-- 查看文档对话�?-->
     <el-dialog
       v-model="viewDialogVisible"
       title="文档详情"
@@ -166,7 +166,7 @@
           </el-link>
           <span v-else>-</span>
         </el-descriptions-item>
-        <el-descriptions-item label="相似度" v-if="viewData.similarity !== undefined">
+        <el-descriptions-item label="相似�" v-if="viewData.similarity !== undefined">
           {{ (viewData.similarity * 100).toFixed(1) }}%
         </el-descriptions-item>
       </el-descriptions>
@@ -180,7 +180,7 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import { Plus } from '@element-plus/icons-vue'
 import { knowledgeBaseApi, type KnowledgeDocument } from '@/api/knowledgeBase'
 
-// 响应式数据
+// 响应式数据据�?
 const loading = ref(false)
 const submitLoading = ref(false)
 const addDialogVisible = ref(false)
@@ -207,7 +207,7 @@ const viewData = ref<KnowledgeDocument>({})
 // 表单验证规则
 const formRules: FormRules = {
   docCode: [
-    { required: true, message: '请输入文档编码', trigger: 'blur' }
+    { required: true, message: '请输入文档编码码', trigger: 'blur' }
   ],
   docName: [
     { required: true, message: '请输入文档名称', trigger: 'blur' }
@@ -223,7 +223,7 @@ const formRules: FormRules = {
 // 初始化知识库
 const handleInit = async () => {
   try {
-    await ElMessageBox.confirm('确定要初始化知识库吗？这将创建必要的表结构。', '初始化确认', {
+    await ElMessageBox.confirm('确定要初始化知识库吗？这将创建人必要的表结构。', '初始化确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
@@ -235,7 +235,7 @@ const handleInit = async () => {
     }
   } catch (error: any) {
     if (error !== 'cancel') {
-      console.error('初始化知识库失败:', error)
+      console.error('初始化知识库失败', error)
       ElMessage.error('初始化知识库失败')
     }
   }
@@ -253,7 +253,7 @@ const handleView = (row: KnowledgeDocument) => {
   viewDialogVisible.value = true
 }
 
-// 检索文档
+// 检索文档内容方式文档�?
 const handleSearch = async () => {
   if (!searchForm.queryText.trim()) {
     ElMessage.warning('请输入检索内容')
@@ -284,8 +284,8 @@ const handleSearch = async () => {
       }
     }
   } catch (error) {
-    console.error('检索失败:', error)
-    ElMessage.error('检索失败')
+      console.error('检索失败', error)
+      ElMessage.error('检索失败')
   } finally {
     loading.value = false
   }
@@ -339,7 +339,7 @@ const resetForm = () => {
   formRef.value?.clearValidate()
 }
 
-// 对话框关闭
+// 对话框关闭闭�?
 const handleDialogClose = () => {
   resetForm()
 }
@@ -378,4 +378,3 @@ const handleDialogClose = () => {
   margin-bottom: 20px;
 }
 </style>
-

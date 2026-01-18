@@ -1,8 +1,11 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.BaseControllerTest;
+import com.sinosoft.testdesign.dto.TestCaseRequestDTO;
+import com.sinosoft.testdesign.dto.TestCaseResponseDTO;
 import com.sinosoft.testdesign.entity.TestCase;
 import com.sinosoft.testdesign.enums.CaseStatus;
+import com.sinosoft.testdesign.mapper.EntityDTOMapper;
 import com.sinosoft.testdesign.service.TestCaseImportExportService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,10 +39,18 @@ class TestCaseControllerTest extends BaseControllerTest {
     @MockBean
     private TestCaseImportExportService importExportService;
     
+    @MockBean
+    private EntityDTOMapper entityDTOMapper;
+    
     @Test
     @DisplayName("创建用例-成功")
     void testCreateTestCase_Success() throws Exception {
         // Given
+        TestCaseRequestDTO dto = new TestCaseRequestDTO();
+        dto.setCaseName("测试用例");
+        dto.setTestStep("1. 步骤一\n2. 步骤二");
+        dto.setExpectedResult("预期结果");
+        
         TestCase testCase = new TestCase();
         testCase.setCaseName("测试用例");
         testCase.setTestStep("1. 步骤一\n2. 步骤二");
@@ -53,13 +64,22 @@ class TestCaseControllerTest extends BaseControllerTest {
         savedCase.setExpectedResult("预期结果");
         savedCase.setCaseStatus(CaseStatus.DRAFT.name());
         
+        TestCaseResponseDTO responseDTO = new TestCaseResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setCaseCode("CASE-20240101-001");
+        responseDTO.setCaseName("测试用例");
+        
+        when(entityDTOMapper.toTestCaseEntity(any(TestCaseRequestDTO.class)))
+            .thenReturn(testCase);
         when(testCaseService.createTestCase(any(TestCase.class)))
             .thenReturn(savedCase);
+        when(entityDTOMapper.toTestCaseResponseDTO(any(TestCase.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(post("/v1/test-cases")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testCase)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.id").value(1L))
@@ -77,8 +97,15 @@ class TestCaseControllerTest extends BaseControllerTest {
         testCase.setCaseCode("CASE-20240101-001");
         testCase.setCaseName("测试用例");
         
+        TestCaseResponseDTO responseDTO = new TestCaseResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setCaseCode("CASE-20240101-001");
+        responseDTO.setCaseName("测试用例");
+        
         when(testCaseService.getTestCaseById(id))
             .thenReturn(testCase);
+        when(entityDTOMapper.toTestCaseResponseDTO(any(TestCase.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(get("/v1/test-cases/{id}", id))
@@ -147,23 +174,41 @@ class TestCaseControllerTest extends BaseControllerTest {
     void testUpdateTestCase_Success() throws Exception {
         // Given
         Long id = 1L;
-        TestCase testCase = new TestCase();
-        testCase.setCaseName("更新后的用例名称");
+        TestCaseRequestDTO dto = new TestCaseRequestDTO();
+        dto.setCaseName("更新后的用例名称");
+        dto.setTestStep("1. 步骤一");
+        dto.setExpectedResult("预期结果");
+        
+        TestCase existingCase = new TestCase();
+        existingCase.setId(id);
+        existingCase.setCaseCode("CASE-20240101-001");
+        existingCase.setCaseName("原用例名称");
         
         TestCase updatedCase = new TestCase();
         updatedCase.setId(id);
         updatedCase.setCaseCode("CASE-20240101-001");
         updatedCase.setCaseName("更新后的用例名称");
         
+        TestCaseResponseDTO responseDTO = new TestCaseResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setCaseCode("CASE-20240101-001");
+        responseDTO.setCaseName("更新后的用例名称");
+        
+        when(testCaseService.getTestCaseById(id))
+            .thenReturn(existingCase);
+        doNothing().when(entityDTOMapper).updateTestCaseFromDTO(any(TestCaseRequestDTO.class), any(TestCase.class));
         when(testCaseService.updateTestCase(eq(id), any(TestCase.class)))
             .thenReturn(updatedCase);
+        when(entityDTOMapper.toTestCaseResponseDTO(any(TestCase.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(put("/v1/test-cases/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(testCase)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.id").value(id))
                 .andExpect(jsonPath("$.data.caseName").value("更新后的用例名称"));
     }
     
@@ -172,6 +217,8 @@ class TestCaseControllerTest extends BaseControllerTest {
     void testDeleteTestCase_Success() throws Exception {
         // Given
         Long id = 1L;
+        
+        doNothing().when(testCaseService).deleteTestCase(id);
         
         // When & Then
         mockMvc.perform(delete("/v1/test-cases/{id}", id))
@@ -194,11 +241,20 @@ class TestCaseControllerTest extends BaseControllerTest {
         when(testCaseService.updateCaseStatus(id, newStatus))
             .thenReturn(updatedCase);
         
+        TestCaseResponseDTO responseDTO = new TestCaseResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setCaseCode("CASE-20240101-001");
+        responseDTO.setCaseStatus(newStatus);
+        
+        when(entityDTOMapper.toTestCaseResponseDTO(any(TestCase.class)))
+            .thenReturn(responseDTO);
+        
         // When & Then
         mockMvc.perform(put("/v1/test-cases/{id}/status", id)
                 .param("status", newStatus))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.id").value(id))
                 .andExpect(jsonPath("$.data.caseStatus").value(newStatus));
     }
     
@@ -215,8 +271,15 @@ class TestCaseControllerTest extends BaseControllerTest {
         reviewedCase.setCaseCode("CASE-20240101-001");
         reviewedCase.setCaseStatus(CaseStatus.REVIEWED.name());
         
+        TestCaseResponseDTO responseDTO = new TestCaseResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setCaseCode("CASE-20240101-001");
+        responseDTO.setCaseStatus(CaseStatus.REVIEWED.name());
+        
         when(testCaseService.reviewTestCase(eq(id), eq(reviewResult), anyString()))
             .thenReturn(reviewedCase);
+        when(entityDTOMapper.toTestCaseResponseDTO(any(TestCase.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(post("/v1/test-cases/{id}/review", id)
@@ -224,7 +287,8 @@ class TestCaseControllerTest extends BaseControllerTest {
                 .param("reviewComment", reviewComment))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data.id").value(id));
+                .andExpect(jsonPath("$.data.id").value(id))
+                .andExpect(jsonPath("$.data.caseCode").value("CASE-20240101-001"));
     }
 }
 

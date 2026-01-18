@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +34,10 @@ public class ModelConfigServiceImpl implements ModelConfigService {
     private final ModelConfigRepository modelConfigRepository;
     private final CacheService cacheService;
     
+    // 编码前缀和日期格式化
+    private static final String MODEL_CODE_PREFIX = "MODEL";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    
     // 缓存键前缀
     private static final String CACHE_KEY_ACTIVE_MODELS = "cache:model:active";
     private static final String CACHE_KEY_MODEL_BY_CODE = "cache:model:code:";
@@ -46,13 +52,14 @@ public class ModelConfigServiceImpl implements ModelConfigService {
         // 数据验证
         validateModelConfig(modelConfig, true);
         
-        // 检查模型编码是否已存在
-        if (StringUtils.hasText(modelConfig.getModelCode())) {
+        // 自动生成模型编码（如果未提供）
+        if (!StringUtils.hasText(modelConfig.getModelCode())) {
+            modelConfig.setModelCode(generateModelCode());
+        } else {
+            // 检查编码是否已存在
             if (modelConfigRepository.findByModelCode(modelConfig.getModelCode()).isPresent()) {
                 throw new BusinessException("模型编码已存在: " + modelConfig.getModelCode());
             }
-        } else {
-            throw new BusinessException("模型编码不能为空");
         }
         
         // 设置默认值
@@ -279,6 +286,38 @@ public class ModelConfigServiceImpl implements ModelConfigService {
     }
     
     /**
+     * 生成模型编码
+     * 格式：MODEL-YYYYMMDD-序号（如 MODEL-20240101-001）
+     */
+    private String generateModelCode() {
+        String dateStr = LocalDate.now().format(DATE_FORMATTER);
+        String prefix = MODEL_CODE_PREFIX + "-" + dateStr + "-";
+        
+        // 查询当天已生成的最大序号（使用数据库查询，避免全量加载）
+        List<ModelConfig> todayModels = modelConfigRepository.findByModelCodeStartingWithOrderByIdDesc(prefix);
+        
+        int maxSequence = 0;
+        for (ModelConfig model : todayModels) {
+            String code = model.getModelCode();
+            if (code != null && code.length() > prefix.length()) {
+                try {
+                    int sequence = Integer.parseInt(code.substring(prefix.length()));
+                    maxSequence = Math.max(maxSequence, sequence);
+                } catch (NumberFormatException e) {
+                    // 忽略格式不正确的编码
+                    log.warn("模型编码格式不正确: {}", code);
+                }
+            }
+        }
+        
+        // 生成新序号
+        int newSequence = maxSequence + 1;
+        String modelCode = prefix + String.format("%03d", newSequence);
+        log.debug("生成模型编码: {}", modelCode);
+        return modelCode;
+    }
+    
+    /**
      * 清除模型相关缓存
      */
     private void clearModelCache() {
@@ -290,9 +329,8 @@ public class ModelConfigServiceImpl implements ModelConfigService {
      * 验证模型配置数据
      */
     private void validateModelConfig(ModelConfig modelConfig, boolean isCreate) {
-        if (isCreate && !StringUtils.hasText(modelConfig.getModelCode())) {
-            throw new BusinessException("模型编码不能为空");
-        }
+        // 注意：编码在createModelConfig中会自动生成，这里不再验证编码为空
+        // 如果用户提供了编码，则验证编码格式
         
         if (!StringUtils.hasText(modelConfig.getModelName())) {
             throw new BusinessException("模型名称不能为空");

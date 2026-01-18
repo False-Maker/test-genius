@@ -293,11 +293,11 @@ public class RequirementServiceImpl implements RequirementService {
     }
     
     /**
-     * 清除需求列表缓存（预留，当前分页查询不缓存）
+     * 清除需求列表缓存
      */
     private void clearRequirementCache() {
-        // 分页查询不缓存，此方法预留用于未来扩展
-        // cacheService.deleteByPattern(CACHE_KEY_REQ_LIST + "*");
+        // 清除需求列表相关的缓存（使用通配符匹配所有列表缓存）
+        cacheService.deleteByPattern(CACHE_KEY_REQ_LIST + "*");
     }
 }
 

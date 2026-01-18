@@ -4,7 +4,7 @@
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import llm_router, case_router, prompt_router, document_router, knowledge_router, case_reuse_router
+from app.api import llm_router, case_router, prompt_router, document_router, knowledge_router, case_reuse_router, ui_script_router
 
 app = FastAPI(
     title="测试设计助手系统 - AI服务",
@@ -28,6 +28,7 @@ app.include_router(prompt_router.router, prefix="/api/v1/prompt", tags=["提示�
 app.include_router(document_router.router, prefix="/api/v1/document", tags=["文档解析"])
 app.include_router(knowledge_router.router, prefix="/api/v1", tags=["知识库"])
 app.include_router(case_reuse_router.router, prefix="/api/v1", tags=["用例复用"])
+app.include_router(ui_script_router.router, prefix="/api/v1", tags=["UI脚本生成"])
 
 
 @app.get("/")

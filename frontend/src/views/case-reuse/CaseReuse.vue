@@ -1,7 +1,7 @@
 <template>
   <div class="case-reuse">
     <div class="header">
-      <h2>用例复用</h2>
+      <h2>用例复用管理</h2>
       <div class="header-actions">
         <el-button @click="handleInit">初始化向量表</el-button>
         <el-button type="primary" @click="handleCreateSuite">
@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <!-- 搜索栏 -->
+    <!-- 搜索条件�?-->
     <el-card class="search-card" shadow="never">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="检索方式">
@@ -159,30 +159,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { caseReuseApi, type SimilarCase } from '@/api/caseReuse'
 import { commonApi, type TestLayer, type TestDesignMethod } from '@/api/common'
 
-// 响应式数据
-const loading = ref(false)
-const suiteLoading = ref(false)
-const suiteDialogVisible = ref(false)
-const suiteFormRef = ref<FormInstance>()
-
-const caseList = ref<SimilarCase[]>([])
-const selectedCases = ref<SimilarCase[]>([])
-const searchType = ref<'semantic' | 'keyword' | 'recommend'>('semantic')
-const searchForm = reactive({
-  caseText: '',
-  caseId: undefined as number | undefined,
-  layerId: undefined as number | undefined,
-  methodId: undefined as number | undefined
-})
-
-const layerList = ref<TestLayer[]>([])
-const methodList = ref<TestDesignMethod[]>([])
-
-const suiteForm = reactive({
-  suiteName: ''
-})
-
-// 表单验证规则
+// 响应式数据表单验证规则
 const suiteFormRules: FormRules = {
   suiteName: [
     { required: true, message: '请输入套件名称', trigger: 'blur' }
@@ -204,7 +181,7 @@ const handleInit = async () => {
     }
   } catch (error: any) {
     if (error !== 'cancel') {
-      console.error('初始化失败:', error)
+      console.error('初始化失败', error)
       ElMessage.error('初始化失败')
     }
   }
@@ -249,14 +226,14 @@ const handleSearch = async () => {
       }
     }
   } catch (error) {
-    console.error('检索失败:', error)
+    console.error('检索失败', error)
     ElMessage.error('检索失败')
   } finally {
     loading.value = false
   }
 }
 
-// 重置搜索
+// 重置搜索条件
 const handleReset = () => {
   searchForm.caseText = ''
   searchForm.caseId = undefined
@@ -273,7 +250,7 @@ const handleSelectionChange = (selection: SimilarCase[]) => {
 
 // 查看用例
 const handleView = (row: SimilarCase) => {
-  // 跳转到用例管理页面查看详情
+  // 跳转到用例管理页面查看详�?
   window.open(`/test-case?id=${row.caseId}`, '_blank')
 }
 
@@ -341,7 +318,7 @@ const loadBaseData = async () => {
   }
 }
 
-// 初始化
+// 初始�?
 onMounted(() => {
   loadBaseData()
 })
@@ -380,4 +357,3 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 </style>
-

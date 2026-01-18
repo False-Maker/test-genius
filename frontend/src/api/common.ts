@@ -1,5 +1,4 @@
 import request from './request'
-import type { ApiResult } from './types'
 
 // 测试分层类型
 export interface TestLayer {

@@ -10,9 +10,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -99,9 +99,15 @@ class FileUploadControllerTest extends BaseControllerTest {
         doNothing().when(fileUploadService).deleteFile(eq(filePath));
         
         // When & Then
-        mockMvc.perform(delete("/v1/files/{filePath}", filePath))
+        // Spring的路径变量模式 {filePath:.*} 在包含斜杠时需要URL编码
+        // Controller会自动解码URL编码的路径变量
+        String encodedPath = filePath.replace("/", "%2F");
+        mockMvc.perform(delete("/v1/files/" + encodedPath))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200));
+        
+        // 验证Service方法被正确调用（路径应该被解码）
+        verify(fileUploadService, times(1)).deleteFile(eq(filePath));
     }
     
     @Test
@@ -112,10 +118,14 @@ class FileUploadControllerTest extends BaseControllerTest {
         
         doNothing().when(fileUploadService).deleteFile(eq(filePath));
         
-        // When & Then
-        mockMvc.perform(delete("/v1/files/{filePath}", filePath))
+        // When & Then - 使用URL编码的路径分隔符，Controller会自动解码
+        String encodedPath = filePath.replace("/", "%2F");
+        mockMvc.perform(delete("/v1/files/" + encodedPath))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200));
+        
+        // 验证Service方法被正确调用（路径应该被解码）
+        verify(fileUploadService, times(1)).deleteFile(eq(filePath));
     }
 }
 

@@ -36,7 +36,7 @@ public class ModelConfig {
     private String modelName;
     
     /**
-     * 模型类型：DeepSeek/豆包/Kimi/千问
+     * 模型类型：DeepSeek/豆包/Kimi/千问/智谱
      */
     @Column(name = "model_type", length = 50)
     private String modelType;

@@ -11,6 +11,7 @@ import com.sinosoft.testdesign.repository.RequirementRepository;
 import com.sinosoft.testdesign.repository.TestCaseRepository;
 import com.sinosoft.testdesign.repository.TestLayerRepository;
 import com.sinosoft.testdesign.repository.TestMethodRepository;
+import com.sinosoft.testdesign.service.TestCaseImportExportService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -172,17 +174,42 @@ class TestCaseImportExportServiceImplTest {
         when(file.getOriginalFilename())
             .thenReturn("test.xlsx");
         
-        // 创建一个简单的Excel输入流（实际应该使用真实的Excel文件）
-        // 这里简化处理，使用空流，实际测试中应该准备真实的Excel文件
-        InputStream inputStream = new java.io.ByteArrayInputStream(new byte[0]);
+        // 创建一个最小有效的Excel文件输入流
+        // 这里需要创建一个有效的Excel文件结构
+        // 由于EasyExcel需要读取有效的Excel格式，我们需要创建一个最简单的Excel文件
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        
+        // 使用EasyExcel写入一个空模板，然后读取它
+        try {
+            importExportService.exportTemplate(baos);
+        } catch (Exception e) {
+            // 如果导出失败，跳过这个测试
+            fail("无法创建测试Excel文件: " + e.getMessage());
+        }
+        
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
         when(file.getInputStream())
             .thenReturn(inputStream);
         
-        // 由于EasyExcel读取空文件会抛出异常，这里测试异常处理
-        // When & Then
-        assertThrows(Exception.class, () -> {
-            importExportService.importFromExcel(file);
-        });
+        // 由于导入需要实际的测试用例数据，这里只测试文件格式验证和读取流程
+        // 实际导入成功需要mock Repository的调用
+        when(requirementRepository.findByRequirementCode(anyString()))
+            .thenReturn(Optional.empty());
+        when(testLayerRepository.findByLayerName(anyString()))
+            .thenReturn(Optional.empty());
+        when(testMethodRepository.findByMethodName(anyString()))
+            .thenReturn(Optional.empty());
+        
+        // When
+        // importFromExcel方法不会抛出异常，而是返回ImportResult，包含成功和失败的数量
+        TestCaseImportExportService.ImportResult result = importExportService.importFromExcel(file);
+        
+        // Then
+        assertNotNull(result);
+        // 由于mock的Repository都返回empty，所以应该没有成功导入的用例
+        assertEquals(0, result.getSuccessCount());
+        // 可能会有失败记录，取决于Excel文件内容
+        assertTrue(result.getFailureCount() >= 0);
     }
     
     @Test

@@ -7,7 +7,9 @@ import com.sinosoft.testdesign.dto.CaseGenerationRequest;
 import com.sinosoft.testdesign.dto.CaseGenerationResult;
 import com.sinosoft.testdesign.dto.GenerationTaskDTO;
 import com.sinosoft.testdesign.entity.*;
+import com.sinosoft.testdesign.metrics.BusinessMetricsCollector;
 import com.sinosoft.testdesign.repository.*;
+import com.sinosoft.testdesign.service.SpecificationCheckService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,7 +62,13 @@ class IntelligentCaseGenerationServiceImplTest {
     private TestCaseService testCaseService;
     
     @Mock
+    private SpecificationCheckService specificationCheckService;
+    
+    @Mock
     private RestTemplate restTemplate;
+    
+    @Mock
+    private BusinessMetricsCollector metricsCollector;
     
     @InjectMocks
     private IntelligentCaseGenerationServiceImpl intelligentCaseGenerationService;

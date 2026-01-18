@@ -42,4 +42,8 @@ app:
   ai-service:
     url: http://localhost:8000
     timeout: 60000
+  # 文件上传配置（测试环境）
+  upload:
+    base-path: ./test-uploads
+    url-prefix: /api/v1/files
 

@@ -1,5 +1,4 @@
 import request from './request'
-import type { ApiResult } from './types'
 
 // 知识库文档类型
 export interface KnowledgeDocument {

@@ -89,6 +89,20 @@ public class Result<T> implements Serializable {
     }
     
     /**
+     * 错误响应（使用错误码）
+     */
+    public static <T> Result<T> error(String message) {
+        return new Result<>(ResultCode.FAIL.getCode(), message, null);
+    }
+    
+    /**
+     * 错误响应（自定义错误码和消息）
+     */
+    public static <T> Result<T> error(Integer code, String message) {
+        return new Result<>(code, message, null);
+    }
+    
+    /**
      * 判断是否成功
      */
     public boolean isSuccess() {

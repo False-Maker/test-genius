@@ -1,5 +1,4 @@
 import request from './request'
-import type { ApiResult } from './types'
 
 // 文件上传响应类型
 export interface FileUploadResponse {

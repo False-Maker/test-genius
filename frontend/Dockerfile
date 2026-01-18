@@ -27,9 +27,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # 暴露端口
 EXPOSE 80
 
-# 健康检查
+# 健康检查（使用 127.0.0.1 避免 IPv6 连接问题）
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1/health || exit 1
 
 # 启动Nginx
 CMD ["nginx", "-g", "daemon off;"]

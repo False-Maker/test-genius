@@ -1,5 +1,4 @@
 import request from './request'
-import type { ApiResult } from './types'
 
 // 用例生成相关类型定义
 export interface CaseGenerationRequest {

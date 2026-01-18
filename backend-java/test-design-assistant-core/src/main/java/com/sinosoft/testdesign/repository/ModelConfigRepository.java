@@ -32,5 +32,10 @@ public interface ModelConfigRepository extends JpaRepository<ModelConfig, Long>,
      * 根据模型类型查询启用的模型配置
      */
     List<ModelConfig> findByModelTypeAndIsActive(String modelType, String isActive);
+    
+    /**
+     * 根据编码前缀查询模型配置，按ID倒序排列（用于生成编码）
+     */
+    List<ModelConfig> findByModelCodeStartingWithOrderByIdDesc(String prefix);
 }
 

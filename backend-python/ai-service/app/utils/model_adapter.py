@@ -1,6 +1,6 @@
 """
 多模型适配器
-支持DeepSeek、豆包、Kimi、千问等模型
+支持DeepSeek、豆包、Kimi、千问、智谱等模型
 使用LangChain统一接口
 兼容 LangChain 0.3.x
 """
@@ -185,6 +185,48 @@ class QianwenAdapter:
         )
 
 
+class ZhipuAdapter:
+    """智谱模型适配器（智谱AI）"""
+    
+    @staticmethod
+    def create_llm(api_key: str, api_endpoint: str, model_version: str,
+                   max_tokens: int, temperature: float):
+        """
+        创建智谱 LLM实例
+        智谱兼容OpenAI API
+        """
+        if ChatOpenAI is None:
+            # 如果ChatOpenAI不可用，使用HTTP方式
+            return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
+        
+        # LangChain 0.3.x 兼容：新版本 API
+        # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
+        try:
+            # 尝试新版本 API（langchain-openai 0.2.x）
+            return ChatOpenAI(
+                model=model_version,
+                api_key=api_key,
+                base_url=api_endpoint,  # 新版本使用 base_url
+                max_tokens=max_tokens,
+                temperature=temperature,
+                timeout=60.0
+            )
+        except (TypeError, ValueError):
+            # 兼容旧版本 API（langchain-openai 0.0.x）
+            try:
+                return ChatOpenAI(
+                    model=model_version,
+                    openai_api_key=api_key,
+                    openai_api_base=api_endpoint,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    timeout=60
+                )
+            except Exception:
+                # 如果都失败，使用 HTTP 适配器
+                return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
+
+
 class HTTPLLMAdapter:
     """HTTP方式调用LLM的通用适配器（用于不兼容OpenAI API的模型）"""
     
@@ -243,6 +285,8 @@ class ModelAdapterFactory:
         "DOUBAO": DoubaoAdapter,
         "KIMI": KimiAdapter,
         "QIANWEN": QianwenAdapter,
+        "ZHIPU": ZhipuAdapter,
+        "智谱": ZhipuAdapter,  # 支持中文名称
     }
     
     @classmethod
@@ -252,7 +296,7 @@ class ModelAdapterFactory:
         创建LLM实例
         
         Args:
-            model_type: 模型类型（DEEPSEEK/DOUBAO/KIMI/QIANWEN）
+            model_type: 模型类型（DEEPSEEK/DOUBAO/KIMI/QIANWEN/ZHIPU/智谱）
             api_key: API密钥
             api_endpoint: API端点
             model_version: 模型版本

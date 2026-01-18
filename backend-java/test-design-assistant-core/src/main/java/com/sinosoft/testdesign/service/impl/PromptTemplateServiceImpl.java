@@ -284,8 +284,8 @@ public class PromptTemplateServiceImpl implements PromptTemplateService {
             }
         }
         
-        // 验证模板内容
-        if (!StringUtils.hasText(template.getTemplateContent())) {
+        // 验证模板内容（创建时必须，更新时可选）
+        if (isCreate && !StringUtils.hasText(template.getTemplateContent())) {
             throw new BusinessException("模板内容不能为空");
         }
     }

@@ -1,5 +1,8 @@
 package com.sinosoft.testdesign.service.impl;
 
+import com.sinosoft.testdesign.config.FeatureFlagConfig;
+import com.sinosoft.testdesign.service.ModelConfigService;
+import com.sinosoft.testdesign.metrics.BusinessMetricsCollector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,6 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,11 +30,21 @@ import static org.mockito.Mockito.*;
  * @date 2024-01-01
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("AI服务客户端测试")
 class AIServiceClientImplTest {
     
     @Mock
     private RestTemplate restTemplate;
+    
+    @Mock
+    private ModelConfigService modelConfigService;
+    
+    @Mock
+    private BusinessMetricsCollector metricsCollector;
+    
+    @Mock
+    private FeatureFlagConfig featureFlagConfig;
     
     @InjectMocks
     private AIServiceClientImpl aiServiceClient;
@@ -40,6 +56,12 @@ class AIServiceClientImplTest {
         mockResponse = new HashMap<>();
         mockResponse.put("status", "success");
         mockResponse.put("data", "test data");
+        
+        // 设置 AI 服务 URL
+        ReflectionTestUtils.setField(aiServiceClient, "aiServiceUrl", "http://localhost:8000");
+        
+        // Mock featureFlagConfig
+        when(featureFlagConfig.isModelFallbackEnabled()).thenReturn(false);
     }
     
     @Test

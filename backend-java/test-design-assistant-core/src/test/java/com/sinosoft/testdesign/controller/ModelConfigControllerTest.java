@@ -1,7 +1,10 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.BaseControllerTest;
+import com.sinosoft.testdesign.dto.ModelConfigRequestDTO;
+import com.sinosoft.testdesign.dto.ModelConfigResponseDTO;
 import com.sinosoft.testdesign.entity.ModelConfig;
+import com.sinosoft.testdesign.mapper.EntityDTOMapper;
 import com.sinosoft.testdesign.service.ModelConfigService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,10 +34,18 @@ class ModelConfigControllerTest extends BaseControllerTest {
     @MockBean
     private ModelConfigService modelConfigService;
     
+    @MockBean
+    private EntityDTOMapper entityDTOMapper;
+    
     @Test
     @DisplayName("创建模型配置-成功")
     void testCreateModelConfig_Success() throws Exception {
         // Given
+        ModelConfigRequestDTO dto = new ModelConfigRequestDTO();
+        dto.setModelName("DeepSeek Chat");
+        dto.setModelType("LLM");
+        dto.setApiEndpoint("https://api.deepseek.com/v1/chat/completions");
+        
         ModelConfig modelConfig = new ModelConfig();
         modelConfig.setModelCode("DEEPSEEK-001");
         modelConfig.setModelName("DeepSeek Chat");
@@ -49,13 +60,24 @@ class ModelConfigControllerTest extends BaseControllerTest {
         savedConfig.setApiEndpoint("https://api.deepseek.com/v1/chat/completions");
         savedConfig.setIsActive("1");
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setModelCode("DEEPSEEK-001");
+        responseDTO.setModelName("DeepSeek Chat");
+        responseDTO.setModelType("LLM");
+        responseDTO.setApiEndpoint("https://api.deepseek.com/v1/chat/completions");
+        
+        when(entityDTOMapper.toModelConfigEntity(any(ModelConfigRequestDTO.class)))
+            .thenReturn(modelConfig);
         when(modelConfigService.createModelConfig(any(ModelConfig.class)))
             .thenReturn(savedConfig);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(post("/v1/model-configs")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(modelConfig)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.id").value(1L))
@@ -73,8 +95,15 @@ class ModelConfigControllerTest extends BaseControllerTest {
         modelConfig.setModelCode("DEEPSEEK-001");
         modelConfig.setModelName("DeepSeek Chat");
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setModelCode("DEEPSEEK-001");
+        responseDTO.setModelName("DeepSeek Chat");
+        
         when(modelConfigService.getModelConfigById(id))
             .thenReturn(modelConfig);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(get("/v1/model-configs/{id}", id))
@@ -95,8 +124,15 @@ class ModelConfigControllerTest extends BaseControllerTest {
         modelConfig.setModelCode(modelCode);
         modelConfig.setModelName("DeepSeek Chat");
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setModelCode(modelCode);
+        responseDTO.setModelName("DeepSeek Chat");
+        
         when(modelConfigService.getModelConfigByCode(modelCode))
             .thenReturn(modelConfig);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(get("/v1/model-configs/code/{modelCode}", modelCode))
@@ -165,9 +201,14 @@ class ModelConfigControllerTest extends BaseControllerTest {
     void testUpdateModelConfig_Success() throws Exception {
         // Given
         Long id = 1L;
-        ModelConfig modelConfig = new ModelConfig();
-        modelConfig.setModelName("更新后的模型名称");
-        modelConfig.setMaxTokens(8192);
+        ModelConfigRequestDTO dto = new ModelConfigRequestDTO();
+        dto.setModelName("更新后的模型名称");
+        dto.setMaxTokens(8192);
+        
+        ModelConfig existingConfig = new ModelConfig();
+        existingConfig.setId(id);
+        existingConfig.setModelCode("DEEPSEEK-001");
+        existingConfig.setModelName("原模型名称");
         
         ModelConfig updatedConfig = new ModelConfig();
         updatedConfig.setId(id);
@@ -175,13 +216,24 @@ class ModelConfigControllerTest extends BaseControllerTest {
         updatedConfig.setModelName("更新后的模型名称");
         updatedConfig.setMaxTokens(8192);
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setModelCode("DEEPSEEK-001");
+        responseDTO.setModelName("更新后的模型名称");
+        responseDTO.setMaxTokens(8192);
+        
+        when(modelConfigService.getModelConfigById(id))
+            .thenReturn(existingConfig);
+        doNothing().when(entityDTOMapper).updateModelConfigFromDTO(any(ModelConfigRequestDTO.class), any(ModelConfig.class));
         when(modelConfigService.updateModelConfig(eq(id), any(ModelConfig.class)))
             .thenReturn(updatedConfig);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(put("/v1/model-configs/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(modelConfig)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.modelName").value("更新后的模型名称"));
@@ -192,6 +244,8 @@ class ModelConfigControllerTest extends BaseControllerTest {
     void testDeleteModelConfig_Success() throws Exception {
         // Given
         Long id = 1L;
+        
+        doNothing().when(modelConfigService).deleteModelConfig(id);
         
         // When & Then
         mockMvc.perform(delete("/v1/model-configs/{id}", id))
@@ -211,8 +265,15 @@ class ModelConfigControllerTest extends BaseControllerTest {
         updatedConfig.setModelCode("DEEPSEEK-001");
         updatedConfig.setIsActive(newStatus);
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(id);
+        responseDTO.setModelCode("DEEPSEEK-001");
+        responseDTO.setIsActive(newStatus);
+        
         when(modelConfigService.toggleModelConfigStatus(id, newStatus))
             .thenReturn(updatedConfig);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(put("/v1/model-configs/{id}/status", id)
@@ -234,8 +295,16 @@ class ModelConfigControllerTest extends BaseControllerTest {
         config1.setIsActive("1");
         configs.add(config1);
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setModelCode("DEEPSEEK-001");
+        responseDTO.setModelName("DeepSeek Chat");
+        responseDTO.setIsActive("1");
+        
         when(modelConfigService.getActiveModelConfigs())
             .thenReturn(configs);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(get("/v1/model-configs/active"))
@@ -259,8 +328,17 @@ class ModelConfigControllerTest extends BaseControllerTest {
         config1.setIsActive("1");
         configs.add(config1);
         
+        ModelConfigResponseDTO responseDTO = new ModelConfigResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setModelCode("DEEPSEEK-001");
+        responseDTO.setModelName("DeepSeek Chat");
+        responseDTO.setModelType(modelType);
+        responseDTO.setIsActive("1");
+        
         when(modelConfigService.getActiveModelConfigsByType(modelType))
             .thenReturn(configs);
+        when(entityDTOMapper.toModelConfigResponseDTO(any(ModelConfig.class)))
+            .thenReturn(responseDTO);
         
         // When & Then
         mockMvc.perform(get("/v1/model-configs/active/type/{modelType}", modelType))

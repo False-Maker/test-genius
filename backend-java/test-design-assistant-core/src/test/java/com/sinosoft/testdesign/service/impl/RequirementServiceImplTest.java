@@ -4,6 +4,7 @@ import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.enums.RequirementStatus;
 import com.sinosoft.testdesign.repository.RequirementRepository;
+import com.sinosoft.testdesign.service.CacheService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ class RequirementServiceImplTest {
     @Mock
     private RequirementRepository requirementRepository;
     
+    @Mock
+    private CacheService cacheService;
+    
     @InjectMocks
     private RequirementServiceImpl requirementService;
     
@@ -74,6 +78,7 @@ class RequirementServiceImplTest {
                 req.setId(1L);
                 return req;
             });
+        doNothing().when(cacheService).deleteByPattern(anyString());
         
         // When
         TestRequirement result = requirementService.createRequirement(newRequirement);
@@ -85,6 +90,7 @@ class RequirementServiceImplTest {
         assertEquals(RequirementStatus.DRAFT.name(), result.getRequirementStatus());
         assertEquals(1, result.getVersion());
         verify(requirementRepository, times(1)).save(any(TestRequirement.class));
+        verify(cacheService, atLeastOnce()).deleteByPattern(anyString());
     }
     
     @Test
@@ -136,6 +142,7 @@ class RequirementServiceImplTest {
             .thenReturn(Optional.of(testRequirement));
         when(requirementRepository.save(any(TestRequirement.class)))
             .thenReturn(testRequirement);
+        doNothing().when(cacheService).deleteByPattern(anyString());
         
         // When
         TestRequirement result = requirementService.updateRequirement(id, updateRequirement);
@@ -146,6 +153,7 @@ class RequirementServiceImplTest {
         assertEquals("优化", result.getRequirementType());
         verify(requirementRepository, times(1)).findById(id);
         verify(requirementRepository, times(1)).save(any(TestRequirement.class));
+        verify(cacheService, atLeastOnce()).deleteByPattern(anyString());
     }
     
     @Test
