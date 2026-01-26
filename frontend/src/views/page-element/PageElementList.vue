@@ -206,8 +206,40 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import { pageElementApi, type PageElementInfoRequestDTO, type PageElementInfoResponseDTO } from '@/api/pageElement'
+import type { PageResult } from '@/api/types'
 
-// 响应式数据表单验证规则
+// 响应式数据
+const loading = ref(false)
+const submitLoading = ref(false)
+const dialogVisible = ref(false)
+const dialogType = ref<'create' | 'edit'>('create')
+const formRef = ref<FormInstance>()
+const elementList = ref<PageElementInfoResponseDTO[]>([])
+const currentId = ref<number | undefined>(undefined)
+
+const formData = reactive<PageElementInfoRequestDTO>({
+  pageUrl: '',
+  elementType: '',
+  elementLocatorType: 'XPATH',
+  elementLocatorValue: '',
+  elementText: '',
+  elementAttributes: '',
+  pageStructure: '',
+  screenshotUrl: ''
+})
+
+const searchForm = reactive({
+  pageUrl: '',
+  elementType: ''
+})
+
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+
+// 表单验证规则
 const formRules: FormRules = {
   pageUrl: [
     { required: true, message: '请输入页面URL', trigger: 'blur' }

@@ -477,6 +477,28 @@ import { testRiskAssessmentApi, type TestRiskAssessmentRequestDTO, type TestRisk
 
 
 
+// 响应式数据定义
+const loading = ref(false)
+const assessmentList = ref<TestRiskAssessmentResponseDTO[]>([])
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+const formRef = ref<FormInstance | null>(null)
+const formData = reactive<TestRiskAssessmentRequestDTO>({
+  assessmentName: '',
+  requirementId: undefined,
+  executionTaskId: undefined
+})
+const targetType = ref<'REQUIREMENT' | 'EXECUTION'>('REQUIREMENT')
+const dialogVisible = ref(false)
+const submitLoading = ref(false)
+const viewDialogVisible = ref(false)
+const viewData = ref<TestRiskAssessmentResponseDTO>({} as TestRiskAssessmentResponseDTO)
+
+
+
 
 // 响应式数据表单验证规则
 

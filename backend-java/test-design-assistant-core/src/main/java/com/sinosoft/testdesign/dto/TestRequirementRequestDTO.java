@@ -1,5 +1,6 @@
 package com.sinosoft.testdesign.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.Data;
  * @date 2024-01-01
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TestRequirementRequestDTO {
     
     /**

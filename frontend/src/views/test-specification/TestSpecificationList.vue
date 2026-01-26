@@ -790,6 +790,43 @@ import { testSpecificationApi, type TestSpecificationRequestDTO, type TestSpecif
 
 
 
+// 响应式数据
+const loading = ref(false)
+const specList = ref<TestSpecificationResponseDTO[]>([])
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+const searchForm = reactive({
+  specName: '',
+  specType: '',
+  isActive: ''
+})
+const formData = reactive<Partial<TestSpecificationRequestDTO>>({
+  specName: '',
+  specType: 'APPLICATION',
+  specCategory: '',
+  specDescription: '',
+  specContent: '',
+  applicableModules: '',
+  applicableLayers: '',
+  applicableMethods: '',
+  effectiveDate: '',
+  expireDate: ''
+})
+const dialogVisible = ref(false)
+const detailVisible = ref(false)
+const dialogType = ref<'create' | 'edit'>('create')
+const currentId = ref<number | undefined>(undefined)
+const currentDetail = ref<TestSpecificationResponseDTO | null>(null)
+const formRef = ref<FormInstance>()
+const submitLoading = ref(false)
+
+
+
+
+
 // 响应式数据表单验证规则
 
 

@@ -49,7 +49,10 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         
         // 2. 如果需求有文档，先解析文档
         String requirementText = requirement.getRequirementDescription();
-        if (requirement.getRequirementDocUrl() != null && !requirement.getRequirementDocUrl().isEmpty()) {
+        boolean hasDescription = requirementText != null && !requirementText.trim().isEmpty();
+        boolean hasDocUrl = requirement.getRequirementDocUrl() != null && !requirement.getRequirementDocUrl().isEmpty();
+        
+        if (hasDocUrl) {
             // 如果有文档，调用文档解析服务
             try {
                 String documentContent = parseDocument(requirement.getRequirementDocUrl());
@@ -58,11 +61,15 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
                 }
             } catch (Exception e) {
                 log.warn("文档解析失败，使用需求描述: {}", e.getMessage());
+                // 文档解析失败时，如果没有需求描述，则无法继续分析
+                if (!hasDescription) {
+                    throw new BusinessException("需求文档解析失败，且需求描述为空，无法进行分析。请检查文档路径或填写需求描述。");
+                }
             }
         }
         
         if (requirementText == null || requirementText.trim().isEmpty()) {
-            throw new BusinessException("需求描述或文档内容不能为空");
+            throw new BusinessException("需求描述和文档内容不能同时为空，请至少填写需求描述或上传需求文档后再进行分析。");
         }
         
         // 3. 调用AI服务进行需求分析

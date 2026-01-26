@@ -79,7 +79,8 @@ class CaseGenerationService:
                 requirement_text=requirement_text,
                 requirement_info=requirement_info,
                 layer_code=layer_code,
-                method_code=method_code
+                method_code=method_code,
+                requirement_id=requirement_id
             )
             
             prompt = self.prompt_service.generate_prompt(
@@ -219,7 +220,8 @@ class CaseGenerationService:
         requirement_text: str,
         requirement_info: Dict,
         layer_code: str,
-        method_code: str
+        method_code: str,
+        requirement_id: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         构建提示词变量
@@ -229,17 +231,110 @@ class CaseGenerationService:
             requirement_info: 需求分析信息
             layer_code: 测试分层代码
             method_code: 测试方法代码
+            requirement_id: 需求ID（可选，用于查询需求详细信息）
             
         Returns:
             变量字典
         """
-        return {
+        variables = {
             "requirement_text": requirement_text,
+            "requirement_description": requirement_text,  # 别名，兼容不同模板
             "requirement_keywords": ", ".join(requirement_info.get("keywords", [])),
             "layer_code": layer_code,
             "method_code": method_code,
             "sentence_count": requirement_info.get("sentence_count", 0)
         }
+        
+        # 从数据库查询测试分层名称
+        try:
+            from sqlalchemy import text
+            layer_result = self.db.execute(
+                text("SELECT layer_name FROM test_layer WHERE layer_code = :layer_code AND is_active = '1'"),
+                {"layer_code": layer_code}
+            ).first()
+            if layer_result:
+                variables["layer_name"] = layer_result[0]
+            else:
+                variables["layer_name"] = layer_code  # 如果查询不到，使用代码作为名称
+                logger.warning(f"未找到测试分层名称，使用代码: {layer_code}")
+        except Exception as e:
+            logger.warning(f"查询测试分层名称失败: {str(e)}，使用代码: {layer_code}")
+            variables["layer_name"] = layer_code
+        
+        # 从数据库查询测试方法名称
+        try:
+            from sqlalchemy import text
+            method_result = self.db.execute(
+                text("SELECT method_name FROM test_design_method WHERE method_code = :method_code AND is_active = '1'"),
+                {"method_code": method_code}
+            ).first()
+            if method_result:
+                variables["method_name"] = method_result[0]
+            else:
+                variables["method_name"] = method_code  # 如果查询不到，使用代码作为名称
+                logger.warning(f"未找到测试方法名称，使用代码: {method_code}")
+        except Exception as e:
+            logger.warning(f"查询测试方法名称失败: {str(e)}，使用代码: {method_code}")
+            variables["method_name"] = method_code
+        
+        # 如果有需求ID，查询需求详细信息
+        if requirement_id:
+            try:
+                from sqlalchemy import text
+                req_result = self.db.execute(
+                    text("""
+                        SELECT requirement_name, requirement_description, business_module 
+                        FROM test_requirement 
+                        WHERE id = :requirement_id
+                    """),
+                    {"requirement_id": requirement_id}
+                ).first()
+                if req_result:
+                    variables["requirement_name"] = req_result[0] or ""
+                    # 如果需求描述为空，使用传入的 requirement_text
+                    variables["requirement_description"] = req_result[1] or requirement_text
+                    variables["business_module"] = req_result[2] or ""
+                else:
+                    logger.warning(f"未找到需求信息，需求ID: {requirement_id}")
+            except Exception as e:
+                logger.warning(f"查询需求信息失败: {str(e)}")
+        
+        # 如果需求名称未设置，尝试从需求文本中提取（简单处理）
+        if "requirement_name" not in variables or not variables.get("requirement_name"):
+            # 尝试提取第一行或前50个字符作为需求名称
+            if requirement_text:
+                lines = requirement_text.strip().split('\n')
+                if lines:
+                    first_line = lines[0].strip()
+                    variables["requirement_name"] = first_line[:50] if len(first_line) > 50 else first_line
+                else:
+                    variables["requirement_name"] = requirement_text[:50] if len(requirement_text) > 50 else requirement_text
+            else:
+                variables["requirement_name"] = ""
+        
+        # 设置业务模块（如果未设置）
+        if "business_module" not in variables:
+            variables["business_module"] = ""
+        
+        # 注意：以下变量是生成用例后才有的，不应该在生成提示词时提供
+        # 但为了兼容现有模板，提供占位符说明
+        # caseName, testStep, expectedResult, preCondition 这些变量应该在模板中
+        # 作为输出格式的占位符，而不是输入变量
+        # 如果模板中使用了这些变量，它们会被替换为空字符串或占位符说明
+        
+        # 为输出格式变量提供占位符（如果模板需要）
+        # 这些变量在生成提示词时不应该有值，但为了兼容性提供说明
+        output_format_vars = {
+            "caseName": "[请生成用例名称]",
+            "preCondition": "[请生成前置条件]",
+            "testStep": "[请生成测试步骤]",
+            "expectedResult": "[请生成预期结果]"
+        }
+        
+        # 只在模板确实需要这些变量时才添加（避免不必要的警告）
+        # 这里先不添加，让模板服务处理未提供的变量
+        
+        return variables
     
     def parse_cases(self, content: str) -> List[Dict]:
         """

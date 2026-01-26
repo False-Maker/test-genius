@@ -295,7 +295,24 @@ docker compose build --no-cache backend-java
 
 # 构建并启动
 docker compose up -d --build
+
+# 使用便捷脚本（推荐）
+.\rebuild.ps1 -Service backend-java
+.\rebuild.ps1  # 重建所有服务
 ```
+
+### 问题6：代码更新后Docker不识别变化（构建缓存问题）
+
+**问题现象**：修改代码后，`docker compose build` 不会重新构建代码，必须使用 `--no-cache` 才能更新。
+
+**问题原因**：Docker的层缓存机制，当COPY指令的缓存命中时，后续构建步骤不会重新执行。
+
+**解决方案**：
+1. **开发环境推荐**：使用卷挂载或直接在本地运行应用（无需Docker）
+2. **重新构建时**：使用 `docker compose build --no-cache` 或便捷脚本 `.\rebuild.ps1`
+3. **长期优化**：已添加`.dockerignore`文件，提高缓存准确性
+
+**详细说明**：请参考 `docs/Docker构建缓存问题解决方案.md`
 
 ---
 
@@ -322,9 +339,14 @@ docker compose up -d --build
 | 服务 | 地址 | 说明 |
 |------|------|------|
 | 前端 | http://localhost:3000 | 主应用界面 |
-| Java后端API | http://localhost:8080 | REST API |
-| Java后端健康检查 | http://localhost:8080/actuator/health | 健康检查 |
+| Java后端API | http://localhost:8080/api | REST API |
+| Java后端Swagger | http://localhost:8080/api/swagger-ui.html | API文档（Swagger UI） |
+| Java后端OpenAPI | http://localhost:8080/api/v3/api-docs | OpenAPI JSON文档 |
+| Java后端健康检查 | http://localhost:8080/api/actuator/health | 健康检查 |
 | Python AI服务 | http://localhost:8000 | AI服务API |
+| Python Swagger | http://localhost:8000/docs | API文档（Swagger UI） |
+| Python ReDoc | http://localhost:8000/redoc | API文档（ReDoc） |
+| Python OpenAPI | http://localhost:8000/openapi.json | OpenAPI JSON文档 |
 | Python健康检查 | http://localhost:8000/health | 健康检查 |
 | Prometheus | http://localhost:9090 | 监控指标 |
 | Grafana | http://localhost:3001 | 监控面板（admin/admin） |
@@ -337,7 +359,8 @@ docker compose up -d --build
 
 服务启动成功后，可以：
 1. 访问前端界面：http://localhost:3000
-2. 查看API文档：http://localhost:8080/swagger-ui.html
-3. 查看监控面板：http://localhost:3001
-4. 开始使用系统功能
+2. 查看Java API文档：http://localhost:8080/api/swagger-ui.html
+3. 查看Python API文档：http://localhost:8000/docs
+4. 查看监控面板：http://localhost:3001
+5. 开始使用系统功能
 

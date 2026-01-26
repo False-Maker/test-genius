@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.services.knowledge_base_service import KnowledgeBaseService
 
-router = APIRouter(prefix="/api/knowledge", tags=["知识库"])
+router = APIRouter(prefix="/knowledge", tags=["知识库"])
 
 
 class DocumentCreateRequest(BaseModel):

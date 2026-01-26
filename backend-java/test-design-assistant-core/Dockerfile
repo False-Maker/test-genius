@@ -53,6 +53,11 @@ COPY --from=build /app/test-design-assistant-core/target/test-design-assistant-c
 
 # 创建非root用户
 RUN addgroup -S spring && adduser -S spring -G spring
+
+# 创建上传目录并设置权限（必须在切换用户之前执行）
+RUN mkdir -p /app/uploads && chown -R spring:spring /app/uploads
+
+# 切换到非root用户
 USER spring:spring
 
 # 暴露端口

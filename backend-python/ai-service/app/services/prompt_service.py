@@ -106,17 +106,40 @@ class PromptService:
             variable_name = match.group(1).strip()
             required_variables.add(variable_name)
         
+        # 定义输出格式变量（这些变量是生成用例后才有的，不应该在生成提示词时提供）
+        # 这些变量在模板中作为输出格式的占位符，应该提供说明性文本
+        output_format_variables = {
+            "caseName": "[请生成用例名称]",
+            "preCondition": "[请生成前置条件]",
+            "testStep": "[请生成测试步骤]",
+            "expectedResult": "[请生成预期结果]"
+        }
+        
         # 检查必需变量是否都提供了值（仅警告，不阻止）
         for var_name in required_variables:
             if var_name not in variables or variables[var_name] is None:
-                logger.warning(f"模板变量 {var_name} 未提供值，将使用空字符串替换")
+                # 如果是输出格式变量，提供说明性文本，不警告
+                if var_name in output_format_variables:
+                    logger.debug(f"模板变量 {var_name} 是输出格式变量，将使用说明性文本")
+                else:
+                    logger.warning(f"模板变量 {var_name} 未提供值，将使用空字符串替换")
         
         # 替换所有变量
         def replace_func(match):
             variable_name = match.group(1).strip()
             value = variables.get(variable_name)
-            # 如果值为None，使用空字符串
-            replacement = str(value) if value is not None else ""
+            
+            # 如果变量未提供值
+            if value is None:
+                # 如果是输出格式变量，提供说明性文本
+                if variable_name in output_format_variables:
+                    replacement = output_format_variables[variable_name]
+                else:
+                    # 其他变量使用空字符串
+                    replacement = ""
+            else:
+                replacement = str(value)
+            
             return replacement
         
         result = VARIABLE_PATTERN.sub(replace_func, template_content)

@@ -625,6 +625,35 @@ import { testReportApi, type TestReportRequestDTO, type TestReportResponseDTO } 
 
 
 
+// 响应式数据
+const loading = ref(false)
+const submitLoading = ref(false)
+const dialogVisible = ref(false)
+const viewDialogVisible = ref(false)
+const isEdit = ref(false)
+const formRef = ref<FormInstance>()
+
+const reportList = ref<TestReportResponseDTO[]>([])
+const formData = reactive<TestReportRequestDTO>({
+  reportName: '',
+  reportType: 'EXECUTION',
+  requirementId: undefined,
+  executionTaskId: undefined
+})
+const viewData = ref<TestReportResponseDTO>({} as TestReportResponseDTO)
+
+const searchForm = reactive({
+  reportName: '',
+  reportType: ''
+})
+
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+
+
 // 响应式数据表单验证规则
 
 
@@ -704,6 +733,29 @@ const getStatusText = (status: string) => {
 
 
         PUBLISHED: '已发布'
+
+
+    }
+
+
+    return map[status] || status
+
+
+}
+
+
+
+
+const getStatusType = (status: string) => {
+
+
+    const map: Record<string, string> = {
+
+
+        DRAFT: 'info',
+
+
+        PUBLISHED: 'success'
 
 
     }

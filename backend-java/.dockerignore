@@ -1,0 +1,41 @@
+# Maven构建产物
+target/
+.m2/
+
+# IDE配置
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# 日志文件
+*.log
+logs/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Git配置
+.git/
+.gitignore
+.gitattributes
+
+# 临时文件
+*.tmp
+*.swp
+*.bak
+*~
+
+# Node模块（如果前端和后端在同一目录）
+node_modules/
+
+# 测试覆盖率报告
+coverage/
+
+# 环境配置文件（如果需要）
+.env.local
+.env.development
+

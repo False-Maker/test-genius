@@ -673,6 +673,36 @@ import { uiScriptTemplateApi, type UIScriptTemplateRequestDTO, type UIScriptTemp
 
 
 
+// 响应式数据
+const loading = ref(false)
+const templateList = ref<UIScriptTemplateResponseDTO[]>([])
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+const searchForm = reactive({
+  templateName: '',
+  templateType: '',
+  scriptLanguage: '',
+  isActive: ''
+})
+const dialogVisible = ref(false)
+const dialogType = ref<'create' | 'edit'>('create')
+const formRef = ref<FormInstance>()
+const formData = reactive<UIScriptTemplateRequestDTO>({
+  templateName: '',
+  templateType: 'SELENIUM',
+  scriptLanguage: 'JAVA',
+  templateContent: '',
+  templateVariables: '',
+  applicableScenarios: '',
+  templateDescription: '',
+  isActive: '1'
+})
+const submitLoading = ref(false)
+const currentId = ref<number | undefined>(undefined)
+
 // 响应式数据表单验证规则
 
 

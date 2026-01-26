@@ -514,6 +514,43 @@ import { modelConfigApi, type ModelConfig } from '@/api/modelConfig'
 
 import type { PageResult } from '@/api/types'
 
+import { useCacheStore } from '@/store/cache'
+
+// 使用缓存store
+const cacheStore = useCacheStore()
+
+// 响应式数据
+const loading = ref(false)
+const modelConfigList = ref<ModelConfig[]>([])
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+const searchForm = reactive({
+  modelName: '',
+  modelType: '',
+  isActive: ''
+})
+const formData = reactive<Partial<ModelConfig>>({
+  modelName: '',
+  modelType: '',
+  apiEndpoint: '',
+  apiKey: '',
+  modelVersion: '',
+  maxTokens: undefined,
+  temperature: undefined,
+  priority: undefined,
+  dailyLimit: undefined,
+  isActive: '1'
+})
+const dialogVisible = ref(false)
+const viewDialogVisible = ref(false)
+const isEdit = ref(false)
+const formRef = ref<FormInstance>()
+const viewData = ref<ModelConfig>({} as ModelConfig)
+const submitLoading = ref(false)
+
 // 响应式数据表单验证规则
 
 const formRules: FormRules = {
@@ -715,6 +752,10 @@ const handleDelete = async (row: ModelConfig) => {
     ElMessage.success('删除成功')
 
     loadModelConfigList()
+    
+    // 清除并刷新模型列表缓存
+    cacheStore.clearCache('modelList')
+    await cacheStore.loadModelList(true)
 
   } catch (error: any) {
 
@@ -741,6 +782,10 @@ const handleToggleStatus = async (row: ModelConfig) => {
     ElMessage.success('状态更新成功')
 
     loadModelConfigList()
+    
+    // 清除并刷新模型列表缓存
+    cacheStore.clearCache('modelList')
+    await cacheStore.loadModelList(true)
 
   } catch (error) {
 
@@ -776,13 +821,17 @@ const handleSubmit = async () => {
 
           await modelConfigApi.createModelConfig(formData)
 
-          ElMessage.success('创建人成功')
+          ElMessage.success('创建成功')
 
         }
 
         dialogVisible.value = false
 
         loadModelConfigList()
+        
+        // 清除并刷新模型列表缓存，使其他页面能立即看到新创建的模型
+        cacheStore.clearCache('modelList')
+        await cacheStore.loadModelList(true)
 
       } catch (error) {
 

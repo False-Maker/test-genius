@@ -28,6 +28,28 @@ except ImportError:
     ChatTongyi = None
 
 
+def _normalize_api_endpoint(api_endpoint: str) -> str:
+    """
+    规范化API端点URL
+    移除可能存在的 /chat/completions 后缀，因为 LangChain 会自动追加
+    
+    Args:
+        api_endpoint: 原始API端点
+        
+    Returns:
+        规范化后的API端点
+    """
+    if not api_endpoint:
+        return api_endpoint
+    
+    # 移除末尾的 /chat/completions（不区分大小写）
+    endpoint = api_endpoint.rstrip('/')
+    if endpoint.lower().endswith('/chat/completions'):
+        endpoint = endpoint[:-len('/chat/completions')]
+    
+    return endpoint
+
+
 class DeepSeekAdapter:
     """DeepSeek模型适配器"""
     
@@ -84,6 +106,9 @@ class DoubaoAdapter:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
         
+        # 规范化API端点，移除可能存在的 /chat/completions 后缀
+        normalized_endpoint = _normalize_api_endpoint(api_endpoint)
+        
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -91,7 +116,7 @@ class DoubaoAdapter:
             return ChatOpenAI(
                 model=model_version,
                 api_key=api_key,
-                base_url=api_endpoint,  # 新版本使用 base_url
+                base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
                 timeout=60.0
@@ -102,7 +127,7 @@ class DoubaoAdapter:
                 return ChatOpenAI(
                     model=model_version,
                     openai_api_key=api_key,
-                    openai_api_base=api_endpoint,
+                    openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
                     timeout=60
@@ -126,6 +151,9 @@ class KimiAdapter:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
         
+        # 规范化API端点，移除可能存在的 /chat/completions 后缀
+        normalized_endpoint = _normalize_api_endpoint(api_endpoint)
+        
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -133,7 +161,7 @@ class KimiAdapter:
             return ChatOpenAI(
                 model=model_version,
                 api_key=api_key,
-                base_url=api_endpoint,  # 新版本使用 base_url
+                base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
                 timeout=60.0
@@ -144,7 +172,7 @@ class KimiAdapter:
                 return ChatOpenAI(
                     model=model_version,
                     openai_api_key=api_key,
-                    openai_api_base=api_endpoint,
+                    openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
                     timeout=60
@@ -199,6 +227,9 @@ class ZhipuAdapter:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
         
+        # 规范化API端点，移除可能存在的 /chat/completions 后缀
+        normalized_endpoint = _normalize_api_endpoint(api_endpoint)
+        
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -206,7 +237,7 @@ class ZhipuAdapter:
             return ChatOpenAI(
                 model=model_version,
                 api_key=api_key,
-                base_url=api_endpoint,  # 新版本使用 base_url
+                base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
                 timeout=60.0
@@ -217,7 +248,7 @@ class ZhipuAdapter:
                 return ChatOpenAI(
                     model=model_version,
                     openai_api_key=api_key,
-                    openai_api_base=api_endpoint,
+                    openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
                     timeout=60

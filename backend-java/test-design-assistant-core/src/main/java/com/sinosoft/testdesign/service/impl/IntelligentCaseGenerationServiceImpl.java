@@ -100,19 +100,15 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
                     .orElseThrow(() -> new BusinessException("模型配置不存在: " + finalModelCode));
         }
         
-        // 创建任务
-        CaseGenerationTask task = new CaseGenerationTask();
-        task.setTaskCode(generateTaskCode());
-        task.setRequirementId(request.getRequirementId());
-        task.setLayerId(layerId);
-        task.setMethodId(methodId);
-        task.setTemplateId(request.getTemplateId());
-        task.setModelCode(modelCode);
-        task.setTaskStatus("PENDING");
-        task.setProgress(0);
-        task.setCreatorId(request.getCreatorId());
-        
-        task = taskRepository.save(task);
+        // 创建任务（带重试机制处理并发冲突）
+        CaseGenerationTask task = createTaskWithRetry(
+                request.getRequirementId(),
+                layerId,
+                methodId,
+                request.getTemplateId(),
+                modelCode,
+                request.getCreatorId()
+        );
         long elapsedTime = System.currentTimeMillis() - startTime;
         log.info("用例生成任务创建成功，任务ID: {}, 任务编码: {}, 耗时: {}ms", 
                 task.getId(), task.getTaskCode(), elapsedTime);
@@ -206,19 +202,16 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
                 TestRequirement requirement = requirementRepository.findById(requirementId)
                         .orElseThrow(() -> new BusinessException("需求不存在: " + requirementId));
                 
-                // 创建单个任务
-                CaseGenerationTask task = new CaseGenerationTask();
-                task.setTaskCode(generateTaskCode());
-                task.setRequirementId(requirementId);
-                task.setLayerId(layerId);
-                task.setMethodId(methodId);
-                task.setTemplateId(request.getTemplateId());
-                task.setModelCode(modelCode);
-                task.setTaskStatus("PENDING");
-                task.setProgress(0);
-                task.setCreatorId(request.getCreatorId());
+                // 创建单个任务（使用重试机制处理并发冲突）
+                CaseGenerationTask task = createTaskWithRetry(
+                        requirementId,
+                        layerId,
+                        methodId,
+                        request.getTemplateId(),
+                        modelCode,
+                        request.getCreatorId()
+                );
                 
-                task = taskRepository.save(task);
                 taskIds.add(task.getId());
                 
                 // 异步执行任务
@@ -287,10 +280,21 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
                 throw new BusinessException("测试分层或测试方法不能为空");
             }
             
+            // 获取需求文本，如果需求描述为空，使用需求名称作为备选
+            String requirementText = requirement.getRequirementDescription();
+            if (requirementText == null || requirementText.trim().isEmpty()) {
+                if (requirement.getRequirementName() != null && !requirement.getRequirementName().trim().isEmpty()) {
+                    requirementText = requirement.getRequirementName();
+                    log.warn("需求ID {} 的需求描述为空，使用需求名称作为备选: {}", requirement.getId(), requirementText);
+                } else {
+                    throw new BusinessException("需求描述和需求名称不能同时为空，无法生成用例");
+                }
+            }
+            
             // 构建Python服务请求
             Map<String, Object> pythonRequest = new HashMap<>();
             pythonRequest.put("requirement_id", requirement.getId());
-            pythonRequest.put("requirement_text", requirement.getRequirementDescription());
+            pythonRequest.put("requirement_text", requirementText);
             pythonRequest.put("layer_code", layerCode);
             pythonRequest.put("method_code", methodCode);
             pythonRequest.put("model_code", task.getModelCode());
@@ -304,7 +308,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
             task.setProgress(30);
             task = taskRepository.save(task);
             
-            String url = aiServiceUrl + "/api/case/generate";
+            String url = aiServiceUrl + "/api/v1/case/generate";
             Map<String, Object> response = restTemplate.postForObject(url, pythonRequest, Map.class);
             
             if (response == null) {
@@ -481,6 +485,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
      * 生成任务编码
      * 格式：TASK-YYYYMMDD-序号（如 TASK-20240101-001）
      * 优化：使用数据库查询替代全量查询，提高性能
+     * 注意：在高并发场景下可能存在竞态条件，通过 createTaskWithRetry 方法的重试机制处理
      */
     private String generateTaskCode() {
         String dateStr = LocalDate.now().format(DATE_FORMATTER);
@@ -509,6 +514,61 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
         String taskCode = prefix + String.format("%03d", newSequence);
         log.debug("生成任务编码: {}", taskCode);
         return taskCode;
+    }
+    
+    /**
+     * 创建任务（带重试机制处理并发冲突）
+     * 当遇到唯一约束冲突时，重新生成编码并重试
+     */
+    private CaseGenerationTask createTaskWithRetry(
+            Long requirementId,
+            Long layerId,
+            Long methodId,
+            Long templateId,
+            String modelCode,
+            Long creatorId
+    ) {
+        int maxRetries = 5;
+        int retryCount = 0;
+        
+        while (retryCount < maxRetries) {
+            try {
+                CaseGenerationTask task = new CaseGenerationTask();
+                task.setTaskCode(generateTaskCode());
+                task.setRequirementId(requirementId);
+                task.setLayerId(layerId);
+                task.setMethodId(methodId);
+                task.setTemplateId(templateId);
+                task.setModelCode(modelCode);
+                task.setTaskStatus("PENDING");
+                task.setProgress(0);
+                task.setCreatorId(creatorId);
+                
+                return taskRepository.save(task);
+                
+            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                // 捕获唯一约束冲突异常
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    log.error("创建任务失败，已重试{}次，任务编码冲突", maxRetries, e);
+                    throw new BusinessException("创建任务失败，任务编码冲突，请稍后重试");
+                }
+                // 等待一小段时间后重试（指数退避）
+                try {
+                    Thread.sleep(50 * retryCount);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new BusinessException("创建任务被中断");
+                }
+                log.warn("任务编码冲突，重试第{}次", retryCount);
+            } catch (Exception e) {
+                // 其他异常直接抛出
+                log.error("创建任务失败", e);
+                throw new BusinessException("创建任务失败: " + e.getMessage());
+            }
+        }
+        
+        throw new BusinessException("创建任务失败");
     }
 }
 

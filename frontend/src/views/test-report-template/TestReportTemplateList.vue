@@ -541,6 +541,54 @@ import { testReportTemplateApi, type TestReportTemplateRequestDTO, type TestRepo
 
 
 
+// 响应式数据
+
+
+const loading = ref(false)
+
+
+const templateList = ref<TestReportTemplateResponseDTO[]>([])
+
+
+const pagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+
+
+const dialogVisible = ref(false)
+
+
+const viewDialogVisible = ref(false)
+
+
+const isEdit = ref(false)
+
+
+const formRef = ref<FormInstance>()
+
+
+const formData = reactive<Partial<TestReportTemplateRequestDTO>>({
+  templateName: '',
+  templateType: 'EXECUTION',
+  templateContent: '{}',
+  fileFormat: 'WORD',
+  templateDescription: '',
+  isActive: '1',
+  isDefault: '0'
+})
+
+
+const submitLoading = ref(false)
+
+
+const viewData = ref<TestReportTemplateResponseDTO>({} as TestReportTemplateResponseDTO)
+
+
+
+
+
 // 响应式数据表单验证规则
 
 
