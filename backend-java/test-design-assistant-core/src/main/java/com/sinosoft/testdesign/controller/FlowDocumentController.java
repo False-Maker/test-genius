@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/flow-documents")
+@RequestMapping("/v1/flow-documents")
 @RequiredArgsConstructor
 @Tag(name = "流程文档生成", description = "测试流程文档生成接口，包括场景图和路径图生成")
 public class FlowDocumentController {

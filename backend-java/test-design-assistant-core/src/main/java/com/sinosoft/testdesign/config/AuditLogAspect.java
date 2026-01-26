@@ -202,7 +202,17 @@ public class AuditLogAspect {
      * 获取当前用户ID
      */
     private Long getCurrentUserId() {
-        // TODO: 从SecurityContext或Session获取当前用户ID
+        // 注意：如果后续有认证系统（如Spring Security），可以从SecurityContext或Session获取当前用户ID
+        // 示例代码（需要引入Spring Security）：
+        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // if (authentication != null && authentication.isAuthenticated()) {
+        //     Object principal = authentication.getPrincipal();
+        //     if (principal instanceof UserDetails) {
+        //         UserDetails userDetails = (UserDetails) principal;
+        //         // 从UserDetails中获取用户ID
+        //     }
+        // }
+        // 或者从JWT Token中解析用户ID
         return null;
     }
     
@@ -210,7 +220,12 @@ public class AuditLogAspect {
      * 获取当前用户名
      */
     private String getCurrentUserName() {
-        // TODO: 从SecurityContext或Session获取当前用户名
+        // 注意：如果后续有认证系统（如Spring Security），可以从SecurityContext或Session获取当前用户名
+        // 示例代码（需要引入Spring Security）：
+        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // if (authentication != null && authentication.isAuthenticated()) {
+        //     return authentication.getName();
+        // }
         return "SYSTEM";
     }
     

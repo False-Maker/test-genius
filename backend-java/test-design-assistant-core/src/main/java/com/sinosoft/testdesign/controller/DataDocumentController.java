@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/data-documents")
+@RequestMapping("/v1/data-documents")
 @RequiredArgsConstructor
 @Tag(name = "数据文档生成", description = "测试数据文档生成接口，包括等价类表和正交表生成")
 public class DataDocumentController {

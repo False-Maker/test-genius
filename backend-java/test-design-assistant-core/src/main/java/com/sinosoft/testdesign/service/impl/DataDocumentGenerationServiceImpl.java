@@ -451,12 +451,34 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
         
         // 从用例中提取参数（简单实现：基于测试步骤中的关键词）
         if (request.getAutoIdentifyParameters() != null && request.getAutoIdentifyParameters()) {
-            // TODO: 使用AI或NLP技术从用例中提取参数和等价类
-            // 当前实现：简单的示例数据
-            equivalenceClasses.put("输入参数1", Map.of(
-                    "有效等价类", Arrays.asList("值1", "值2", "值3"),
-                    "无效等价类", Arrays.asList("空值", "非法值")
-            ));
+            // 注意：完整的AI/NLP参数提取功能需要调用Python AI服务实现
+            // 当前实现：基于关键词的简单提取（作为占位实现）
+            // 实际生产环境应调用AI服务进行智能提取
+            log.warn("自动参数识别功能使用简单实现，建议后续集成AI服务进行智能提取");
+            
+            // 简单实现：从测试步骤中提取可能的参数
+            String testStep = testCase.getTestStep();
+            if (testStep != null && testStep.length() > 0) {
+                // 提取可能的输入参数（简单关键词匹配）
+                String[] keywords = {"输入", "输入值", "参数", "值", "金额", "数量", "日期"};
+                for (String keyword : keywords) {
+                    if (testStep.contains(keyword)) {
+                        equivalenceClasses.put(keyword, Map.of(
+                                "有效等价类", Arrays.asList("正常值1", "正常值2", "正常值3"),
+                                "无效等价类", Arrays.asList("空值", "非法值", "超出范围值")
+                        ));
+                        break; // 只提取第一个匹配的参数
+                    }
+                }
+            }
+            
+            // 如果没有提取到参数，使用默认示例数据
+            if (equivalenceClasses.isEmpty()) {
+                equivalenceClasses.put("输入参数", Map.of(
+                        "有效等价类", Arrays.asList("值1", "值2", "值3"),
+                        "无效等价类", Arrays.asList("空值", "非法值")
+                ));
+            }
             equivalenceClasses.put("输入参数2", Map.of(
                     "有效等价类", Arrays.asList("值A", "值B"),
                     "无效等价类", Arrays.asList("空值")

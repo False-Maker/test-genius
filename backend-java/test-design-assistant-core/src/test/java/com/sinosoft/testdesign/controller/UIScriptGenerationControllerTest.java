@@ -43,7 +43,7 @@ class UIScriptGenerationControllerTest extends BaseControllerTest {
             .thenReturn(taskCode);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/ui-script/generate")
+        mockMvc.perform(post("/v1/ui-script/generate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class UIScriptGenerationControllerTest extends BaseControllerTest {
             .thenReturn(result);
         
         // When & Then
-        mockMvc.perform(get("/api/v1/ui-script/tasks/{taskCode}", taskCode))
+        mockMvc.perform(get("/v1/ui-script/tasks/{taskCode}", taskCode))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data.taskCode").value(taskCode))
@@ -89,7 +89,7 @@ class UIScriptGenerationControllerTest extends BaseControllerTest {
             .thenReturn(elements);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/ui-script/parse-page")
+        mockMvc.perform(post("/v1/ui-script/parse-page")
                 .param("pageCodeUrl", pageCodeUrl))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))

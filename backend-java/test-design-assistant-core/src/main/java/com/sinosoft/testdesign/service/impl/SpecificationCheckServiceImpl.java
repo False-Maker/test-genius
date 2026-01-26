@@ -475,5 +475,14 @@ public class SpecificationCheckServiceImpl implements SpecificationCheckService 
         target.setCreatorName(source.getCreatorName());
         return target;
     }
+    
+    @Override
+    public List<TestSpecification> getSpecificationsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        log.info("根据ID列表查询规约，ID数量: {}", ids.size());
+        return specificationRepository.findByIdIn(ids);
+    }
 }
 

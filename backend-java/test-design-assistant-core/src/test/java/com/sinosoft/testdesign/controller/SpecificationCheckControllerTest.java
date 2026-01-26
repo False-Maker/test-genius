@@ -56,7 +56,7 @@ class SpecificationCheckControllerTest extends BaseControllerTest {
             .thenReturn(specs);
         
         // When & Then
-        mockMvc.perform(get("/api/v1/specification-check/match/{caseId}", caseId))
+        mockMvc.perform(get("/v1/specification-check/match/{caseId}", caseId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").isArray());
@@ -92,7 +92,7 @@ class SpecificationCheckControllerTest extends BaseControllerTest {
             .thenReturn(matchedSpecs);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/specification-check/check")
+        mockMvc.perform(post("/v1/specification-check/check")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

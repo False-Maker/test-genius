@@ -185,7 +185,7 @@ export const testExecutionApi = {
 
   // 获取任务的执行记录列表
   getExecutionRecordsByTaskId(taskId: number) {
-    return request.get<TestExecutionRecordResponse[]>(`/v1/test-execution/records/task/${taskId}`)
+    return request.get<TestExecutionRecordResponse[]>(`/v1/test-execution/tasks/${taskId}/records`)
   },
 
   // 更新执行记录状态
@@ -198,7 +198,7 @@ export const testExecutionApi = {
   // ========== 统计分析相关接口 ==========
 
   // 获取执行统计信息
-  getExecutionStatistics(params?: { requirementId?: number; caseId?: number; startTime?: string; endTime?: string }) {
+  getExecutionStatistics(params?: { requirementId?: number; caseId?: number; startDate?: string; endDate?: string }) {
     return request.get<TestExecutionStatistics>('/v1/test-execution/statistics', { params })
   }
 }

@@ -44,7 +44,7 @@ class FlowDocumentControllerTest extends BaseControllerTest {
             .thenReturn(response);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/flow-documents/scene-diagrams")
+        mockMvc.perform(post("/v1/flow-documents/scene-diagrams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ class FlowDocumentControllerTest extends BaseControllerTest {
             .thenReturn(response);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/flow-documents/path-diagrams")
+        mockMvc.perform(post("/v1/flow-documents/path-diagrams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -90,7 +90,7 @@ class FlowDocumentControllerTest extends BaseControllerTest {
             .thenReturn(fileUrl);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/flow-documents/scene-diagrams/export")
+        mockMvc.perform(post("/v1/flow-documents/scene-diagrams/export")
                 .param("mermaidCode", mermaidCode)
                 .param("format", format))
                 .andExpect(status().isOk())

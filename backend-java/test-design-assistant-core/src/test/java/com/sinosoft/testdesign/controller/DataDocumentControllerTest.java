@@ -49,7 +49,7 @@ class DataDocumentControllerTest extends BaseControllerTest {
             .thenReturn(response);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/data-documents/equivalence-tables")
+        mockMvc.perform(post("/v1/data-documents/equivalence-tables")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -79,7 +79,7 @@ class DataDocumentControllerTest extends BaseControllerTest {
             .thenReturn(response);
         
         // When & Then
-        mockMvc.perform(post("/api/v1/data-documents/orthogonal-tables")
+        mockMvc.perform(post("/v1/data-documents/orthogonal-tables")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

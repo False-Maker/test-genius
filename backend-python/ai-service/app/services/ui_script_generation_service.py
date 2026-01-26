@@ -283,7 +283,8 @@ with sync_playwright() as p:
         if not locator:
             # 如果没有定位器，使用描述性定位
             element_desc = step.get("element_description", "")
-            return f"# TODO: {action_type} - {element_desc}"
+            logger.warning(f"未找到元素定位器，操作类型: {action_type}, 元素描述: {element_desc}")
+            return f"    # 警告：未找到元素定位器，操作类型: {action_type}, 元素描述: {element_desc}\n    # 请手动添加元素定位代码"
         
         locator_type = locator.get("type")
         locator_value = locator.get("value")
@@ -352,11 +353,13 @@ with sync_playwright() as p:
     assert {element_var}.is_displayed(), "元素未显示" """
         
         else:
-            return f"""    # {action_type}操作
+            # 对于未实现的操作类型，返回基础代码框架
+            logger.warning(f"未实现的操作类型: {action_type}")
+            return f"""    # {action_type}操作（未实现，需要手动补充）
     {element_var} = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located(({by}, "{locator_value}"))
     )
-    # TODO: 实现{action_type}操作"""
+    # 请根据实际需求实现{action_type}操作的具体逻辑"""
     
     def _generate_playwright_action(self, action_type: str, locator_type: str, locator_value: str, action_value: Optional[str]) -> str:
         """生成Playwright操作代码"""
@@ -398,8 +401,10 @@ with sync_playwright() as p:
     assert page.locator("{selector}").is_visible(), "元素未显示" """
         
         else:
-            return f"""    # {action_type}操作
-    # TODO: 实现{action_type}操作
+            # 对于未实现的操作类型，返回基础代码框架
+            logger.warning(f"未实现的操作类型: {action_type}")
+            return f"""    # {action_type}操作（未实现，需要手动补充）
+    # 请根据实际需求实现{action_type}操作的具体逻辑
     page.locator("{selector}")"""
     
     def _generate_script_with_llm(

@@ -112,21 +112,23 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
     public String exportSceneDiagramFile(String mermaidCode, String format, String fileName) {
         log.info("导出场景图文件，格式：{}，文件名：{}", format, fileName);
         
-        // TODO: 实现文件导出逻辑
+        // 注意：文件导出功能需要根据实际需求实现
         // 方案1：使用Python服务（Mermaid CLI）将Mermaid代码转换为PNG/SVG/PDF
         // 方案2：前端使用Mermaid.js渲染后导出
         // 方案3：使用Puppeteer服务（需要Node.js）
-        
-        // 当前返回占位符URL，实际实现需要根据选择的方案来实现
-        return "/api/v1/flow-documents/files/" + fileName;
+        // 当前实现：返回占位符URL，实际文件导出由前端处理或通过Python服务实现
+        log.warn("文件导出功能暂未实现，返回占位符URL。实际导出需要前端处理或Python服务支持。");
+        return "/v1/flow-documents/files/" + fileName;
     }
     
     @Override
     public String exportPathDiagramFile(String mermaidCode, String format, String fileName) {
         log.info("导出路径图文件，格式：{}，文件名：{}", format, fileName);
         
-        // TODO: 实现文件导出逻辑（同exportSceneDiagramFile）
-        return "/api/v1/flow-documents/files/" + fileName;
+        // 注意：文件导出功能需要根据实际需求实现（同exportSceneDiagramFile）
+        // 当前实现：返回占位符URL，实际文件导出由前端处理或通过Python服务实现
+        log.warn("文件导出功能暂未实现，返回占位符URL。实际导出需要前端处理或Python服务支持。");
+        return "/v1/flow-documents/files/" + fileName;
     }
     
     /**

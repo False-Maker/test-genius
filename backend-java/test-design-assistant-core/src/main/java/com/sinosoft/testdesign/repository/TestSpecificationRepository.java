@@ -43,6 +43,11 @@ public interface TestSpecificationRepository extends JpaRepository<TestSpecifica
     List<TestSpecification> findBySpecCodeStartingWithOrderByIdDesc(String prefix);
     
     /**
+     * 根据ID列表查询规约
+     */
+    List<TestSpecification> findByIdIn(List<Long> ids);
+    
+    /**
      * 根据适用模块查询
      */
     @Query("SELECT ts FROM TestSpecification ts WHERE ts.applicableModules LIKE :pattern AND ts.isActive = '1'")

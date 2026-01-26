@@ -62,7 +62,12 @@ public class LoggingMDCFilter implements Filter {
             // 设置userId：从请求头获取，如果没有则设置为"anonymous"
             String userId = httpRequest.getHeader(USER_ID_HEADER);
             if (userId == null || userId.isEmpty()) {
-                // TODO: 如果后续有认证系统，可以从SecurityContext或JWT中获取userId
+                // 注意：如果后续有认证系统（如Spring Security），可以从SecurityContext或JWT中获取userId
+                // 示例代码（需要引入Spring Security）：
+                // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                // if (authentication != null && authentication.isAuthenticated()) {
+                //     userId = authentication.getName();
+                // }
                 userId = "anonymous";
             }
             MDC.put(MDC_USER_ID, userId);

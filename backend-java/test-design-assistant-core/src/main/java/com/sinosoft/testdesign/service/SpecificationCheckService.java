@@ -42,6 +42,14 @@ public interface SpecificationCheckService {
     SpecificationInjectionResult injectSpecification(TestCase testCase, List<TestSpecification> specifications);
     
     /**
+     * 根据ID列表查询规约
+     * 
+     * @param ids 规约ID列表
+     * @return 规约列表
+     */
+    List<TestSpecification> getSpecificationsByIds(List<Long> ids);
+    
+    /**
      * 规约符合性检查结果
      */
     class SpecificationComplianceResult {

@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Tag(name = "UI脚本生成", description = "UI自动化脚本生成相关接口")
 @RestController
-@RequestMapping("/api/v1/ui-script")
+@RequestMapping("/v1/ui-script")
 @RequiredArgsConstructor
 public class UIScriptGenerationController {
     

@@ -3,7 +3,9 @@ package com.sinosoft.testdesign.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.BusinessException;
+import com.sinosoft.testdesign.entity.TestReport;
 import com.sinosoft.testdesign.entity.TestReportTemplate;
+import com.sinosoft.testdesign.repository.TestReportRepository;
 import com.sinosoft.testdesign.repository.TestReportTemplateRepository;
 import com.sinosoft.testdesign.service.TestReportTemplateService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import java.util.Optional;
 public class TestReportTemplateServiceImpl implements TestReportTemplateService {
     
     private final TestReportTemplateRepository templateRepository;
+    private final TestReportRepository testReportRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     private static final String TEMPLATE_CODE_PREFIX = "TMP";
@@ -158,8 +161,11 @@ public class TestReportTemplateServiceImpl implements TestReportTemplateService 
         TestReportTemplate template = templateRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("模板不存在"));
         
-        // 检查是否被使用（可选，根据业务需求）
-        // TODO: 检查是否有报告使用此模板
+        // 检查是否被使用
+        List<TestReport> reports = testReportRepository.findByTemplateId(id);
+        if (!reports.isEmpty()) {
+            throw new BusinessException("该模板正在被 " + reports.size() + " 个报告使用，无法删除");
+        }
         
         templateRepository.delete(template);
         log.info("删除模板成功，编码: {}", template.getTemplateCode());

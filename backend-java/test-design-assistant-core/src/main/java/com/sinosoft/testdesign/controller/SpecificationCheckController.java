@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/specification-check")
+@RequestMapping("/v1/specification-check")
 @RequiredArgsConstructor
 @Tag(name = "规约检查", description = "规约检查和规约应用相关API")
 public class SpecificationCheckController {
@@ -60,8 +60,7 @@ public class SpecificationCheckController {
         // 如果指定了规约ID列表，则查询这些规约；否则自动匹配
         List<TestSpecification> specifications = null;
         if (request.getSpecificationIds() != null && !request.getSpecificationIds().isEmpty()) {
-            // TODO: 需要添加根据ID列表查询规约的方法
-            specifications = new ArrayList<>();
+            specifications = specificationCheckService.getSpecificationsByIds(request.getSpecificationIds());
         }
         
         SpecificationCheckService.SpecificationComplianceResult result = 
@@ -87,8 +86,7 @@ public class SpecificationCheckController {
         // 如果指定了规约ID列表，则查询这些规约；否则自动匹配
         List<TestSpecification> specifications = null;
         if (request.getSpecificationIds() != null && !request.getSpecificationIds().isEmpty()) {
-            // TODO: 需要添加根据ID列表查询规约的方法
-            specifications = new ArrayList<>();
+            specifications = specificationCheckService.getSpecificationsByIds(request.getSpecificationIds());
         }
         
         SpecificationCheckService.SpecificationInjectionResult result = 
@@ -111,8 +109,7 @@ public class SpecificationCheckController {
         // 如果指定了规约ID列表，则查询这些规约；否则自动匹配
         List<TestSpecification> specifications = null;
         if (request.getSpecificationIds() != null && !request.getSpecificationIds().isEmpty()) {
-            // TODO: 需要添加根据ID列表查询规约的方法
-            specifications = new ArrayList<>();
+            specifications = specificationCheckService.getSpecificationsByIds(request.getSpecificationIds());
         }
         
         // 检查符合性

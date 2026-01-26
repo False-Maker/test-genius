@@ -16,6 +16,12 @@ export interface CaseGenerationResult {
   message?: string
 }
 
+export interface BatchCaseGenerationResult {
+  taskIds: number[]
+  totalTasks: number
+  message?: string
+}
+
 export interface GenerationTask {
   id: number
   requirementId: number
@@ -36,7 +42,14 @@ export const caseGenerationApi = {
 
   // 批量生成用例
   batchGenerateTestCases(data: CaseGenerationRequest[]) {
-    return request.post<CaseGenerationResult>('/v1/case-generation/batch', data)
+    return request.post<BatchCaseGenerationResult>('/v1/case-generation/batch-generate', {
+      requirementIds: data.map(item => item.requirementId),
+      layerCode: data[0]?.layerCode,
+      methodCode: data[0]?.methodCode,
+      templateId: data[0]?.templateId,
+      modelCode: data[0]?.modelCode,
+      creatorId: data[0]?.creatorId
+    })
   },
 
   // 查询生成任务
