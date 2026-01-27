@@ -1851,6 +1851,14 @@ import { promptTemplateApi, type PromptTemplate } from '@/api/promptTemplate'
 
 import type { PageResult } from '@/api/types'
 
+import PromptEditor from '@/components/PromptEditor.vue'
+
+import ModelComparison from '@/components/ModelComparison.vue'
+
+import BatchTest from '@/components/BatchTest.vue'
+
+import VersionHistory from '@/components/VersionHistory.vue'
+
 
 
 
@@ -1915,11 +1923,22 @@ const formData = reactive<Partial<PromptTemplate>>({
 
 })
 
+// 编辑器变量（从模板内容中提取）
+const templateVariables = ref<Record<string, string>>({})
+
 const dialogVisible = ref(false)
 
 const viewDialogVisible = ref(false)
 
 const testDialogVisible = ref(false)
+
+const compareDialogVisible = ref(false)
+
+const batchTestDialogVisible = ref(false)
+
+const versionHistoryDialogVisible = ref(false)
+
+const currentVersionTemplate = ref<PromptTemplate | null>(null)
 
 const isEdit = ref(false)
 
@@ -1932,6 +1951,8 @@ const submitLoading = ref(false)
 const generateLoading = ref(false)
 
 const currentTestTemplate = ref<PromptTemplate | null>(null)
+
+const currentCompareTemplate = ref<PromptTemplate | null>(null)
 
 const testForm = reactive({
 

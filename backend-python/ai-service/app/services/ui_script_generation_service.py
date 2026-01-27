@@ -352,6 +352,44 @@ with sync_playwright() as p:
     )
     assert {element_var}.is_displayed(), "元素未显示" """
         
+        elif action_type == "hover":
+            return f"""    # 鼠标悬停
+    from selenium.webdriver.common.action_chains import ActionChains
+    {element_var} = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(({by}, "{locator_value}"))
+    )
+    ActionChains(driver).move_to_element({element_var}).perform()"""
+        
+        elif action_type == "double_click":
+            return f"""    # 双击
+    from selenium.webdriver.common.action_chains import ActionChains
+    {element_var} = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(({by}, "{locator_value}"))
+    )
+    ActionChains(driver).double_click({element_var}).perform()"""
+        
+        elif action_type == "right_click":
+            return f"""    # 右键点击
+    from selenium.webdriver.common.action_chains import ActionChains
+    {element_var} = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(({by}, "{locator_value}"))
+    )
+    ActionChains(driver).context_click({element_var}).perform()"""
+        
+        elif action_type == "scroll":
+            return f"""    # 滚动到元素
+    {element_var} = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(({by}, "{locator_value}"))
+    )
+    driver.execute_script("arguments[0].scrollIntoView(true);", {element_var})"""
+        
+        elif action_type == "switch_frame":
+            return f"""    # 切换iframe
+    {element_var} = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(({by}, "{locator_value}"))
+    )
+    driver.switch_to.frame({element_var})"""
+        
         else:
             # 对于未实现的操作类型，返回基础代码框架
             logger.warning(f"未实现的操作类型: {action_type}")
@@ -399,6 +437,27 @@ with sync_playwright() as p:
         elif action_type == "verify":
             return f"""    # 验证元素存在
     assert page.locator("{selector}").is_visible(), "元素未显示" """
+        
+        elif action_type == "hover":
+            return f"""    # 鼠标悬停
+    page.hover("{selector}")"""
+        
+        elif action_type == "double_click":
+            return f"""    # 双击
+    page.locator("{selector}").dblclick()"""
+        
+        elif action_type == "right_click":
+            return f"""    # 右键点击
+    page.locator("{selector}").click(button="right")"""
+        
+        elif action_type == "scroll":
+            return f"""    # 滚动到元素
+    page.locator("{selector}").scroll_into_view_if_needed()"""
+        
+        elif action_type == "switch_frame":
+            return f"""    # 切换iframe
+    frame = page.frame_locator("{selector}")
+    # 注意：后续操作需要在frame上下文中进行"""
         
         else:
             # 对于未实现的操作类型，返回基础代码框架

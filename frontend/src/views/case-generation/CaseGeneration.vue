@@ -194,6 +194,60 @@
 
 
 
+        <el-form-item label="工作流">
+
+          <el-select
+
+            v-model="form.workflowId"
+
+            placeholder="请选择工作流（可选，使用工作流将替代默认流程）"
+
+            filterable
+
+            clearable
+
+            style="width: 100%"
+
+            :loading="workflowLoading"
+
+          >
+
+            <el-option
+
+              v-for="workflow in workflowList"
+
+              :key="workflow.id"
+
+              :label="`${workflow.workflowName} (${workflow.workflowCode})`"
+
+              :value="workflow.id"
+
+            />
+
+          </el-select>
+
+          <div style="margin-top: 5px; font-size: 12px; color: #909399">
+
+            <el-link type="primary" :underline="false" @click="handleOpenWorkflowEditor">
+
+              创建工作流
+
+            </el-link>
+
+            <span style="margin: 0 8px">|</span>
+
+            <el-link type="primary" :underline="false" @click="loadWorkflows">
+
+              刷新列表
+
+            </el-link>
+
+          </div>
+
+        </el-form-item>
+
+
+
         <el-form-item>
 
           <el-button type="primary" @click="handleGenerate" :loading="generateLoading">
@@ -320,6 +374,8 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
 import { caseGenerationApi, type CaseGenerationRequest, type GenerationTask } from '@/api/caseGeneration'
 
+import { workflowApi, type WorkflowDefinition } from '@/api/workflow'
+
 import { useCacheStore } from '@/store/cache'
 
 
@@ -366,7 +422,7 @@ const modelLoading = computed(() => cacheStore.loading.modelList)
 
 
 
-const form = reactive<CaseGenerationRequest & { templateId?: number }>({
+const form = reactive<CaseGenerationRequest & { templateId?: number; workflowId?: number }>({
 
   requirementId: undefined,
 
@@ -376,9 +432,15 @@ const form = reactive<CaseGenerationRequest & { templateId?: number }>({
 
   templateId: undefined,
 
-  modelCode: undefined
+  modelCode: undefined,
+
+  workflowId: undefined
 
 })
+
+// 工作流相关
+const workflowList = ref<WorkflowDefinition[]>([])
+const workflowLoading = ref(false)
 
 
 
@@ -468,6 +530,10 @@ const loadAllData = async () => {
 
     ])
 
+    // 加载工作流列表
+
+    await loadWorkflows()
+
   } catch (error) {
 
     console.error('加载数据失败:', error)
@@ -478,7 +544,161 @@ const loadAllData = async () => {
 
 }
 
+// 加载工作流列表
 
+const loadWorkflows = async () => {
+
+  workflowLoading.value = true
+
+  try {
+
+    const response = await workflowApi.getWorkflowsByType('CASE_GENERATION')
+
+    if (response.data) {
+
+      workflowList.value = response.data.filter(w => w.isActive)
+
+    }
+
+  } catch (error) {
+
+    console.error('加载工作流列表失败:', error)
+
+    ElMessage.error('加载工作流列表失败')
+
+  } finally {
+
+    workflowLoading.value = false
+
+  }
+
+}
+
+// 打开工作流编辑器
+
+const handleOpenWorkflowEditor = () => {
+
+  router.push('/workflow')
+
+}
+
+// 使用工作流生成用例
+
+const handleGenerateWithWorkflow = async () => {
+
+  try {
+
+    // 获取工作流配置
+
+    const workflowResponse = await workflowApi.getWorkflow(form.workflowId!)
+
+    if (!workflowResponse.data) {
+
+      ElMessage.error('工作流不存在')
+
+      generateLoading.value = false
+
+      return
+
+    }
+
+    const workflow = workflowResponse.data
+
+    // 准备输入数据
+
+    const inputData: Record<string, any> = {
+
+      requirement_id: form.requirementId,
+
+      requirement_text: requirementList.value.find(r => r.id === form.requirementId)?.requirementText || '',
+
+      layer_code: form.layerCode || undefined,
+
+      method_code: form.methodCode || undefined,
+
+      template_id: form.templateId,
+
+      model_code: form.modelCode
+
+    }
+
+    // 执行工作流
+
+    const result = await workflowApi.executeWorkflow(
+
+      workflow.workflowConfig,
+
+      inputData,
+
+      workflow.id,
+
+      workflow.workflowCode,
+
+      workflow.version
+
+    )
+
+    if (result.data.status === 'success') {
+
+      generationResult.value = {
+
+        id: parseInt(result.data.execution_id || '0'),
+
+        requirementId: form.requirementId!,
+
+        status: 'SUCCESS',
+
+        message: '用例生成成功（通过工作流）',
+
+        result: result.data.output
+
+      }
+
+      ElMessage.success('用例生成成功（通过工作流）')
+
+    } else {
+
+      generationResult.value = {
+
+        id: parseInt(result.data.execution_id || '0'),
+
+        requirementId: form.requirementId!,
+
+        status: 'FAILED',
+
+        message: result.data.error || '用例生成失败'
+
+      }
+
+      ElMessage.error('用例生成失败: ' + (result.data.error || '未知错误'))
+
+    }
+
+  } catch (error: any) {
+
+    console.error('使用工作流生成用例失败:', error)
+
+    ElMessage.error('使用工作流生成用例失败: ' + (error.message || '未知错误'))
+
+    generationResult.value = {
+
+      id: 0,
+
+      requirementId: form.requirementId!,
+
+      status: 'FAILED',
+
+      message: error.message || '使用工作流生成用例失败'
+
+    }
+
+  } finally {
+
+    generateLoading.value = false
+
+  }
+
+}
 
 // 轮询任务状态
 
@@ -561,6 +781,18 @@ const handleGenerate = async () => {
       generateLoading.value = true
 
       try {
+
+        // 如果选择了工作流，使用工作流执行
+
+        if (form.workflowId) {
+
+          await handleGenerateWithWorkflow()
+
+          return
+
+        }
+
+        // 否则使用默认流程
 
         const request: CaseGenerationRequest = {
 

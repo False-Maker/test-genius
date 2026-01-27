@@ -39,17 +39,17 @@ export interface PathDiagramResponse {
 export const flowDocumentApi = {
   // 生成场景图
   generateSceneDiagram(data: SceneDiagramRequest) {
-    return request.post<SceneDiagramResponse>('/api/v1/flow-documents/scene-diagrams', data)
+    return request.post<SceneDiagramResponse>('/v1/flow-documents/scene-diagrams', data)
   },
 
   // 生成路径图
   generatePathDiagram(data: PathDiagramRequest) {
-    return request.post<PathDiagramResponse>('/api/v1/flow-documents/path-diagrams', data)
+    return request.post<PathDiagramResponse>('/v1/flow-documents/path-diagrams', data)
   },
 
   // 导出场景图文件
   exportSceneDiagramFile(mermaidCode: string, format: 'PNG' | 'SVG' | 'PDF', fileName?: string) {
-    return request.post<string>('/api/v1/flow-documents/scene-diagrams/export', null, {
+    return request.post<string>('/v1/flow-documents/scene-diagrams/export', null, {
       params: {
         mermaidCode,
         format,
@@ -60,7 +60,7 @@ export const flowDocumentApi = {
 
   // 导出路径图文件
   exportPathDiagramFile(mermaidCode: string, format: 'PNG' | 'SVG' | 'PDF', fileName?: string) {
-    return request.post<string>('/api/v1/flow-documents/path-diagrams/export', null, {
+    return request.post<string>('/v1/flow-documents/path-diagrams/export', null, {
       params: {
         mermaidCode,
         format,

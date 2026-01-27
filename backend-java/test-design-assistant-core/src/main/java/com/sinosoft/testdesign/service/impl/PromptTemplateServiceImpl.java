@@ -4,7 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.entity.PromptTemplate;
+import com.sinosoft.testdesign.entity.PromptTemplateAbTest;
+import com.sinosoft.testdesign.entity.PromptTemplateVersion;
 import com.sinosoft.testdesign.repository.PromptTemplateRepository;
+import com.sinosoft.testdesign.repository.PromptTemplateAbTestRepository;
+import com.sinosoft.testdesign.repository.PromptTemplateVersionRepository;
 import com.sinosoft.testdesign.service.PromptTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Optional;
 
 /**
  * 提示词模板管理服务实现
@@ -32,6 +37,8 @@ import java.util.regex.Pattern;
 public class PromptTemplateServiceImpl implements PromptTemplateService {
     
     private final PromptTemplateRepository templateRepository;
+    private final PromptTemplateAbTestRepository abTestRepository;
+    private final PromptTemplateVersionRepository versionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     private static final String TEMPLATE_CODE_PREFIX = "TMP";
@@ -97,6 +104,10 @@ public class PromptTemplateServiceImpl implements PromptTemplateService {
             validateTemplateVariables(template.getTemplateVariables());
         }
         
+        // 检查内容是否有变化，如果有变化则创建新版本
+        boolean contentChanged = !existing.getTemplateContent().equals(template.getTemplateContent());
+        boolean variablesChanged = !java.util.Objects.equals(existing.getTemplateVariables(), template.getTemplateVariables());
+        
         // 更新字段
         if (StringUtils.hasText(template.getTemplateName())) {
             existing.setTemplateName(template.getTemplateName());
@@ -132,7 +143,7 @@ public class PromptTemplateServiceImpl implements PromptTemplateService {
         // 版本号自增
         existing.setVersion(existing.getVersion() + 1);
         
-        log.info("更新模板成功，编码: {}", existing.getTemplateCode());
+        log.info("更新模板成功，编码: {}, 版本: {}", existing.getTemplateCode(), existing.getVersion());
         return templateRepository.save(existing);
     }
     
@@ -187,7 +198,31 @@ public class PromptTemplateServiceImpl implements PromptTemplateService {
             throw new BusinessException("模板未启用，无法生成提示词");
         }
         
+        // 检查是否有正在运行的A/B测试
+        Optional<PromptTemplateAbTest> runningTest = abTestRepository.findRunningTestByTemplateId(templateId);
+        if (runningTest.isPresent()) {
+            PromptTemplateAbTest abTest = runningTest.get();
+            // 根据流量分配选择版本（这里简化处理，实际应该在调用时传入requestId）
+            // 注意：实际实现中，应该使用requestId来确保同一请求使用相同版本
+            String selectedVersion = selectVersionForAbTest(abTest);
+            PromptTemplateVersion version = "A".equals(selectedVersion) 
+                    ? versionRepository.findById(abTest.getVersionAId())
+                            .orElseThrow(() -> new BusinessException("版本A不存在"))
+                    : versionRepository.findById(abTest.getVersionBId())
+                            .orElseThrow(() -> new BusinessException("版本B不存在"));
+            
+            return generatePrompt(version.getTemplateContent(), variables);
+        }
+        
         return generatePrompt(template.getTemplateContent(), variables);
+    }
+    
+    /**
+     * 为A/B测试选择版本（简化版，实际应该基于requestId的哈希值）
+     */
+    private String selectVersionForAbTest(PromptTemplateAbTest abTest) {
+        int randomValue = new java.util.Random().nextInt(100);
+        return randomValue < abTest.getTrafficSplitA() ? "A" : "B";
     }
     
     @Override

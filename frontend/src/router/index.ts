@@ -111,6 +111,16 @@ const router = createRouter({
       path: '/data-document',
       name: 'DataDocumentGeneration',
       component: () => import('../views/data-document/DataDocumentGeneration.vue')
+    },
+    {
+      path: '/workflow',
+      name: 'WorkflowEditor',
+      component: () => import('../views/workflow/WorkflowEditor.vue')
+    },
+    {
+      path: '/monitoring',
+      name: 'MonitoringDashboard',
+      component: () => import('../views/monitoring/MonitoringDashboard.vue')
     }
   ]
 })

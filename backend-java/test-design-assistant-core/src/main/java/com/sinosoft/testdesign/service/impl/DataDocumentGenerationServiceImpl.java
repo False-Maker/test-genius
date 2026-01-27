@@ -8,11 +8,13 @@ import com.sinosoft.testdesign.entity.TestCase;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.repository.TestCaseRepository;
 import com.sinosoft.testdesign.repository.RequirementRepository;
+import com.sinosoft.testdesign.service.AIServiceClient;
 import com.sinosoft.testdesign.service.DataDocumentGenerationService;
 import com.sinosoft.testdesign.service.FileUploadService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -45,6 +47,10 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
     private final TestCaseRepository testCaseRepository;
     private final FileUploadService fileUploadService;
     private final ObjectMapper objectMapper;
+    private final AIServiceClient aiServiceClient;
+    
+    @Value("${app.ai-service.url:http://localhost:8000}")
+    private String aiServiceUrl;
     
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     
@@ -449,40 +455,68 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
             testCases.addAll(testCaseRepository.findAllById(request.getCaseIds()));
         }
         
-        // 从用例中提取参数（简单实现：基于测试步骤中的关键词）
+        // 从用例中提取参数（使用AI服务智能提取）
         if (request.getAutoIdentifyParameters() != null && request.getAutoIdentifyParameters()) {
-            // 注意：完整的AI/NLP参数提取功能需要调用Python AI服务实现
-            // 当前实现：基于关键词的简单提取（作为占位实现）
-            // 实际生产环境应调用AI服务进行智能提取
-            log.warn("自动参数识别功能使用简单实现，建议后续集成AI服务进行智能提取");
-            
-            // 简单实现：从测试步骤中提取可能的参数
-            String testStep = testCase.getTestStep();
-            if (testStep != null && testStep.length() > 0) {
-                // 提取可能的输入参数（简单关键词匹配）
-                String[] keywords = {"输入", "输入值", "参数", "值", "金额", "数量", "日期"};
-                for (String keyword : keywords) {
-                    if (testStep.contains(keyword)) {
-                        equivalenceClasses.put(keyword, Map.of(
-                                "有效等价类", Arrays.asList("正常值1", "正常值2", "正常值3"),
-                                "无效等价类", Arrays.asList("空值", "非法值", "超出范围值")
-                        ));
-                        break; // 只提取第一个匹配的参数
-                    }
+            try {
+                // 构建Python服务请求
+                List<Map<String, Object>> testCasesData = new ArrayList<>();
+                for (TestCase testCase : testCases) {
+                    Map<String, Object> caseData = new HashMap<>();
+                    caseData.put("case_name", testCase.getCaseName());
+                    caseData.put("test_step", testCase.getTestStep());
+                    caseData.put("expected_result", testCase.getExpectedResult());
+                    caseData.put("pre_condition", testCase.getPreCondition());
+                    testCasesData.add(caseData);
                 }
+                
+                Map<String, Object> pythonRequest = new HashMap<>();
+                pythonRequest.put("test_cases", testCasesData);
+                pythonRequest.put("use_llm", true);
+                
+                // 调用Python服务提取参数
+                String url = aiServiceUrl + "/api/v1/parameter-extraction/extract";
+                log.info("调用Python服务提取参数，用例数量: {}", testCases.size());
+                
+                @SuppressWarnings("unchecked")
+                Map<String, Object> response = aiServiceClient.post(url, pythonRequest);
+                
+                if (response != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> extractedEquivalenceClasses = 
+                            (Map<String, Object>) response.get("equivalence_classes");
+                    
+                    if (extractedEquivalenceClasses != null) {
+                        // 转换格式
+                        for (Map.Entry<String, Object> entry : extractedEquivalenceClasses.entrySet()) {
+                            String paramName = entry.getKey();
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> classes = (Map<String, Object>) entry.getValue();
+                            
+                            @SuppressWarnings("unchecked")
+                            List<String> validClasses = (List<String>) classes.get("有效等价类");
+                            @SuppressWarnings("unchecked")
+                            List<String> invalidClasses = (List<String>) classes.get("无效等价类");
+                            
+                            equivalenceClasses.put(paramName, Map.of(
+                                    "有效等价类", validClasses != null ? validClasses : new ArrayList<>(),
+                                    "无效等价类", invalidClasses != null ? invalidClasses : new ArrayList<>()
+                            ));
+                        }
+                        
+                        log.info("AI参数提取成功，提取到 {} 个参数", equivalenceClasses.size());
+                    } else {
+                        log.warn("Python服务返回的等价类为空，使用降级方案");
+                        extractParametersWithRules(testCases, equivalenceClasses);
+                    }
+                } else {
+                    log.warn("Python服务返回空响应，使用降级方案");
+                    extractParametersWithRules(testCases, equivalenceClasses);
+                }
+            } catch (Exception e) {
+                log.error("调用Python服务提取参数失败: {}", e.getMessage(), e);
+                log.warn("使用降级方案：基于规则的参数提取");
+                extractParametersWithRules(testCases, equivalenceClasses);
             }
-            
-            // 如果没有提取到参数，使用默认示例数据
-            if (equivalenceClasses.isEmpty()) {
-                equivalenceClasses.put("输入参数", Map.of(
-                        "有效等价类", Arrays.asList("值1", "值2", "值3"),
-                        "无效等价类", Arrays.asList("空值", "非法值")
-                ));
-            }
-            equivalenceClasses.put("输入参数2", Map.of(
-                    "有效等价类", Arrays.asList("值A", "值B"),
-                    "无效等价类", Arrays.asList("空值")
-            ));
         } else if (request.getParameterNames() != null && !request.getParameterNames().isEmpty()) {
             // 为指定的参数创建空的等价类
             for (String paramName : request.getParameterNames()) {
@@ -494,6 +528,40 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
         }
         
         return equivalenceClasses;
+    }
+    
+    /**
+     * 使用规则提取参数（降级方案）
+     */
+    private void extractParametersWithRules(
+            List<TestCase> testCases,
+            Map<String, Map<String, List<String>>> equivalenceClasses) {
+        // 简单实现：从测试步骤中提取可能的参数
+        String[] keywords = {"输入", "输入值", "参数", "值", "金额", "数量", "日期"};
+        
+        for (TestCase testCase : testCases) {
+            String testStep = testCase.getTestStep();
+            if (testStep != null && testStep.length() > 0) {
+                // 提取可能的输入参数（简单关键词匹配）
+                for (String keyword : keywords) {
+                    if (testStep.contains(keyword) && !equivalenceClasses.containsKey(keyword)) {
+                        equivalenceClasses.put(keyword, Map.of(
+                                "有效等价类", Arrays.asList("正常值1", "正常值2", "正常值3"),
+                                "无效等价类", Arrays.asList("空值", "非法值", "超出范围值")
+                        ));
+                        break; // 每个用例只提取第一个匹配的参数
+                    }
+                }
+            }
+        }
+        
+        // 如果没有提取到参数，使用默认示例数据
+        if (equivalenceClasses.isEmpty()) {
+            equivalenceClasses.put("输入参数", Map.of(
+                    "有效等价类", Arrays.asList("值1", "值2", "值3"),
+                    "无效等价类", Arrays.asList("空值", "非法值")
+            ));
+        }
     }
     
     /**

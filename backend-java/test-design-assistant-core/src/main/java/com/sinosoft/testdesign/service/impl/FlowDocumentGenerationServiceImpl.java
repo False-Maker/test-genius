@@ -8,9 +8,11 @@ import com.sinosoft.testdesign.entity.TestCase;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.repository.TestCaseRepository;
 import com.sinosoft.testdesign.repository.RequirementRepository;
+import com.sinosoft.testdesign.service.AIServiceClient;
 import com.sinosoft.testdesign.service.FlowDocumentGenerationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -31,6 +33,10 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
     
     private final RequirementRepository requirementRepository;
     private final TestCaseRepository testCaseRepository;
+    private final AIServiceClient aiServiceClient;
+    
+    @Value("${app.ai-service.url:http://localhost:8000}")
+    private String aiServiceUrl;
     
     @Override
     @Transactional(readOnly = true)
@@ -112,23 +118,122 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
     public String exportSceneDiagramFile(String mermaidCode, String format, String fileName) {
         log.info("导出场景图文件，格式：{}，文件名：{}", format, fileName);
         
-        // 注意：文件导出功能需要根据实际需求实现
-        // 方案1：使用Python服务（Mermaid CLI）将Mermaid代码转换为PNG/SVG/PDF
-        // 方案2：前端使用Mermaid.js渲染后导出
-        // 方案3：使用Puppeteer服务（需要Node.js）
-        // 当前实现：返回占位符URL，实际文件导出由前端处理或通过Python服务实现
-        log.warn("文件导出功能暂未实现，返回占位符URL。实际导出需要前端处理或Python服务支持。");
-        return "/v1/flow-documents/files/" + fileName;
+        try {
+            // 构建Python服务请求
+            Map<String, Object> request = new HashMap<>();
+            request.put("mermaid_code", mermaidCode);
+            request.put("format", format.toLowerCase());
+            if (fileName != null && !fileName.isEmpty()) {
+                request.put("filename", fileName);
+            }
+            request.put("width", 1920);
+            request.put("height", 1080);
+            
+            // 调用Python服务导出文件
+            String url = aiServiceUrl + "/api/v1/flow-documents/export";
+            log.info("调用Python服务导出场景图，URL: {}", url);
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = aiServiceClient.post(url, request);
+            
+            if (response == null) {
+                log.warn("Python服务返回空响应，返回占位符URL");
+                return "/v1/flow-documents/files/" + fileName;
+            }
+            
+            String status = (String) response.get("status");
+            if (!"success".equals(status)) {
+                Object messageObj = response.get("message");
+                String errorMessage = messageObj != null ? messageObj.toString() : "未知错误";
+                log.warn("Python服务导出失败: {}，返回占位符URL", errorMessage);
+                return "/v1/flow-documents/files/" + fileName;
+            }
+            
+            // 获取文件URL
+            Object urlObj = response.get("url");
+            if (urlObj != null) {
+                String fileUrl = urlObj.toString();
+                log.info("场景图导出成功，文件URL: {}", fileUrl);
+                return fileUrl;
+            }
+            
+            // 如果有在线URL，返回在线URL
+            Object onlineUrlObj = response.get("online_url");
+            if (onlineUrlObj != null) {
+                String onlineUrl = onlineUrlObj.toString();
+                log.info("场景图导出成功，在线URL: {}", onlineUrl);
+                return onlineUrl;
+            }
+            
+            log.warn("Python服务响应中未找到文件URL，返回占位符URL");
+            return "/v1/flow-documents/files/" + fileName;
+            
+        } catch (Exception e) {
+            log.error("调用Python服务导出场景图失败: {}", e.getMessage(), e);
+            // 降级处理：返回占位符URL
+            return "/v1/flow-documents/files/" + fileName;
+        }
     }
     
     @Override
     public String exportPathDiagramFile(String mermaidCode, String format, String fileName) {
         log.info("导出路径图文件，格式：{}，文件名：{}", format, fileName);
         
-        // 注意：文件导出功能需要根据实际需求实现（同exportSceneDiagramFile）
-        // 当前实现：返回占位符URL，实际文件导出由前端处理或通过Python服务实现
-        log.warn("文件导出功能暂未实现，返回占位符URL。实际导出需要前端处理或Python服务支持。");
-        return "/v1/flow-documents/files/" + fileName;
+        try {
+            // 构建Python服务请求
+            Map<String, Object> request = new HashMap<>();
+            request.put("mermaid_code", mermaidCode);
+            request.put("format", format.toLowerCase());
+            if (fileName != null && !fileName.isEmpty()) {
+                request.put("filename", fileName);
+            }
+            request.put("width", 1920);
+            request.put("height", 1080);
+            
+            // 调用Python服务导出文件
+            String url = aiServiceUrl + "/api/v1/flow-documents/export";
+            log.info("调用Python服务导出路径图，URL: {}", url);
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = aiServiceClient.post(url, request);
+            
+            if (response == null) {
+                log.warn("Python服务返回空响应，返回占位符URL");
+                return "/v1/flow-documents/files/" + fileName;
+            }
+            
+            String status = (String) response.get("status");
+            if (!"success".equals(status)) {
+                Object messageObj = response.get("message");
+                String errorMessage = messageObj != null ? messageObj.toString() : "未知错误";
+                log.warn("Python服务导出失败: {}，返回占位符URL", errorMessage);
+                return "/v1/flow-documents/files/" + fileName;
+            }
+            
+            // 获取文件URL
+            Object urlObj = response.get("url");
+            if (urlObj != null) {
+                String fileUrl = urlObj.toString();
+                log.info("路径图导出成功，文件URL: {}", fileUrl);
+                return fileUrl;
+            }
+            
+            // 如果有在线URL，返回在线URL
+            Object onlineUrlObj = response.get("online_url");
+            if (onlineUrlObj != null) {
+                String onlineUrl = onlineUrlObj.toString();
+                log.info("路径图导出成功，在线URL: {}", onlineUrl);
+                return onlineUrl;
+            }
+            
+            log.warn("Python服务响应中未找到文件URL，返回占位符URL");
+            return "/v1/flow-documents/files/" + fileName;
+            
+        } catch (Exception e) {
+            log.error("调用Python服务导出路径图失败: {}", e.getMessage(), e);
+            // 降级处理：返回占位符URL
+            return "/v1/flow-documents/files/" + fileName;
+        }
     }
     
     /**

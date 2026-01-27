@@ -634,10 +634,16 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 
 
+import { useRouter } from 'vue-router'
+
+
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
 
 import { uiScriptGenerationApi, type UIScriptGenerationRequest, type UIScriptGenerationResult } from '@/api/uiScriptGeneration'
+
+
+import { workflowApi, type WorkflowDefinition } from '@/api/workflow'
 
 
 import { useCacheStore } from '@/store/cache'
@@ -673,7 +679,7 @@ const requirementLoading = computed(() => cacheStore.loading.requirementList)
 
 
 
-const form = reactive<UIScriptGenerationRequest>({
+const form = reactive<UIScriptGenerationRequest & { workflowId?: number }>({
 
 
   naturalLanguageDesc: '',
@@ -694,10 +700,18 @@ const form = reactive<UIScriptGenerationRequest>({
   useLlm: true,
 
 
-  requirementId: undefined
+  requirementId: undefined,
+
+
+  workflowId: undefined
 
 
 })
+
+// 工作流相关
+const workflowList = ref<WorkflowDefinition[]>([])
+const workflowLoading = ref(false)
+const router = useRouter()
 
 
 
@@ -859,6 +873,88 @@ const loadRequirementList = async () => {
   }
 
 
+}
+
+// 加载工作流列表
+const loadWorkflows = async () => {
+  workflowLoading.value = true
+  try {
+    const response = await workflowApi.getWorkflowsByType('UI_SCRIPT_GENERATION')
+    if (response.data) {
+      workflowList.value = response.data.filter(w => w.isActive)
+    }
+  } catch (error) {
+    console.error('加载工作流列表失败:', error)
+    ElMessage.error('加载工作流列表失败')
+  } finally {
+    workflowLoading.value = false
+  }
+}
+
+// 打开工作流编辑器
+const handleOpenWorkflowEditor = () => {
+  router.push('/workflow')
+}
+
+// 使用工作流生成脚本
+const handleGenerateWithWorkflow = async () => {
+  try {
+    const workflowResponse = await workflowApi.getWorkflow(form.workflowId!)
+    if (!workflowResponse.data) {
+      ElMessage.error('工作流不存在')
+      generateLoading.value = false
+      return
+    }
+    const workflow = workflowResponse.data
+    const inputData: Record<string, any> = {
+      natural_language_desc: form.naturalLanguageDesc,
+      page_code_url: form.pageCodeUrl || undefined,
+      page_url: form.pageUrl || undefined,
+      script_type: form.scriptType,
+      script_language: form.scriptLanguage,
+      use_llm: form.useLlm,
+      requirement_id: form.requirementId
+    }
+    const result = await workflowApi.executeWorkflow(
+      workflow.workflowConfig,
+      inputData,
+      workflow.id,
+      workflow.workflowCode,
+      workflow.version
+    )
+    if (result.data.status === 'success') {
+      generationResult.value = {
+        taskCode: result.data.execution_id || '',
+        taskStatus: 'SUCCESS',
+        progress: 100,
+        scriptContent: result.data.output?.script_content || '',
+        scriptType: result.data.output?.script_type || form.scriptType,
+        scriptLanguage: result.data.output?.script_language || form.scriptLanguage,
+        elementsUsed: result.data.output?.elements_used || [],
+        steps: result.data.output?.steps || []
+      }
+      ElMessage.success('脚本生成成功（通过工作流）')
+    } else {
+      generationResult.value = {
+        taskCode: result.data.execution_id || '',
+        taskStatus: 'FAILED',
+        progress: 0,
+        errorMessage: result.data.error || '脚本生成失败'
+      }
+      ElMessage.error('脚本生成失败: ' + (result.data.error || '未知错误'))
+    }
+  } catch (error: any) {
+    console.error('使用工作流生成脚本失败:', error)
+    ElMessage.error('使用工作流生成脚本失败: ' + (error.message || '未知错误'))
+    generationResult.value = {
+      taskCode: '',
+      taskStatus: 'FAILED',
+      progress: 0,
+      errorMessage: error.message || '使用工作流生成脚本失败'
+    }
+  } finally {
+    generateLoading.value = false
+  }
 }
 
 
@@ -1028,6 +1124,24 @@ const handleGenerate = async () => {
 
 
       try {
+
+
+        // 如果选择了工作流，使用工作流执行
+
+
+        if (form.workflowId) {
+
+
+          await handleGenerateWithWorkflow()
+
+
+          return
+
+
+        }
+
+
+        // 否则使用默认流程
 
 
         const response = await uiScriptGenerationApi.generateScript(form)
@@ -1250,6 +1364,9 @@ onMounted(() => {
 
 
   loadRequirementList()
+
+
+  loadWorkflows()
 
 
 })

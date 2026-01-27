@@ -2,6 +2,8 @@ package com.sinosoft.testdesign.mapper;
 
 import com.sinosoft.testdesign.dto.*;
 import com.sinosoft.testdesign.entity.*;
+import com.sinosoft.testdesign.entity.PromptTemplateVersion;
+import com.sinosoft.testdesign.entity.PromptTemplateAbTest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -116,6 +118,50 @@ public interface EntityDTOMapper {
      * PromptTemplate List -> PromptTemplateResponseDTO List
      */
     List<PromptTemplateResponseDTO> toPromptTemplateResponseDTOList(List<PromptTemplate> templates);
+    
+    // ========== PromptTemplateVersion 转换 ==========
+    
+    /**
+     * PromptTemplateVersion Entity -> PromptTemplateVersionResponseDTO
+     */
+    PromptTemplateVersionResponseDTO toPromptTemplateVersionResponseDTO(PromptTemplateVersion version);
+    
+    /**
+     * PromptTemplateVersionRequestDTO -> PromptTemplateVersion Entity
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "templateId", ignore = true)
+    @Mapping(target = "createTime", ignore = true)
+    PromptTemplateVersion toPromptTemplateVersionEntity(PromptTemplateVersionRequestDTO dto);
+    
+    /**
+     * PromptTemplateVersion List -> PromptTemplateVersionResponseDTO List
+     */
+    List<PromptTemplateVersionResponseDTO> toPromptTemplateVersionResponseDTOList(List<PromptTemplateVersion> versions);
+    
+    // ========== PromptTemplateAbTest 转换 ==========
+    
+    /**
+     * PromptTemplateAbTest Entity -> PromptTemplateAbTestResponseDTO
+     */
+    PromptTemplateAbTestResponseDTO toPromptTemplateAbTestResponseDTO(PromptTemplateAbTest abTest);
+    
+    /**
+     * PromptTemplateAbTestRequestDTO -> PromptTemplateAbTest Entity
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "templateId", ignore = true)
+    @Mapping(target = "startTime", ignore = true)
+    @Mapping(target = "endTime", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createTime", ignore = true)
+    @Mapping(target = "updateTime", ignore = true)
+    PromptTemplateAbTest toPromptTemplateAbTestEntity(PromptTemplateAbTestRequestDTO dto);
+    
+    /**
+     * PromptTemplateAbTest List -> PromptTemplateAbTestResponseDTO List
+     */
+    List<PromptTemplateAbTestResponseDTO> toPromptTemplateAbTestResponseDTOList(List<PromptTemplateAbTest> abTests);
     
     // ========== ModelConfig 转换 ==========
     

@@ -65,21 +65,21 @@ export interface SpecificationComplianceReportDTO {
 export const specificationCheckApi = {
     // Match specifications
     matchSpecifications(caseId: number) {
-        return request.get<any, SpecificationSummaryDTO[]>(`/api/v1/specification-check/match/${caseId}`)
+        return request.get<any, SpecificationSummaryDTO[]>(`/v1/specification-check/match/${caseId}`)
     },
 
     // Check compliance
     checkCompliance(data: SpecificationCheckRequestDTO) {
-        return request.post<any, SpecificationCheckResponseDTO>('/api/v1/specification-check/check', data)
+        return request.post<any, SpecificationCheckResponseDTO>('/v1/specification-check/check', data)
     },
 
     // Inject specification
     injectSpecification(data: SpecificationCheckRequestDTO) {
-        return request.post<any, SpecificationInjectionResponseDTO>('/api/v1/specification-check/inject', data)
+        return request.post<any, SpecificationInjectionResponseDTO>('/v1/specification-check/inject', data)
     },
 
     // Generate compliance report
     generateComplianceReport(data: SpecificationCheckRequestDTO) {
-        return request.post<any, SpecificationComplianceReportDTO>('/api/v1/specification-check/report', data)
+        return request.post<any, SpecificationComplianceReportDTO>('/v1/specification-check/report', data)
     }
 }
