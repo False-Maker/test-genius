@@ -121,6 +121,31 @@ const router = createRouter({
       path: '/monitoring',
       name: 'MonitoringDashboard',
       component: () => import('../views/monitoring/MonitoringDashboard.vue')
+    },
+    {
+      path: '/agent',
+      name: 'AgentManagement',
+      component: () => import('../views/agent/AgentManagement.vue')
+    },
+    {
+      path: '/agent/chat/:agentId',
+      name: 'AgentChat',
+      component: () => import('../views/agent/AgentChat.vue')
+    },
+    {
+      path: '/agent/sessions',
+      name: 'AgentSessionHistory',
+      component: () => import('../views/agent/AgentSessionHistory.vue')
+    },
+    {
+      path: '/model-comparison',
+      name: 'ModelPerformanceComparison',
+      component: () => import('../views/model-comparison/ModelPerformanceComparison.vue')
+    },
+    {
+      path: '/intelligent-model',
+      name: 'IntelligentModelSelection',
+      component: () => import('../views/intelligent-model/IntelligentModelSelection.vue')
     }
   ]
 })

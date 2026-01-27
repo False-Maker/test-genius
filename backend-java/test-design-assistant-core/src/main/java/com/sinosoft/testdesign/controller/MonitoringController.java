@@ -119,4 +119,13 @@ public class MonitoringController {
                 startTime, endTime, interval, metric, modelCode, appType);
         return Result.success(data);
     }
+
+    @Operation(summary = "获取模型性能对比统计", description = "获取各模型的性能对比数据（包括成功率、响应时间、成本、评分等）")
+    @GetMapping("/model-performance")
+    public Result<java.util.List<Map<String, Object>>> getModelPerformanceStats(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+        java.util.List<Map<String, Object>> stats = monitoringService.getModelPerformanceStats(startTime, endTime);
+        return Result.success(stats);
+    }
 }

@@ -356,4 +356,117 @@ public class MonitoringServiceImpl implements MonitoringService {
                 return time.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         }
     }
+
+    @Override
+    public java.util.List<Map<String, Object>> getModelPerformanceStats(LocalDateTime startTime, LocalDateTime endTime) {
+        // 构建查询条件
+        Specification<AppLog> spec = buildSpecification(startTime, endTime, null, null, null);
+        List<AppLog> logs = appLogRepository.findAll(spec);
+
+        // 按模型分组统计
+        Map<String, List<AppLog>> modelLogs = logs.stream()
+                .collect(Collectors.groupingBy(AppLog::getModelCode));
+
+        java.util.List<Map<String, Object>> performanceList = new ArrayList<>();
+
+        for (Map.Entry<String, List<AppLog>> entry : modelLogs.entrySet()) {
+            String modelCode = entry.getKey();
+            List<AppLog> modelLogList = entry.getValue();
+
+            if (modelLogList.isEmpty()) {
+                continue;
+            }
+
+            // 统计指标
+            long totalRequests = modelLogList.size();
+            long successCount = modelLogList.stream()
+                    .filter(log -> "success".equals(log.getStatus()))
+                    .count();
+            long failureCount = totalRequests - successCount;
+            double successRate = totalRequests > 0 ? (double) successCount / totalRequests : 0.0;
+
+            // 响应时间统计
+            List<Integer> responseTimes = modelLogList.stream()
+                    .filter(log -> log.getResponseTime() != null && "success".equals(log.getStatus()))
+                    .map(AppLog::getResponseTime)
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            double avgResponseTime = responseTimes.stream()
+                    .mapToInt(Integer::intValue)
+                    .average()
+                    .orElse(0.0);
+
+            double p50ResponseTime = calculatePercentile(responseTimes, 50);
+            double p95ResponseTime = calculatePercentile(responseTimes, 95);
+            double p99ResponseTime = calculatePercentile(responseTimes, 99);
+
+            // Token统计
+            long totalTokens = modelLogList.stream()
+                    .filter(log -> log.getTokensTotal() != null)
+                    .mapToLong(AppLog::getTokensTotal)
+                    .sum();
+
+            double avgTokens = totalRequests > 0 ? (double) totalTokens / totalRequests : 0.0;
+
+            // 成本统计
+            BigDecimal totalCost = modelLogList.stream()
+                    .filter(log -> log.getCost() != null)
+                    .map(AppLog::getCost)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            double costPerRequest = totalRequests > 0 ? totalCost.doubleValue() / totalRequests : 0.0;
+
+            // 综合评分计算
+            // 成功率权重40%，响应时间权重30%，成本权重30%
+            double scoreRate = successRate * 0.4;
+            // 响应时间分数（响应时间越短分数越高）
+            double scoreTime = 0.0;
+            if (avgResponseTime > 0) {
+                // 假设3000ms为基准，响应时间越短分数越高
+                scoreTime = Math.max(0, (3000 - avgResponseTime) / 3000) * 100 * 0.3;
+            }
+            // 成本分数（成本越低分数越高）
+            double scoreCost = 0.0;
+            if (costPerRequest > 0) {
+                // 假设0.1元为基准，成本越低分数越高
+                scoreCost = Math.max(0, (0.1 - costPerRequest) / 0.1) * 100 * 0.3;
+            }
+
+            double performanceScore = scoreRate + scoreTime + scoreCost;
+
+            Map<String, Object> modelStats = new HashMap<>();
+            modelStats.put("modelCode", modelCode);
+            modelStats.put("totalRequests", totalRequests);
+            modelStats.put("successCount", successCount);
+            modelStats.put("failureCount", failureCount);
+            modelStats.put("successRate", successRate);
+            modelStats.put("avgResponseTime", avgResponseTime);
+            modelStats.put("p50ResponseTime", p50ResponseTime);
+            modelStats.put("p95ResponseTime", p95ResponseTime);
+            modelStats.put("p99ResponseTime", p99ResponseTime);
+            modelStats.put("totalTokens", totalTokens);
+            modelStats.put("avgTokens", avgTokens);
+            modelStats.put("totalCost", totalCost);
+            modelStats.put("costPerRequest", costPerRequest);
+            modelStats.put("performanceScore", performanceScore);
+            modelStats.put("isRecommended", false); // 稍后在Controller中设置推荐模型
+
+            performanceList.add(modelStats);
+        }
+
+        // 按评分排序
+        performanceList.sort((a, b) -> {
+            double scoreA = (Double) a.get("performanceScore");
+            double scoreB = (Double) b.get("performanceScore");
+            return Double.compare(scoreB, scoreA);
+        });
+
+        // 标记推荐模型（评分最高的）
+        if (!performanceList.isEmpty()) {
+            performanceList.get(0).put("isRecommended", true);
+        }
+
+        return performanceList;
+    }
 }

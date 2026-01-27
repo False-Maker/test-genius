@@ -94,7 +94,7 @@ public interface MonitoringService {
     
     /**
      * 获取时间序列数据（用于图表展示）
-     * 
+     *
      * @param startTime 开始时间
      * @param endTime 结束时间
      * @param interval 时间间隔（HOUR/DAY/WEEK/MONTH）
@@ -106,4 +106,13 @@ public interface MonitoringService {
     Map<String, Object> getTimeSeriesData(LocalDateTime startTime, LocalDateTime endTime,
                                          String interval, String metric,
                                          String modelCode, String appType);
+
+    /**
+     * 获取模型性能对比统计
+     *
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 模型性能对比数据列表
+     */
+    java.util.List<Map<String, Object>> getModelPerformanceStats(LocalDateTime startTime, LocalDateTime endTime);
 }

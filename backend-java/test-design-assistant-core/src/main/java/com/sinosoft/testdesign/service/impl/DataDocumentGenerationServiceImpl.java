@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Random;
 
 /**
  * 数据文档生成服务实现类
@@ -591,13 +592,28 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
             parameterCombinations.add(paramValues);
         }
         
-        // 生成笛卡尔积
-        List<List<Map.Entry<String, String>>> cartesianProduct = generateCartesianProduct(parameterCombinations);
+        // 优化：如果参数组合数过多，使用智能生成策略
+        long totalCombinations = parameterCombinations.stream()
+                .mapToLong(List::size)
+                .reduce(1, (a, b) -> a * b);
         
-        // 构建表格数据
+        List<List<Map.Entry<String, String>>> cartesianProduct;
+        if (totalCombinations > 1000) {
+            // 如果组合数过多，使用智能生成（优先生成有效组合和边界组合）
+            cartesianProduct = generateSmartCombinations(parameterCombinations, equivalenceClasses);
+        } else {
+            // 组合数较少，生成完整笛卡尔积
+            cartesianProduct = generateCartesianProduct(parameterCombinations);
+        }
+        
+        // 构建表格数据（优化：按有效性排序，有效用例在前）
+        List<Map<String, Object>> validRows = new ArrayList<>();
+        List<Map<String, Object>> invalidRows = new ArrayList<>();
+        
         for (List<Map.Entry<String, String>> combination : cartesianProduct) {
             Map<String, Object> row = new LinkedHashMap<>();
             boolean isValid = true;
+            int invalidCount = 0; // 统计无效等价类数量
             
             for (Map.Entry<String, String> entry : combination) {
                 row.put(entry.getKey(), entry.getValue());
@@ -606,12 +622,30 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
                 List<String> invalidClasses = classes.getOrDefault("无效等价类", Collections.emptyList());
                 if (invalidClasses.contains(entry.getValue())) {
                     isValid = false;
+                    invalidCount++;
                 }
             }
             
             row.put("isValid", isValid);
-            tableData.add(row);
+            row.put("invalidCount", invalidCount); // 记录无效等价类数量，用于排序
+            
+            if (isValid) {
+                validRows.add(row);
+            } else {
+                invalidRows.add(row);
+            }
         }
+        
+        // 排序：有效用例在前，无效用例按无效数量排序
+        validRows.sort((r1, r2) -> 0); // 有效用例保持原序
+        invalidRows.sort((r1, r2) -> {
+            Integer count1 = (Integer) r1.get("invalidCount");
+            Integer count2 = (Integer) r2.get("invalidCount");
+            return Integer.compare(count1 != null ? count1 : 0, count2 != null ? count2 : 0);
+        });
+        
+        tableData.addAll(validRows);
+        tableData.addAll(invalidRows);
         
         return tableData;
     }
@@ -641,6 +675,108 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
     }
     
     /**
+     * 智能生成组合（优化：优先生成有效组合和边界组合）
+     */
+    private List<List<Map.Entry<String, String>>> generateSmartCombinations(
+            List<List<Map.Entry<String, String>>> parameterCombinations,
+            Map<String, Map<String, List<String>>> equivalenceClasses) {
+        List<List<Map.Entry<String, String>>> result = new ArrayList<>();
+        
+        // 策略1：生成所有有效等价类的组合（优先）
+        List<List<Map.Entry<String, String>>> validCombinations = new ArrayList<>();
+        for (List<Map.Entry<String, String>> paramValues : parameterCombinations) {
+            List<Map.Entry<String, String>> validValues = new ArrayList<>();
+            for (Map.Entry<String, String> entry : paramValues) {
+                String paramName = entry.getKey();
+                Map<String, List<String>> classes = equivalenceClasses.get(paramName);
+                List<String> validClasses = classes.getOrDefault("有效等价类", Collections.emptyList());
+                if (validClasses.contains(entry.getValue())) {
+                    validValues.add(entry);
+                }
+            }
+            if (!validValues.isEmpty()) {
+                validCombinations.add(validValues);
+            }
+        }
+        if (!validCombinations.isEmpty()) {
+            result.addAll(generateCartesianProduct(validCombinations));
+        }
+        
+        // 策略2：生成边界组合（每个参数选择一个无效等价类，其他选择有效等价类）
+        for (int i = 0; i < parameterCombinations.size(); i++) {
+            List<Map.Entry<String, String>> boundaryCombination = new ArrayList<>();
+            for (int j = 0; j < parameterCombinations.size(); j++) {
+                if (i == j) {
+                    // 当前参数选择第一个无效等价类
+                    String paramName = parameterCombinations.get(j).get(0).getKey();
+                    Map<String, List<String>> classes = equivalenceClasses.get(paramName);
+                    List<String> invalidClasses = classes.getOrDefault("无效等价类", Collections.emptyList());
+                    if (!invalidClasses.isEmpty()) {
+                        boundaryCombination.add(new AbstractMap.SimpleEntry<>(paramName, invalidClasses.get(0)));
+                    } else {
+                        // 如果没有无效等价类，选择有效等价类
+                        boundaryCombination.add(parameterCombinations.get(j).get(0));
+                    }
+                } else {
+                    // 其他参数选择第一个有效等价类
+                    String paramName = parameterCombinations.get(j).get(0).getKey();
+                    Map<String, List<String>> classes = equivalenceClasses.get(paramName);
+                    List<String> validClasses = classes.getOrDefault("有效等价类", Collections.emptyList());
+                    if (!validClasses.isEmpty()) {
+                        boundaryCombination.add(new AbstractMap.SimpleEntry<>(paramName, validClasses.get(0)));
+                    } else {
+                        boundaryCombination.add(parameterCombinations.get(j).get(0));
+                    }
+                }
+            }
+            if (!boundaryCombination.isEmpty()) {
+                result.add(boundaryCombination);
+            }
+        }
+        
+        // 策略3：如果结果仍然太少，补充一些随机组合（最多100个）
+        if (result.size() < 50) {
+            int maxAdditional = Math.min(100, (int) (parameterCombinations.stream()
+                    .mapToLong(List::size)
+                    .reduce(1, (a, b) -> a * b) - result.size()));
+            
+            // 随机生成一些组合
+            Random random = new Random();
+            Set<String> existingCombinations = new HashSet<>();
+            for (List<Map.Entry<String, String>> combo : result) {
+                existingCombinations.add(comboToString(combo));
+            }
+            
+            int added = 0;
+            while (added < maxAdditional && added < 1000) {
+                List<Map.Entry<String, String>> randomCombo = new ArrayList<>();
+                for (List<Map.Entry<String, String>> paramValues : parameterCombinations) {
+                    if (!paramValues.isEmpty()) {
+                        randomCombo.add(paramValues.get(random.nextInt(paramValues.size())));
+                    }
+                }
+                String comboKey = comboToString(randomCombo);
+                if (!existingCombinations.contains(comboKey)) {
+                    result.add(randomCombo);
+                    existingCombinations.add(comboKey);
+                    added++;
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * 将组合转换为字符串（用于去重）
+     */
+    private String comboToString(List<Map.Entry<String, String>> combo) {
+        return combo.stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining("|"));
+    }
+    
+    /**
      * 确定正交表类型
      */
     private String determineOrthogonalTableType(Map<String, List<String>> factors) {
@@ -651,23 +787,59 @@ public class DataDocumentGenerationServiceImpl implements DataDocumentGeneration
                 .sorted(Collections.reverseOrder())
                 .collect(Collectors.toList());
         
-        // 根据因素数和水平数选择正交表类型
-        if (factorCount <= 2 && levels.get(0) == 2 && (levels.size() == 1 || levels.get(1) == 2)) {
-            return "L4";
-        } else if (factorCount <= 7 && levels.stream().allMatch(l -> l == 2)) {
-            return "L8";
-        } else if (factorCount <= 2 && levels.stream().allMatch(l -> l == 3)) {
-            return "L9";
-        } else if (factorCount <= 11 && levels.stream().allMatch(l -> l == 2)) {
-            return "L12";
-        } else if (factorCount <= 15 && levels.stream().allMatch(l -> l == 2)) {
-            return "L16";
-        } else if (factorCount <= 2 && levels.stream().allMatch(l -> l == 5)) {
-            return "L25";
+        // 优化：根据因素数和水平数智能选择正交表类型
+        int maxLevel = levels.isEmpty() ? 0 : levels.get(0);
+        boolean allSameLevel = levels.stream().allMatch(l -> l.equals(maxLevel));
+        
+        // 标准正交表选择规则
+        if (allSameLevel) {
+            // 所有因素水平数相同
+            if (maxLevel == 2) {
+                if (factorCount <= 3) {
+                    return "L4(2³)";
+                } else if (factorCount <= 7) {
+                    return "L8(2⁷)";
+                } else if (factorCount <= 11) {
+                    return "L12(2¹¹)";
+                } else if (factorCount <= 15) {
+                    return "L16(2¹⁵)";
+                } else {
+                    return "L32(2³¹)";
+                }
+            } else if (maxLevel == 3) {
+                if (factorCount <= 4) {
+                    return "L9(3⁴)";
+                } else if (factorCount <= 13) {
+                    return "L27(3¹³)";
+                } else {
+                    return "L81(3⁴⁰)";
+                }
+            } else if (maxLevel == 4) {
+                if (factorCount <= 5) {
+                    return "L16(4⁵)";
+                } else {
+                    return "L64(4²¹)";
+                }
+            } else if (maxLevel == 5) {
+                if (factorCount <= 6) {
+                    return "L25(5⁶)";
+                } else {
+                    return "L125(5³¹)";
+                }
+            }
         } else {
-            // 默认使用L8
-            return "L8";
+            // 混合水平正交表（简化处理）
+            if (maxLevel <= 2 && factorCount <= 7) {
+                return "L8(混合水平)";
+            } else if (maxLevel <= 3 && factorCount <= 4) {
+                return "L9(混合水平)";
+            } else if (maxLevel <= 4 && factorCount <= 5) {
+                return "L16(混合水平)";
+            }
         }
+        
+        // 默认使用配对组合算法
+        return "配对组合";
     }
     
     /**

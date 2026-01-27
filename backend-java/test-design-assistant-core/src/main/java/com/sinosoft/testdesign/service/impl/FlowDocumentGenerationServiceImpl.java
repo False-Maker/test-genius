@@ -256,20 +256,56 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
             // 查询需求下的所有用例
             List<TestCase> cases = testCaseRepository.findByRequirementId(request.getRequirementId());
             
-            // 根据用例类型和组织场景
+            // 根据用例类型和组织场景（优化：支持更智能的分组）
             Map<String, List<TestCase>> casesByType = cases.stream()
-                    .collect(Collectors.groupingBy(c -> 
-                            StringUtils.hasText(c.getCaseType()) ? c.getCaseType() : "正常"));
+                    .collect(Collectors.groupingBy(c -> {
+                        String caseType = StringUtils.hasText(c.getCaseType()) ? c.getCaseType() : "正常";
+                        // 识别场景类型：正常、异常、边界、性能等
+                        if (caseType.contains("异常") || caseType.contains("错误") || caseType.contains("失败")) {
+                            return "异常场景";
+                        } else if (caseType.contains("边界") || caseType.contains("临界")) {
+                            return "边界场景";
+                        } else if (caseType.contains("性能") || caseType.contains("压力")) {
+                            return "性能场景";
+                        } else {
+                            return "正常场景";
+                        }
+                    }));
+            
+            // 按场景类型排序（正常 -> 边界 -> 异常 -> 性能）
+            List<String> sceneTypeOrder = Arrays.asList("正常场景", "边界场景", "异常场景", "性能场景");
+            List<Map.Entry<String, List<TestCase>>> sortedEntries = casesByType.entrySet().stream()
+                    .sorted((e1, e2) -> {
+                        int idx1 = sceneTypeOrder.indexOf(e1.getKey());
+                        int idx2 = sceneTypeOrder.indexOf(e2.getKey());
+                        if (idx1 == -1) idx1 = 999;
+                        if (idx2 == -1) idx2 = 999;
+                        return Integer.compare(idx1, idx2);
+                    })
+                    .collect(Collectors.toList());
             
             // 创建场景节点
             int nodeIndex = 1;
-            for (Map.Entry<String, List<TestCase>> entry : casesByType.entrySet()) {
+            for (Map.Entry<String, List<TestCase>> entry : sortedEntries) {
                 String sceneType = entry.getKey();
                 List<TestCase> sceneCases = entry.getValue();
                 
                 SceneNode node = new SceneNode();
                 node.setId("scene_" + nodeIndex);
-                node.setLabel(sceneType + "场景(" + sceneCases.size() + "个用例)");
+                // 优化标签显示：包含用例数量和关键信息
+                String label = sceneType + "(" + sceneCases.size() + "个用例)";
+                if (sceneCases.size() <= 5 && request.getIncludeCaseDetails()) {
+                    // 如果用例数量少，显示用例名称
+                    String caseNames = sceneCases.stream()
+                            .map(TestCase::getCaseName)
+                            .limit(3)
+                            .collect(Collectors.joining("、"));
+                    if (sceneCases.size() > 3) {
+                        caseNames += "...";
+                    }
+                    label = sceneType + "\n" + caseNames;
+                }
+                node.setLabel(label);
                 node.setType(sceneType);
                 if (request.getIncludeCaseDetails()) {
                     node.setDetails(sceneCases.stream()
@@ -280,13 +316,29 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
                 nodeIndex++;
             }
             
-            // 创建边（场景之间的关联）
-            for (int i = 0; i < nodes.size() - 1; i++) {
-                SceneEdge edge = new SceneEdge();
-                edge.setFrom(nodes.get(i).getId());
-                edge.setTo(nodes.get(i + 1).getId());
-                edge.setLabel("顺序");
-                edges.add(edge);
+            // 创建边（场景之间的关联）- 优化：支持分支和合并
+            if (nodes.size() > 1) {
+                // 如果只有正常场景和异常场景，创建分支结构
+                boolean hasNormalScene = nodes.stream().anyMatch(n -> n.getType().equals("正常场景"));
+                boolean hasExceptionScene = nodes.stream().anyMatch(n -> n.getType().equals("异常场景"));
+                
+                if (hasNormalScene && hasExceptionScene && nodes.size() == 2) {
+                    // 创建分支结构：正常场景 -> 异常场景
+                    SceneEdge edge = new SceneEdge();
+                    edge.setFrom(nodes.get(0).getId());
+                    edge.setTo(nodes.get(1).getId());
+                    edge.setLabel("异常分支");
+                    edges.add(edge);
+                } else {
+                    // 顺序连接
+                    for (int i = 0; i < nodes.size() - 1; i++) {
+                        SceneEdge edge = new SceneEdge();
+                        edge.setFrom(nodes.get(i).getId());
+                        edge.setTo(nodes.get(i + 1).getId());
+                        edge.setLabel("顺序");
+                        edges.add(edge);
+                    }
+                }
             }
             
         } else if (request.getCaseIds() != null && !request.getCaseIds().isEmpty()) {
@@ -376,21 +428,45 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
             throw new IllegalArgumentException("必须提供用例ID、用例ID列表或需求ID");
         }
         
-        // 从用例中提取测试步骤，生成路径
+        // 从用例中提取测试步骤，生成路径（优化：更智能的步骤解析）
         Set<String> stepSet = new LinkedHashSet<>(); // 保持顺序
         Map<String, String> stepIdMap = new HashMap<>(); // 步骤内容 -> 节点ID映射
         
         for (TestCase testCase : cases) {
             if (StringUtils.hasText(testCase.getTestStep())) {
-                // 解析测试步骤（假设每行一个步骤，或使用特定分隔符）
-                String[] steps = testCase.getTestStep().split("\n|；|;");
+                // 解析测试步骤（支持多种分隔符和格式）
+                String testStep = testCase.getTestStep();
+                // 支持换行、分号、中文分号等多种分隔符
+                String[] steps = testStep.split("\n|；|;|\\r\\n|\\r");
                 List<String> path = new ArrayList<>();
+                
+                // 添加起始节点
+                String startNodeId = "start_" + testCase.getId();
+                if (!stepIdMap.containsKey("开始")) {
+                    stepIdMap.put("开始", startNodeId);
+                    stepSet.add("开始");
+                }
+                path.add(startNodeId);
                 
                 for (String step : steps) {
                     step = step.trim();
-                    if (StringUtils.hasText(step) && step.length() > 2) {
-                        // 清理步骤编号（如"1."、"步骤1："等）
-                        step = step.replaceAll("^\\d+[.、：:：]\\s*", "");
+                    if (StringUtils.hasText(step) && step.length() > 1) {
+                        // 清理步骤编号（如"1."、"步骤1："、"①"等）
+                        step = step.replaceAll("^[\\d①②③④⑤⑥⑦⑧⑨⑩]+[.、：:：]\\s*", "");
+                        step = step.replaceAll("^步骤[\\d一二三四五六七八九十]+[：:]\\s*", "");
+                        
+                        // 识别条件判断步骤
+                        if (step.contains("如果") || step.contains("若") || step.contains("当")) {
+                            step = "判断：" + step;
+                        }
+                        // 识别验证步骤
+                        if (step.contains("验证") || step.contains("检查") || step.contains("确认")) {
+                            step = "验证：" + step;
+                        }
+                        // 识别输入步骤
+                        if (step.contains("输入") || step.contains("填写") || step.contains("录入")) {
+                            step = "输入：" + step;
+                        }
                         
                         if (StringUtils.hasText(step)) {
                             stepSet.add(step);
@@ -400,7 +476,15 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
                     }
                 }
                 
-                if (!path.isEmpty()) {
+                // 添加结束节点
+                String endNodeId = "end_" + testCase.getId();
+                if (!stepIdMap.containsKey("结束")) {
+                    stepIdMap.put("结束", endNodeId);
+                    stepSet.add("结束");
+                }
+                path.add(endNodeId);
+                
+                if (path.size() > 2) { // 至少包含开始、一个步骤、结束
                     paths.add(path);
                 }
             }
@@ -453,11 +537,35 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
         mermaid.append("graph ").append(request.getDirection()).append("\n");
         mermaid.append("    %% 场景图：").append(sceneData.getTitle()).append("\n\n");
         
-        // 添加节点
+        // 添加节点（优化：根据场景类型使用不同形状）
         for (SceneNode node : sceneData.getNodes()) {
             String nodeLabel = escapeMermaidLabel(node.getLabel());
-            mermaid.append("    ").append(node.getId())
-                    .append("[\"").append(nodeLabel).append("\"]\n");
+            String nodeType = node.getType();
+            
+            // 根据场景类型选择不同的节点形状
+            if (nodeType != null) {
+                if (nodeType.contains("异常")) {
+                    // 异常场景使用菱形
+                    mermaid.append("    ").append(node.getId())
+                            .append("{\"").append(nodeLabel).append("\"}\n");
+                } else if (nodeType.contains("边界")) {
+                    // 边界场景使用六边形
+                    mermaid.append("    ").append(node.getId())
+                            .append("{{\"").append(nodeLabel).append("\"}}\n");
+                } else if (nodeType.contains("性能")) {
+                    // 性能场景使用圆柱形
+                    mermaid.append("    ").append(node.getId())
+                            .append("[(\"").append(nodeLabel).append("\")]\n");
+                } else {
+                    // 正常场景使用矩形
+                    mermaid.append("    ").append(node.getId())
+                            .append("[\"").append(nodeLabel).append("\"]\n");
+                }
+            } else {
+                // 默认矩形
+                mermaid.append("    ").append(node.getId())
+                        .append("[\"").append(nodeLabel).append("\"]\n");
+            }
         }
         
         // 添加边
@@ -482,11 +590,33 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
         mermaid.append("graph ").append(request.getDirection()).append("\n");
         mermaid.append("    %% 路径图：").append(pathData.getTitle()).append("\n\n");
         
-        // 添加节点
+        // 添加节点（优化：根据节点类型使用不同形状）
         for (PathNode node : pathData.getNodes()) {
             String nodeLabel = escapeMermaidLabel(node.getLabel());
-            mermaid.append("    ").append(node.getId())
-                    .append("[\"").append(nodeLabel).append("\"]\n");
+            String nodeId = node.getId();
+            
+            // 根据节点类型选择不同的形状
+            if (nodeId.startsWith("start_")) {
+                // 起始节点使用圆角矩形
+                mermaid.append("    ").append(nodeId)
+                        .append("(\"").append(nodeLabel).append("\")\n");
+            } else if (nodeId.startsWith("end_")) {
+                // 结束节点使用圆角矩形
+                mermaid.append("    ").append(nodeId)
+                        .append("(\"").append(nodeLabel).append("\")\n");
+            } else if (nodeLabel.startsWith("判断：")) {
+                // 判断节点使用菱形
+                mermaid.append("    ").append(nodeId)
+                        .append("{\"").append(nodeLabel).append("\"}\n");
+            } else if (nodeLabel.startsWith("验证：")) {
+                // 验证节点使用六边形
+                mermaid.append("    ").append(nodeId)
+                        .append("{{""").append(nodeLabel).append("\"}}\n");
+            } else {
+                // 普通步骤使用矩形
+                mermaid.append("    ").append(nodeId)
+                        .append("[\"").append(nodeLabel).append("\"]\n");
+            }
         }
         
         // 添加边

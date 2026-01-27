@@ -1,9 +1,9 @@
 """
 参数提取API路由
 """
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 import logging
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -43,9 +43,9 @@ class ParameterExtractionResponse(BaseModel):
     equivalence_classes: Dict[str, Dict[str, List[str]]]
 
 
-@router.post("/extract", response_model=ParameterExtractionResponse)
+@router.post("/extract")
 async def extract_parameters(
-    request: ParameterExtractionRequest,
+    request: Dict[str, Any] = Body(...),
     db: Session = Depends(get_db)
 ):
     """
@@ -58,22 +58,54 @@ async def extract_parameters(
     
     start_time = time.time()
     
-    logger.info(f"收到参数提取请求: 用例数量={len(request.test_cases)}, 使用LLM={request.use_llm}")
-    
     try:
-        # 验证参数
-        if not request.test_cases:
-            raise HTTPException(status_code=400, detail="测试用例列表不能为空")
+        # 处理请求格式（支持Pydantic模型和字典格式）
+        if isinstance(request, dict):
+            # 字典格式（Java端直接发送）
+            test_cases_data = request.get("test_cases", [])
+            model_code = request.get("model_code")
+            use_llm = request.get("use_llm", True)
+            
+            # 转换为字典格式
+            test_cases_dict = []
+            for case in test_cases_data:
+                if isinstance(case, dict):
+                    test_cases_dict.append({
+                        "case_name": case.get("case_name") or "",
+                        "test_step": case.get("test_step") or "",
+                        "expected_result": case.get("expected_result") or "",
+                        "pre_condition": case.get("pre_condition") or ""
+                    })
+                else:
+                    # 如果是Pydantic模型
+                    test_cases_dict.append({
+                        "case_name": getattr(case, "case_name", "") or "",
+                        "test_step": getattr(case, "test_step", "") or "",
+                        "expected_result": getattr(case, "expected_result", "") or "",
+                        "pre_condition": getattr(case, "pre_condition", "") or ""
+                    })
+        else:
+            # Pydantic模型格式
+            if not request.test_cases:
+                raise HTTPException(status_code=400, detail="测试用例列表不能为空")
+            
+            test_cases_dict = []
+            for case in request.test_cases:
+                test_cases_dict.append({
+                    "case_name": case.case_name or "",
+                    "test_step": case.test_step or "",
+                    "expected_result": case.expected_result or "",
+                    "pre_condition": case.pre_condition or ""
+                })
+            
+            model_code = request.model_code
+            use_llm = request.use_llm
         
-        # 转换为字典格式
-        test_cases_dict = []
-        for case in request.test_cases:
-            test_cases_dict.append({
-                "case_name": case.case_name or "",
-                "test_step": case.test_step or "",
-                "expected_result": case.expected_result or "",
-                "pre_condition": case.pre_condition or ""
-            })
+        logger.info(f"收到参数提取请求: 用例数量={len(test_cases_dict)}, 使用LLM={use_llm}")
+        
+        # 验证参数
+        if not test_cases_dict:
+            raise HTTPException(status_code=400, detail="测试用例列表不能为空")
         
         # 创建参数提取服务
         extraction_service = ParameterExtractionService(db)
@@ -81,8 +113,8 @@ async def extract_parameters(
         # 提取参数和等价类
         result = extraction_service.extract_parameters_and_equivalence_classes(
             test_cases=test_cases_dict,
-            model_code=request.model_code,
-            use_llm=request.use_llm
+            model_code=model_code,
+            use_llm=use_llm
         )
         
         elapsed_time = int((time.time() - start_time) * 1000)
@@ -96,9 +128,20 @@ async def extract_parameters(
             ParameterInfo(**param) for param in result.get("parameters", [])
         ]
         
+        # 确保equivalence_classes格式正确（Java端期望的格式）
+        equivalence_classes = result.get("equivalence_classes", {})
+        if not equivalence_classes:
+            # 如果没有等价类，从parameters中构建
+            for param in parameters:
+                if param.name and (param.valid_equivalence_classes or param.invalid_equivalence_classes):
+                    equivalence_classes[param.name] = {
+                        "有效等价类": param.valid_equivalence_classes or [],
+                        "无效等价类": param.invalid_equivalence_classes or []
+                    }
+        
         return ParameterExtractionResponse(
             parameters=parameters,
-            equivalence_classes=result.get("equivalence_classes", {})
+            equivalence_classes=equivalence_classes
         )
     
     except ValueError as e:

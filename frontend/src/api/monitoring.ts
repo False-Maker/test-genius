@@ -169,5 +169,12 @@ export const monitoringApi = {
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     return request.get<TimeSeriesData>('/v1/monitoring/time-series', { params })
+  },
+
+  // 获取模型性能对比统计
+  getModelPerformanceStats(startTime: string, endTime: string) {
+    return request.get<any[]>('/v1/monitoring/model-performance', {
+      params: { startTime, endTime }
+    })
   }
 }

@@ -88,7 +88,32 @@ public class ModelConfig {
      */
     @Column(name = "daily_limit")
     private Integer dailyLimit;
-    
+
+    /**
+     * 性能评分（0-100）
+     */
+    @Column(name = "performance_score", precision = 5, scale = 2)
+    private BigDecimal performanceScore = BigDecimal.ZERO;
+
+    /**
+     * 支持的任务类型（JSON格式）
+     * 例如：["CASE_GENERATION", "UI_SCRIPT_GENERATION", "AGENT_CHAT"]
+     */
+    @Column(name = "task_types", columnDefinition = "TEXT")
+    private String taskTypes;
+
+    /**
+     * 是否推荐模型（综合评分最高的）
+     */
+    @Column(name = "is_recommended", columnDefinition = "CHAR(1)")
+    private String isRecommended = "0";
+
+    /**
+     * 最后评分更新时间
+     */
+    @Column(name = "last_score_update_time")
+    private LocalDateTime lastScoreUpdateTime;
+
     /**
      * 创建时间
      */

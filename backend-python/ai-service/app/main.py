@@ -4,7 +4,7 @@
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import llm_router, case_router, prompt_router, document_router, knowledge_router, case_reuse_router, ui_script_router, flow_document_router, parameter_extraction_router, workflow_router
+from app.api import llm_router, case_router, prompt_router, document_router, knowledge_router, case_reuse_router, ui_script_router, flow_document_router, parameter_extraction_router, workflow_router, agent_router
 
 app = FastAPI(
     title="测试设计助手系统 - AI服务",
@@ -32,6 +32,36 @@ app.include_router(knowledge_router.router, prefix="/api/v1", tags=["知识库"]
 app.include_router(case_reuse_router.router, prefix="/api/v1", tags=["用例复用"])
 app.include_router(ui_script_router.router, prefix="/api/v1", tags=["UI脚本生成"])
 app.include_router(workflow_router.router, prefix="/api/v1/workflow", tags=["工作流"])
+app.include_router(agent_router.router, prefix="/api/v1", tags=["Agent"])
+
+# Java后端API代理
+from fastapi import Request
+import requests
+
+java_backend_url = "http://localhost:8080"
+
+@app.api_route("/java/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def proxy_to_java(path: str, request: Request):
+    """代理请求到Java后端"""
+    try:
+        url = f"{java_backend_url}/{path}"
+        
+        # 转发请求
+        if request.method == "GET":
+            response = requests.get(url, params=request.query_params.dict(), timeout=30)
+        else:
+            body = await request.json()
+            response = requests.request(
+                method=request.method,
+                url=url,
+                json=body,
+                params=request.query_params.dict(),
+                timeout=30
+            )
+        
+        return response.json()
+    except Exception as e:
+        return {"code": 500, "message": str(e)}
 
 
 @app.get("/")
