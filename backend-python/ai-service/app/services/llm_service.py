@@ -201,7 +201,8 @@ class LLMService:
             if hasattr(llm, 'get_num_tokens'):
                 try:
                     tokens_used = llm.get_num_tokens(prompt) + llm.get_num_tokens(content)
-                except:
+                except Exception as e:
+                    logger.debug(f"获取token数量失败: {str(e)}")
                     pass
             
             logger.info(

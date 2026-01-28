@@ -47,10 +47,10 @@ public class RequirementServiceImpl implements RequirementService {
     @Override
     @Transactional
     public TestRequirement createRequirement(TestRequirement requirement) {
-        log.info("创建需求: {}", requirement.getRequirementName());
-        
-        // 数据验证
+        // 数据验证（优先执行，防止NPE）
         validateRequirement(requirement, true);
+        
+        log.info("创建需求: {}", requirement.getRequirementName());
         
         // 自动生成需求编码（如果未提供）
         if (!StringUtils.hasText(requirement.getRequirementCode())) {

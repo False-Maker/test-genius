@@ -5,11 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
+import time
+import logging
 from app.database import get_db
 from app.services.knowledge_base_service import KnowledgeBaseService
 from app.services.kb_permission_service import KBPermissionService
 from app.services.kb_sync_service import KBSyncService
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/knowledge", tags=["知识库"])
 
 
@@ -124,6 +127,84 @@ async def search_documents_by_keyword(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"检索失败: {str(e)}")
+
+
+class DocumentCountRequest(BaseModel):
+    """文档数量查询请求"""
+    kb_id: int
+
+
+@router.post("/documents/count")
+async def count_documents(
+    request: DocumentCountRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    统计知识库中的文档数量
+    """
+    try:
+        from sqlalchemy import text
+        count_sql = """
+        SELECT COUNT(*) FROM knowledge_document
+        WHERE kb_id = :kb_id AND is_active = '1'
+        """
+        result = db.execute(text(count_sql), {"kb_id": request.kb_id})
+        count = result.fetchone()[0]
+        
+        return {
+            "success": True,
+            "count": count
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"查询文档数量失败: {str(e)}")
+
+
+@router.post("/statistics")
+async def get_knowledge_base_statistics(
+    request: DocumentCountRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    获取知识库统计信息（文档数量、分块数量、最后同步时间）
+    """
+    try:
+        from sqlalchemy import text
+        
+        # 查询文档数量
+        doc_count_sql = """
+        SELECT COUNT(*) FROM knowledge_document
+        WHERE kb_id = :kb_id AND is_active = '1'
+        """
+        doc_result = db.execute(text(doc_count_sql), {"kb_id": request.kb_id})
+        doc_count = doc_result.fetchone()[0]
+        
+        # 查询分块数量
+        chunk_count_sql = """
+        SELECT COUNT(*) FROM knowledge_document_chunk
+        WHERE doc_id IN (
+            SELECT id FROM knowledge_document 
+            WHERE kb_id = :kb_id AND is_active = '1'
+        )
+        """
+        chunk_result = db.execute(text(chunk_count_sql), {"kb_id": request.kb_id})
+        chunk_count = chunk_result.fetchone()[0]
+        
+        # 查询最后同步时间
+        last_sync_sql = """
+        SELECT MAX(end_time) FROM knowledge_base_sync_log
+        WHERE kb_id = :kb_id AND status = 'success'
+        """
+        sync_result = db.execute(text(last_sync_sql), {"kb_id": request.kb_id})
+        last_sync_time = sync_result.fetchone()[0]
+        
+        return {
+            "success": True,
+            "document_count": doc_count,
+            "chunk_count": chunk_count,
+            "last_sync_time": last_sync_time.isoformat() if last_sync_time else None
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"查询统计信息失败: {str(e)}")
 
 
 # ==================== 知识库管理相关API（第四阶段增强）====================
@@ -333,16 +414,106 @@ async def upload_document(
     try:
         # 解码Base64内容
         import base64
+        import os
+        from pathlib import Path
+        from app.services.document_pipeline_service import DocumentPipelineService
+        from app.services.embedding_service import EmbeddingService
+        from app.services.text_chunking_service import ChunkingStrategy
+
         file_bytes = base64.b64decode(file_content)
-        
-        # TODO: 保存文件并调用文档处理服务
-        # 这里需要实现文件保存和文档处理的完整逻辑
-        
+
+        # 步骤1: 保存文件到本地存储
+        upload_dir = Path("data/uploads")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+
+        # 生成唯一文件名
+        timestamp = int(time.time())
+        safe_filename = f"{timestamp}_{file_name}"
+        file_path = upload_dir / safe_filename
+
+        # 写入文件
+        with open(file_path, "wb") as f:
+            f.write(file_bytes)
+
+        logger.info(f"文件保存成功: {file_path}")
+
+        # 步骤2: 调用文档处理管道服务
+        # 实例化服务
+        embedding_service = EmbeddingService(db)
+        pipeline_service = DocumentPipelineService(
+            db=db,
+            embedding_service=embedding_service
+        )
+
+        # 步骤3: 处理文档（解析、分块、向量化、入库）
+        doc_code = f"DOC-{kb_id}-{timestamp}"
+        file_ext = Path(file_name).suffix[1:].lower() if Path(file_name).suffix else "txt"
+
+        result = pipeline_service.process_document(
+            file_path=str(file_path),
+            doc_code=doc_code,
+            doc_name=file_name,
+            doc_type=file_ext,
+            kb_id=kb_id,
+            doc_category=None,
+            chunking_strategy=ChunkingStrategy.PARAGRAPH,
+            chunk_size=1000,
+            chunk_overlap=200
+        )
+
+        # 步骤4: 检查处理结果
+        if not result.get("success"):
+            # 处理失败，删除已保存的文件
+            if file_path.exists():
+                os.remove(file_path)
+            raise HTTPException(
+                status_code=500,
+                detail=f"文档处理失败: {result.get('error', '未知错误')}"
+            )
+
+        # 步骤5: 记录同步日志（如果知识库同步日志表存在）
+        try:
+            from sqlalchemy import text
+            insert_log_sql = """
+            INSERT INTO knowledge_base_sync_log
+            (kb_id, sync_type, source_path, added_count, updated_count,
+             deleted_count, failed_count, status, start_time, end_time)
+            VALUES
+            (:kb_id, :sync_type, :source_path, :added_count, :updated_count,
+             :deleted_count, :failed_count, :status, NOW(), NOW())
+            """
+            db.execute(
+                text(insert_log_sql),
+                {
+                    "kb_id": kb_id,
+                    "sync_type": "upload",
+                    "source_path": str(file_path),
+                    "added_count": 1,
+                    "updated_count": 0,
+                    "deleted_count": 0,
+                    "failed_count": 0,
+                    "status": "success"
+                }
+            )
+            db.commit()
+            logger.info("同步日志记录成功")
+        except Exception as e:
+            logger.warning(f"记录同步日志失败: {str(e)}")
+            # 不影响主流程
+
+        logger.info(f"文档上传成功: doc_code={doc_code}, doc_id={result.get('doc_id')}, chunks={result.get('chunks')}")
+
         return {
             "success": True,
-            "doc_code": f"DOC-{kb_id}-{file_name}",
+            "doc_id": result.get("doc_id"),
+            "doc_code": doc_code,
+            "chunks": result.get("chunks"),
             "message": "文档上传成功"
         }
+
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"上传文档失败: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"上传文档失败: {str(e)}")
 

@@ -36,31 +36,57 @@ app.include_router(agent_router.router, prefix="/api/v1", tags=["Agent"])
 
 # Java后端API代理
 from fastapi import Request
-import requests
+import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 java_backend_url = "http://localhost:8080"
 
 @app.api_route("/java/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_to_java(path: str, request: Request):
-    """代理请求到Java后端"""
+    """代理请求到Java后端（使用异步httpx）"""
     try:
         url = f"{java_backend_url}/{path}"
         
-        # 转发请求
-        if request.method == "GET":
-            response = requests.get(url, params=request.query_params.dict(), timeout=30)
-        else:
-            body = await request.json()
-            response = requests.request(
+        # 准备请求参数
+        query_params = request.query_params.dict()
+        
+        # 准备请求头（排除host）
+        headers = dict(request.headers)
+        headers.pop("host", None)
+        headers.pop("content-length", None)  # 让httpx重新计算
+        
+        # 准备请求体
+        body = None
+        if request.method not in ["GET", "HEAD"]:
+            try:
+                body = await request.body()
+            except:
+                pass
+        
+        # 使用异步客户端转发请求
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.request(
                 method=request.method,
                 url=url,
-                json=body,
-                params=request.query_params.dict(),
-                timeout=30
+                params=query_params,
+                headers=headers,
+                content=body
             )
         
-        return response.json()
+        # 尝试解析JSON响应
+        try:
+            return response.json()
+        except:
+            # 如果不是JSON，返回原始内容（或根据需求包装）
+            return {"code": response.status_code, "message": response.text}
+            
+    except httpx.RequestError as e:
+        logger.error(f"代理请求失败(网络错误): {str(e)}")
+        return {"code": 502, "message": f"无法连接到Java后端: {str(e)}"}
     except Exception as e:
+        logger.error(f"代理请求失败: {str(e)}", exc_info=True)
         return {"code": 500, "message": str(e)}
 
 

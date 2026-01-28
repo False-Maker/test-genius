@@ -12,13 +12,17 @@ logger = logging.getLogger(__name__)
 class SearchTestCasesTool(BaseTool):
     """搜索历史测试用例工具"""
     
-    def __init__(self, java_api_base_url: str = "http://localhost:8080"):
+    def __init__(self, java_api_base_url: str = None):
         """
         初始化工具
         
         Args:
             java_api_base_url: Java后端API基础URL
         """
+        if java_api_base_url is None:
+            from app.config import JAVA_API_BASE_URL
+            java_api_base_url = JAVA_API_BASE_URL
+            
         schema = {
             "name": "search_test_cases",
             "description": "搜索历史测试用例，可以根据用例名称、需求ID、状态等条件搜索",
@@ -105,7 +109,11 @@ class SearchTestCasesTool(BaseTool):
 class GetRequirementDetailsTool(BaseTool):
     """获取需求详情工具"""
     
-    def __init__(self, java_api_base_url: str = "http://localhost:8080"):
+    def __init__(self, java_api_base_url: str = None):
+        if java_api_base_url is None:
+            from app.config import JAVA_API_BASE_URL
+            java_api_base_url = JAVA_API_BASE_URL
+            
         schema = {
             "name": "get_requirement_details",
             "description": "根据需求ID获取需求的详细信息，包括需求描述、状态、关联的测试用例等",
@@ -168,7 +176,11 @@ class GetRequirementDetailsTool(BaseTool):
 class ValidateTestCaseTool(BaseTool):
     """验证测试用例质量工具"""
     
-    def __init__(self, java_api_base_url: str = "http://localhost:8080"):
+    def __init__(self, java_api_base_url: str = None):
+        if java_api_base_url is None:
+            from app.config import JAVA_API_BASE_URL
+            java_api_base_url = JAVA_API_BASE_URL
+            
         schema = {
             "name": "validate_test_case",
             "description": "验证测试用例的质量，检查用例是否完整、是否符合规范等",

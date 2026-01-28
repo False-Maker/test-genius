@@ -122,25 +122,96 @@
               <el-form-item label="节点类型">
                 <el-input v-model="selectedNode.data.type" disabled />
               </el-form-item>
-              <!-- 根据节点类型显示不同的配置项 -->
-              <template v-if="selectedNode.data.type === 'llm_call'">
-                <el-form-item label="模型代码">
-                  <el-input v-model="selectedNode.data.config.model_code" />
-                </el-form-item>
-              </template>
-              <template v-else-if="selectedNode.data.type === 'template_select'">
-                <el-form-item label="测试分层">
-                  <el-input v-model="selectedNode.data.config.layer_code" />
-                </el-form-item>
-                <el-form-item label="测试方法">
-                  <el-input v-model="selectedNode.data.config.method_code" />
-                </el-form-item>
-              </template>
-              <template v-else-if="selectedNode.data.type === 'condition'">
-                <el-form-item label="条件表达式">
-                  <el-input v-model="selectedNode.data.config.condition" type="textarea" />
-                </el-form-item>
-              </template>
+              <!-- 动态配置组件 -->
+              <component
+                v-if="selectedNode.data.type === NODE_TYPES.REQUIREMENT_INPUT"
+                :is="RequirementInputConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.TEST_CASE_INPUT"
+                :is="TestCaseInputConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.FILE_UPLOAD"
+                :is="FileUploadConfig"
+                v-model="selectedNode.data.config"
+              />
+
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.REQUIREMENT_ANALYSIS"
+                :is="RequirementAnalysisConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.TEMPLATE_SELECT"
+                :is="TemplateSelectConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.PROMPT_GENERATE"
+                :is="PromptGenerateConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.LLM_CALL"
+                :is="LLMCallConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.RESULT_PARSE"
+                :is="ResultParseConfig"
+                v-model="selectedNode.data.config"
+              />
+
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.FORMAT_TRANSFORM"
+                :is="FormatTransformConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.DATA_CLEAN"
+                :is="DataCleanConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.DATA_MERGE"
+                :is="DataMergeConfig"
+                v-model="selectedNode.data.config"
+              />
+
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.CASE_SAVE"
+                :is="CaseSaveConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.REPORT_GENERATE"
+                :is="ReportGenerateConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.FILE_EXPORT"
+                :is="FileExportConfig"
+                v-model="selectedNode.data.config"
+              />
+
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.CONDITION"
+                :is="ConditionConfig"
+                v-model="selectedNode.data.config"
+              />
+              <component
+                v-else-if="selectedNode.data.type === NODE_TYPES.LOOP"
+                :is="LoopConfig"
+                v-model="selectedNode.data.config"
+              />
+              
+              <!-- 兜底提示 -->
+              <div v-else class="config-placeholder">
+                该节点类型暂未配置组件，请联系管理员
+              </div>
             </el-form>
             <el-button type="danger" size="small" @click="handleDeleteNode" style="width: 100%; margin-top: 10px">
               删除节点
@@ -165,11 +236,17 @@
         </el-card>
       </el-col>
     </el-row>
+    
+    <!-- 工作流选择对话框 -->
+    <WorkflowSelectionDialog
+      v-model="selectionDialogVisible"
+      @select="handleWorkflowSelect"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
 import { ElMessage, ElDialog } from 'element-plus'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
@@ -178,44 +255,43 @@ import { MiniMap } from '@vue-flow/minimap'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import { workflowApi, type WorkflowNode, type WorkflowEdge, type WorkflowConfig, type WorkflowDefinition } from '@/api/workflow'
+import WorkflowSelectionDialog from './components/WorkflowSelectionDialog.vue'
+import { NODE_TYPES, NODE_CONFIGS, NODE_CATEGORIES } from '@/config/workflow-nodes'
 
-// 节点定义
-const inputNodes = [
-  { type: 'requirement_input', name: '需求输入' },
-  { type: 'test_case_input', name: '用例输入' },
-  { type: 'file_upload', name: '文件上传' }
-]
+// 动态加载配置组件
+const RequirementInputConfig = defineAsyncComponent(() => import('./components/nodes/input/RequirementInputConfig.vue'))
+const TestCaseInputConfig = defineAsyncComponent(() => import('./components/nodes/input/TestCaseInputConfig.vue'))
+const FileUploadConfig = defineAsyncComponent(() => import('./components/nodes/input/FileUploadConfig.vue'))
+const RequirementAnalysisConfig = defineAsyncComponent(() => import('./components/nodes/process/RequirementAnalysisConfig.vue'))
+const TemplateSelectConfig = defineAsyncComponent(() => import('./components/nodes/process/TemplateSelectConfig.vue'))
+const PromptGenerateConfig = defineAsyncComponent(() => import('./components/nodes/process/PromptGenerateConfig.vue'))
+const LLMCallConfig = defineAsyncComponent(() => import('./components/nodes/process/LLMCallConfig.vue'))
+const ResultParseConfig = defineAsyncComponent(() => import('./components/nodes/process/ResultParseConfig.vue'))
+const FormatTransformConfig = defineAsyncComponent(() => import('./components/nodes/transform/FormatTransformConfig.vue'))
+const DataCleanConfig = defineAsyncComponent(() => import('./components/nodes/transform/DataCleanConfig.vue'))
+const DataMergeConfig = defineAsyncComponent(() => import('./components/nodes/transform/DataMergeConfig.vue'))
+const CaseSaveConfig = defineAsyncComponent(() => import('./components/nodes/output/CaseSaveConfig.vue'))
+const ReportGenerateConfig = defineAsyncComponent(() => import('./components/nodes/output/ReportGenerateConfig.vue'))
+const FileExportConfig = defineAsyncComponent(() => import('./components/nodes/output/FileExportConfig.vue'))
+const ConditionConfig = defineAsyncComponent(() => import('./components/nodes/control/ConditionConfig.vue'))
+const LoopConfig = defineAsyncComponent(() => import('./components/nodes/control/LoopConfig.vue'))
 
-const processNodes = [
-  { type: 'requirement_analysis', name: '需求分析' },
-  { type: 'template_select', name: '模板选择' },
-  { type: 'prompt_generate', name: '提示词生成' },
-  { type: 'llm_call', name: '模型调用' },
-  { type: 'result_parse', name: '结果解析' }
-]
-
-const transformNodes = [
-  { type: 'format_transform', name: '格式转换' },
-  { type: 'data_clean', name: '数据清洗' },
-  { type: 'data_merge', name: '数据合并' }
-]
-
-const outputNodes = [
-  { type: 'case_save', name: '用例保存' },
-  { type: 'report_generate', name: '报告生成' },
-  { type: 'file_export', name: '文件导出' }
-]
-
-const controlNodes = [
-  { type: 'condition', name: '条件判断' },
-  { type: 'loop', name: '循环节点' }
-]
+// 节点列表计算属性
+const getNodeListByCategory = (categoryKey: string) => {
+  return Object.keys(NODE_CONFIGS)
+    .filter(type => NODE_CONFIGS[type].category === categoryKey)
+    .map(type => ({
+      type,
+      ...NODE_CONFIGS[type]
+    }))
+}
 
 // Vue Flow 元素
 const elements = ref<any[]>([])
 const selectedNode = ref<any>(null)
 const selectedEdge = ref<any>(null)
 const currentWorkflowId = ref<number | null>(null)
+const selectionDialogVisible = ref(false)
 
 // 拖拽处理
 const handleDragStart = (event: DragEvent, node: { type: string; name: string }) => {
@@ -356,33 +432,28 @@ const workflowConfigToElements = (config: WorkflowConfig, workflowId?: number) =
 
 // 获取节点颜色
 const getNodeColor = (type: string): string => {
-  if (type.startsWith('requirement_input') || type.startsWith('test_case_input') || type.startsWith('file_upload')) {
-    return '#67C23A' // 绿色 - 输入节点
-  } else if (type.startsWith('requirement_analysis') || type.startsWith('template_select') || type.startsWith('prompt_generate') || type.startsWith('llm_call') || type.startsWith('result_parse')) {
-    return '#409EFF' // 蓝色 - 处理节点
-  } else if (type.startsWith('format_transform') || type.startsWith('data_clean') || type.startsWith('data_merge')) {
-    return '#E6A23C' // 橙色 - 转换节点
-  } else if (type.startsWith('case_save') || type.startsWith('report_generate') || type.startsWith('file_export')) {
-    return '#F56C6C' // 红色 - 输出节点
-  } else if (type.startsWith('condition') || type.startsWith('loop')) {
-    return '#909399' // 灰色 - 控制节点
-  }
-  return '#409EFF'
+  return NODE_CONFIGS[type]?.color || '#409EFF'
 }
 
 // 加载工作流
 const handleLoad = async () => {
+  selectionDialogVisible.value = true
+}
+
+// 选择工作流处理
+const handleWorkflowSelect = async (workflow: WorkflowDefinition) => {
   try {
-    const workflows = await workflowApi.getAllWorkflows()
-    if (workflows.data && workflows.data.length > 0) {
-      // 这里可以显示一个对话框让用户选择要加载的工作流
-      ElMessage.info('请选择要加载的工作流（功能待完善）')
-      // TODO: 实现工作流选择对话框
+    if (workflow.workflowConfig) {
+      const config = JSON.parse(workflow.workflowConfig)
+      elements.value = workflowConfigToElements(config, workflow.id)
+      currentWorkflowId.value = workflow.id
+      ElMessage.success(`已加载工作流: ${workflow.workflowName}`)
     } else {
-      ElMessage.warning('没有可用的工作流')
+      ElMessage.warning('该工作流配置为空')
     }
-  } catch (error: any) {
-    ElMessage.error('加载失败: ' + (error.message || '未知错误'))
+  } catch (error) {
+    console.error('加载工作流配置失败:', error)
+    ElMessage.error('加载工作流配置失败')
   }
 }
 

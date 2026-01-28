@@ -140,8 +140,10 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Robot, Tools } from '@element-plus/icons-vue'
 import { agentApi, type Agent, type AgentSession, type AgentMessage } from '@/api/agent'
+import { useUserStore } from '@/store/user'
 
 const route = useRoute()
+const userStore = useUserStore()
 
 const agentId = ref<number>(Number(route.params.agentId))
 const agentInfo = ref<Agent>()
@@ -179,11 +181,15 @@ const loadSessionList = async () => {
 // 创建会话
 const handleCreateSession = async () => {
   try {
+    // 从用户状态管理获取用户信息
+    const userId = userStore.userInfo?.id || 1
+    const userName = userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
+    
     const { data } = await agentApi.createSession({
       sessionCode: `SESSION-${Date.now()}`,
       agentId: agentId.value,
-      userId: 1, // TODO: 从用户信息获取
-      userName: '用户', // TODO: 从用户信息获取
+      userId: userId,
+      userName: userName,
       sessionTitle: `新会话 ${new Date().toLocaleString()}`,
       status: 'ACTIVE'
     })

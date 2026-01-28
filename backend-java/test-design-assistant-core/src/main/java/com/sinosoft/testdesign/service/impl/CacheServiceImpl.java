@@ -152,5 +152,21 @@ public class CacheServiceImpl implements CacheService {
             log.error("设置过期时间失败: key={}", key, e);
         }
     }
+    
+    @Override
+    public void clear() {
+        try {
+            // 获取所有键并删除（注意：生产环境应该使用更安全的方式，如指定前缀）
+            Set<String> keys = redisTemplate.keys("*");
+            if (keys != null && !keys.isEmpty()) {
+                redisTemplate.delete(keys);
+                log.info("清空所有缓存成功: count={}", keys.size());
+            } else {
+                log.debug("缓存已为空，无需清空");
+            }
+        } catch (Exception e) {
+            log.error("清空缓存失败", e);
+        }
+    }
 }
 

@@ -100,34 +100,34 @@ class TestCaseImportExportServiceImplTest {
         List<TestCase> testCases = new ArrayList<>();
         testCases.add(testCase);
         
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        
-        when(requirementRepository.findById(1L))
-            .thenReturn(Optional.of(requirement));
-        when(testLayerRepository.findById(1L))
-            .thenReturn(Optional.of(testLayer));
-        when(testMethodRepository.findById(1L))
-            .thenReturn(Optional.of(testMethod));
-        
-        // When
-        importExportService.exportToExcel(testCases, outputStream);
-        
-        // Then
-        assertTrue(outputStream.size() > 0);
-        verify(requirementRepository, atLeastOnce()).findById(anyLong());
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            when(requirementRepository.findById(1L))
+                .thenReturn(Optional.of(requirement));
+            when(testLayerRepository.findById(1L))
+                .thenReturn(Optional.of(testLayer));
+            when(testMethodRepository.findById(1L))
+                .thenReturn(Optional.of(testMethod));
+            
+            // When
+            importExportService.exportToExcel(testCases, outputStream);
+            
+            // Then
+            assertTrue(outputStream.size() > 0);
+            verify(requirementRepository, atLeastOnce()).findById(anyLong());
+        }
     }
     
     @Test
     @DisplayName("导出用例模板-成功")
     void testExportTemplate_Success() throws IOException {
         // Given
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        
-        // When
-        importExportService.exportTemplate(outputStream);
-        
-        // Then
-        assertTrue(outputStream.size() > 0);
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            // When
+            importExportService.exportTemplate(outputStream);
+            
+            // Then
+            assertTrue(outputStream.size() > 0);
+        }
     }
     
     @Test

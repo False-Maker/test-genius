@@ -2,6 +2,7 @@
 大模型调用API路由
 """
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from sqlalchemy.orm import Session
@@ -16,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 class LLMRequest(BaseModel):
     """模型调用请求"""
-    model_code: str
-    prompt: str
+    model_code: str = Field(..., min_length=1, description="模型代码")
+    prompt: str = Field(..., min_length=1, description="提示词")
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
 
@@ -67,7 +68,10 @@ async def call_llm(request: LLMRequest, db: Session = Depends(get_db)):
             raise HTTPException(status_code=400, detail="提示词不能为空")
         
         llm_service = LLMService(db)
-        result = llm_service.call_model(
+        
+        # 使用run_in_threadpool在线程池中运行同步阻塞函数，避免阻塞事件循环
+        result = await run_in_threadpool(
+            llm_service.call_model,
             model_code=request.model_code,
             prompt=request.prompt,
             max_tokens=request.max_tokens,
@@ -144,7 +148,8 @@ async def batch_call_llm(batch_request: BatchLLMRequest, db: Session = Depends(g
             for req in batch_request.requests
         ]
         
-        results = llm_service.batch_call(requests)
+        # 使用run_in_threadpool在线程池中运行同步阻塞函数
+        results = await run_in_threadpool(llm_service.batch_call, requests)
         
         elapsed_time = int((time.time() - start_time) * 1000)
         success_count = sum(1 for r in results if "error" not in r)

@@ -81,5 +81,10 @@ public interface CacheService {
      * @param timeout 过期时间（秒）
      */
     void expire(String key, long timeout);
+    
+    /**
+     * 清空所有缓存
+     */
+    void clear();
 }
 

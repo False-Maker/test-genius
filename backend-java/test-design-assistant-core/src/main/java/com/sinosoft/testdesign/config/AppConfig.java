@@ -24,10 +24,14 @@ public class AppConfig {
     
     /**
      * RestTemplate Bean
+     * 配置连接超时和读取超时
      */
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000); // 5秒连接超时
+        factory.setReadTimeout(30000);   // 30秒读取超时
+        return new RestTemplate(factory);
     }
     
     /**

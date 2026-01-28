@@ -7,6 +7,7 @@ import com.sinosoft.testdesign.repository.AlertRecordRepository;
 import com.sinosoft.testdesign.repository.AlertRuleRepository;
 import com.sinosoft.testdesign.repository.AppLogRepository;
 import com.sinosoft.testdesign.service.AlertService;
+import com.sinosoft.testdesign.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,6 +35,7 @@ public class AlertServiceImpl implements AlertService {
     private final AlertRuleRepository ruleRepository;
     private final AlertRecordRepository recordRepository;
     private final AppLogRepository appLogRepository;
+    private final NotificationService notificationService;
     
     @Override
     @Transactional
@@ -240,7 +242,18 @@ public class AlertServiceImpl implements AlertService {
         
         recordRepository.save(record);
         
-        // TODO: 发送通知
+        // 发送通知
+        try {
+            boolean sent = notificationService.sendAlertNotification(record);
+            if (sent) {
+                log.info("告警通知发送成功: alertId={}, ruleCode={}", record.getId(), record.getRuleCode());
+            } else {
+                log.warn("告警通知发送失败: alertId={}, ruleCode={}", record.getId(), record.getRuleCode());
+            }
+        } catch (Exception e) {
+            log.error("发送告警通知异常: alertId={}, ruleCode={}", record.getId(), record.getRuleCode(), e);
+        }
+        
         log.warn("告警触发: {}", record.getAlertTitle());
     }
     

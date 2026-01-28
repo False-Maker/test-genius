@@ -393,14 +393,19 @@ class KBSyncService:
         """
         # 导入文档处理服务
         from app.services.document_pipeline_service import DocumentPipelineService
-        from app.services.text_chunking_service import ChunkingStrategy
+        from app.services.text_chunking_service import ChunkingStrategy, TextChunkingService
         from app.services.embedding_service import EmbeddingService
-        
+        from app.services.document_parser_service import DocumentParserService
+
         # 创建文档处理管道
-        parser = None  # TODO: 创建DocumentParserService实例
-        chunking_service = None  # TODO: 创建TextChunkingService实例
+        parser = DocumentParserService()  # 实例化文档解析器
+        chunking_service = TextChunkingService(  # 实例化分块服务
+            strategy=ChunkingStrategy.PARAGRAPH,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap
+        )
         embedding_service = EmbeddingService(self.db)
-        
+
         pipeline = DocumentPipelineService(
             db=self.db,
             parser=parser,
@@ -651,4 +656,54 @@ class KBSyncService:
         except Exception as e:
             logger.error(f"创建同步日志失败: {str(e)}")
             self.db.rollback()
+    
+    def _get_sync_logs(self, kb_id: int) -> List[Dict]:
+        """
+        获取知识库的同步日志列表
+        
+        Args:
+            kb_id: 知识库ID
+            
+        Returns:
+            同步日志列表
+        """
+        try:
+            query_sql = """
+            SELECT 
+                id, kb_id, sync_type, source_path,
+                added_count, updated_count, deleted_count, failed_count,
+                status, error_message, start_time, end_time, create_time
+            FROM knowledge_base_sync_log
+            WHERE kb_id = :kb_id
+            ORDER BY create_time DESC
+            LIMIT 100
+            """
+            
+            result = self.db.execute(text(query_sql), {"kb_id": kb_id})
+            rows = result.fetchall()
+            
+            logs = []
+            for row in rows:
+                logs.append({
+                    "id": row[0],
+                    "kb_id": row[1],
+                    "sync_type": row[2],
+                    "source_path": row[3],
+                    "added_count": row[4],
+                    "updated_count": row[5],
+                    "deleted_count": row[6],
+                    "failed_count": row[7],
+                    "status": row[8],
+                    "error_message": row[9],
+                    "start_time": row[10].isoformat() if row[10] else None,
+                    "end_time": row[11].isoformat() if row[11] else None,
+                    "create_time": row[12].isoformat() if row[12] else None
+                })
+            
+            logger.info(f"获取同步日志成功: kb_id={kb_id}, 数量={len(logs)}")
+            return logs
+            
+        except Exception as e:
+            logger.error(f"获取同步日志失败: {str(e)}")
+            return []
 

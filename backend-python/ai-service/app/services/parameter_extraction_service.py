@@ -73,7 +73,8 @@ class ParameterExtractionService:
                 if default_model:
                     model_code = default_model.model_code
                 else:
-                    model_code = "DEEPSEEK_CHAT"  # 默认模型
+                    from app.config import DEFAULT_MODEL_CODE
+                    model_code = DEFAULT_MODEL_CODE  # 默认模型
             
             logger.info(f"使用模型提取参数: {model_code}")
             

@@ -148,17 +148,52 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
             // 构建分析提示词
             String prompt = buildAnalysisPrompt(requirementText);
             
-            // 调用大模型进行分析（这里简化处理，实际应该调用ModelCallService）
-            // 暂时返回模拟数据，后续可以集成大模型调用
+            // 调用Python AI服务进行需求分析
+            String url = aiServiceUrl + "/api/v1/requirement/analyze";
+            
+            Map<String, Object> request = new HashMap<>();
+            request.put("requirement_text", requirementText);
+            request.put("prompt", prompt);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url, HttpMethod.POST, entity, Map.class
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> body = response.getBody();
+                
+                // 解析Python服务返回的结果
+                if (Boolean.TRUE.equals(body.get("success"))) {
+                    Map<String, Object> analysisResult = (Map<String, Object>) body.get("result");
+                    if (analysisResult != null) {
+                        return analysisResult;
+                    }
+                }
+                
+                // 如果Python服务返回失败，使用降级策略
+                log.warn("Python AI服务返回失败，使用本地分析: {}", body.get("message"));
+            }
+            
+            // 降级策略：使用本地简单分析
             Map<String, Object> result = new HashMap<>();
             result.put("test_points", extractTestPointsFromText(requirementText));
             result.put("business_rules", extractBusinessRulesFromText(requirementText));
             result.put("key_info", extractKeyInfoFromText(requirementText));
             
             return result;
+            
         } catch (Exception e) {
-            log.error("调用AI分析服务失败: {}", e.getMessage(), e);
-            throw new BusinessException("AI分析服务调用失败: " + e.getMessage());
+            log.error("调用AI分析服务失败，使用降级策略: {}", e.getMessage());
+            // 降级策略：使用本地简单分析
+            Map<String, Object> result = new HashMap<>();
+            result.put("test_points", extractTestPointsFromText(requirementText));
+            result.put("business_rules", extractBusinessRulesFromText(requirementText));
+            result.put("key_info", extractKeyInfoFromText(requirementText));
+            return result;
         }
     }
     

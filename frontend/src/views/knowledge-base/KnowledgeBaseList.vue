@@ -4,6 +4,10 @@
       <h2>知识库管�?管理</h2>
       <div class="header-actions">
         <el-button @click="handleInit">初始化知识库</el-button>
+        <el-button @click="handleUpload">
+          <el-icon><Upload /></el-icon>
+          上传文档
+        </el-button>
         <el-button type="primary" @click="handleAdd">
           <el-icon><Plus /></el-icon>
           添加文档
@@ -144,6 +148,43 @@
       </template>
     </el-dialog>
 
+    <!-- 上传文档对话框 -->
+    <el-dialog
+      v-model="uploadDialogVisible"
+      title="上传文档"
+      width="600px"
+      @close="resetUploadForm"
+    >
+      <el-form label-width="120px">
+        <el-form-item label="选择文件">
+          <el-upload
+            ref="uploadRef"
+            :auto-upload="false"
+            :on-change="handleFileChange"
+            :file-list="fileList"
+            :limit="1"
+            drag
+          >
+            <el-icon class="el-icon--upload"><Upload /></el-icon>
+            <div class="el-upload__text">
+              将文件拖到此处，或<em>点击上传</em>
+            </div>
+            <template #tip>
+              <div class="el-upload__tip">
+                支持的文件格式：txt, md, pdf, doc, docx, ppt, pptx, html, csv
+              </div>
+            </template>
+          </el-upload>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="uploadDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="uploadLoading" @click="handleUploadSubmit">
+          上传
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 查看文档对话�?-->
     <el-dialog
       v-model="viewDialogVisible"
@@ -177,15 +218,20 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Upload } from '@element-plus/icons-vue'
 import { knowledgeBaseApi, type KnowledgeDocument } from '@/api/knowledgeBase'
 
 // 响应式数据据�?
 const loading = ref(false)
 const submitLoading = ref(false)
+const uploadLoading = ref(false)
 const addDialogVisible = ref(false)
+const uploadDialogVisible = ref(false)
 const viewDialogVisible = ref(false)
 const formRef = ref<FormInstance>()
+const uploadRef = ref()
+const fileList = ref<any[]>([])
+const currentKBId = ref<number>(1) // 默认知识库ID，实际应从配置或选择获取
 
 const documentList = ref<KnowledgeDocument[]>([])
 const searchType = ref<'semantic' | 'keyword'>('semantic')
@@ -245,6 +291,55 @@ const handleInit = async () => {
 const handleAdd = () => {
   resetForm()
   addDialogVisible.value = true
+}
+
+// 上传文档
+const handleUpload = () => {
+  resetUploadForm()
+  uploadDialogVisible.value = true
+}
+
+// 文件选择
+const handleFileChange = (file: any) => {
+  fileList.value = [file]
+}
+
+// 提交上传
+const handleUploadSubmit = async () => {
+  if (fileList.value.length === 0) {
+    ElMessage.warning('请选择要上传的文件')
+    return
+  }
+  
+  const file = fileList.value[0].raw
+  if (!file) {
+    ElMessage.warning('文件不存在')
+    return
+  }
+  
+  uploadLoading.value = true
+  try {
+    const response = await knowledgeBaseApi.uploadDocument(currentKBId.value, file)
+    
+    if (response.success) {
+      ElMessage.success('文档上传成功')
+      uploadDialogVisible.value = false
+      handleReset()
+    } else {
+      ElMessage.error(response.message || '上传失败')
+    }
+  } catch (error: any) {
+    console.error('上传失败:', error)
+    ElMessage.error(error.message || '上传失败')
+  } finally {
+    uploadLoading.value = false
+  }
+}
+
+// 重置上传表单
+const resetUploadForm = () => {
+  fileList.value = []
+  uploadRef.value?.clearFiles()
 }
 
 // 查看文档

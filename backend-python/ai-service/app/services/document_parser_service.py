@@ -567,7 +567,8 @@ class DocumentParserService:
             if hasattr(stat_info, 'st_ctime'):
                 import datetime
                 return datetime.datetime.fromtimestamp(stat_info.st_ctime).isoformat()
-        except:
+        except Exception as e:
+            logger.debug(f"获取文件创建时间失败: {file_path}, 错误: {str(e)}")
             pass
         return ""
     
@@ -577,7 +578,8 @@ class DocumentParserService:
             stat_info = os.stat(file_path)
             import datetime
             return datetime.datetime.fromtimestamp(stat_info.st_mtime).isoformat()
-        except:
+        except Exception as e:
+            logger.debug(f"获取文件修改时间失败: {file_path}, 错误: {str(e)}")
             return ""
     
     def _detect_language(self, text: str) -> str:

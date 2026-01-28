@@ -190,6 +190,9 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh, Star, Lightning, Coin } from '@element-plus/icons-vue'
 import { intelligentModelApi, type ModelConfig } from '@/api/intelligentModel'
+import { useConfigStore } from '@/store/config'
+
+const configStore = useConfigStore()
 
 // 选中的任务类型和场景
 const selectedTaskType = ref('CASE_GENERATION')
@@ -278,8 +281,14 @@ const handleRefreshScores = async () => {
 
 // 选择模型
 const handleSelectModel = (model: ModelConfig) => {
+  configStore.updateConfig({
+    selectedModel: {
+      modelCode: model.modelCode,
+      modelName: model.modelName,
+      provider: model.provider || 'unknown'
+    }
+  })
   ElMessage.success(`已选择模型: ${model.modelName}`)
-  // TODO: 这里可以集成到实际的模型调用中
 }
 
 // 查看详情

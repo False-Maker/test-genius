@@ -611,7 +611,7 @@ public class FlowDocumentGenerationServiceImpl implements FlowDocumentGeneration
             } else if (nodeLabel.startsWith("验证：")) {
                 // 验证节点使用六边形
                 mermaid.append("    ").append(nodeId)
-                        .append("{{""").append(nodeLabel).append("\"}}\n");
+                        .append("{{\"").append(nodeLabel).append("\"}}\n");
             } else {
                 // 普通步骤使用矩形
                 mermaid.append("    ").append(nodeId)

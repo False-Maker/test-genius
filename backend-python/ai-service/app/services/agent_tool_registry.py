@@ -158,7 +158,8 @@ class ToolRegistry:
                         "parameters": schema.get("parameters", {}),
                         "class_only": True
                     })
-                except:
+                except Exception as e:
+                    logger.debug(f"无法实例化工具类 {name} 以获取schema: {str(e)}")
                     pass
         
         return tools_info
@@ -253,25 +254,30 @@ class ToolRegistry:
         return loaded
 
 
+import threading
+
 # 全局工具注册表实例
 _global_registry = None
+_registry_lock = threading.Lock()
 
 
 def get_registry() -> ToolRegistry:
     """
-    获取全局工具注册表实例（单例模式）
+    获取全局工具注册表实例（单例模式，线程安全）
     
     Returns:
         工具注册表实例
     """
     global _global_registry
     if _global_registry is None:
-        _global_registry = ToolRegistry()
-        # 自动加载测试工具
-        _global_registry.load_from_directory(
-            "backend-python/ai-service/app/services/agent_tools",
-            "*.py"
-        )
+        with _registry_lock:
+            if _global_registry is None:
+                _global_registry = ToolRegistry()
+                # 自动加载测试工具
+                _global_registry.load_from_directory(
+                    "backend-python/ai-service/app/services/agent_tools",
+                    "*.py"
+                )
     return _global_registry
 
 

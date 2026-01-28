@@ -1,5 +1,9 @@
 package com.sinosoft.testdesign.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 模型调用服务接口
  * 实际调用Python服务，具体实现可后续开发
@@ -27,10 +31,10 @@ public interface ModelCallService {
     /**
      * 获取模型调用统计
      * @param modelCode 模型代码
-     * @param startDate 开始日期
-     * @param endDate 结束日期
+     * @param startTime 开始时间
+     * @param endTime 结束时间
      * @return 统计信息
      */
-    // ModelCallStatistics getModelStatistics(String modelCode, Date startDate, Date endDate);
+    // ModelCallStatistics getModelStatistics(String modelCode, LocalDateTime startTime, LocalDateTime endTime);
 }
 

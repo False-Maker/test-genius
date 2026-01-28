@@ -16,7 +16,7 @@ router = APIRouter(prefix="/agent", tags=["Agent"])
 
 class CreateSessionRequest(BaseModel):
     """创建会话请求"""
-    agent_id: int
+    agent_id: int = Field(..., gt=0, description="Agent ID")
     user_id: Optional[int] = None
     user_name: Optional[str] = None
     session_title: Optional[str] = None
@@ -24,8 +24,8 @@ class CreateSessionRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     """对话请求"""
-    session_id: int
-    message: str
+    session_id: int = Field(..., gt=0, description="会话ID")
+    message: str = Field(..., min_length=1, description="用户消息")
 
 
 class ChatResponse(BaseModel):

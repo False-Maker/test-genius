@@ -1,15 +1,19 @@
 package com.sinosoft.testdesign.service.impl;
 
+import com.sinosoft.testdesign.common.BusinessException;
+import com.sinosoft.testdesign.common.ResultCode;
 import com.sinosoft.testdesign.entity.AppLog;
 import com.sinosoft.testdesign.repository.AppLogRepository;
 import com.sinosoft.testdesign.service.MonitoringService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,10 +29,14 @@ import java.util.stream.Collectors;
 public class MonitoringServiceImpl implements MonitoringService {
     
     private final AppLogRepository appLogRepository;
+
+    @Value("${app.performance.monitoring-max-range-days:90}")
+    private int monitoringMaxRangeDays;
     
     @Override
     public Map<String, Object> getPerformanceStats(LocalDateTime startTime, LocalDateTime endTime,
                                                   String modelCode, String appType, Long userId) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         // 构建查询条件
@@ -85,6 +93,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     @Override
     public Map<String, Object> getResponseTimeStats(LocalDateTime startTime, LocalDateTime endTime,
                                                    String modelCode, String appType) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         Specification<AppLog> spec = buildSpecification(startTime, endTime, modelCode, appType, null);
@@ -119,6 +128,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     @Override
     public Map<String, Object> getSuccessRateStats(LocalDateTime startTime, LocalDateTime endTime,
                                                  String modelCode, String appType) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         Specification<AppLog> spec = buildSpecification(startTime, endTime, modelCode, appType, null);
@@ -149,6 +159,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     @Override
     public Map<String, Object> getTokenUsageStats(LocalDateTime startTime, LocalDateTime endTime,
                                                  String modelCode, String appType) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         Specification<AppLog> spec = buildSpecification(startTime, endTime, modelCode, appType, null);
@@ -174,6 +185,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     @Override
     public Map<String, Object> getCostStats(LocalDateTime startTime, LocalDateTime endTime,
                                           String modelCode, String appType, Long userId) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         Specification<AppLog> spec = buildSpecification(startTime, endTime, modelCode, appType, userId);
@@ -196,6 +208,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     
     @Override
     public Map<String, Object> getModelUsageStats(LocalDateTime startTime, LocalDateTime endTime) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         List<AppLog> logs = appLogRepository.findByTimestampBetweenOrderByTimestampDesc(startTime, endTime);
@@ -212,6 +225,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     
     @Override
     public Map<String, Object> getAppUsageStats(LocalDateTime startTime, LocalDateTime endTime) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> stats = new HashMap<>();
         
         List<AppLog> logs = appLogRepository.findByTimestampBetweenOrderByTimestampDesc(startTime, endTime);
@@ -230,6 +244,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     public Map<String, Object> getTimeSeriesData(LocalDateTime startTime, LocalDateTime endTime,
                                                 String interval, String metric,
                                                 String modelCode, String appType) {
+        validateTimeRange(startTime, endTime);
         Map<String, Object> result = new HashMap<>();
         
         Specification<AppLog> spec = buildSpecification(startTime, endTime, modelCode, appType, null);
@@ -283,6 +298,20 @@ public class MonitoringServiceImpl implements MonitoringService {
         return result;
     }
     
+    /**
+     * 校验查询时间跨度不超过配置上限（第四阶段 4.5）
+     */
+    private void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null || endTime == null) {
+            return;
+        }
+        long days = ChronoUnit.DAYS.between(startTime, endTime);
+        if (days > monitoringMaxRangeDays) {
+            throw new BusinessException(ResultCode.PARAM_ERROR.getCode(),
+                    "查询时间跨度不能超过 " + monitoringMaxRangeDays + " 天，请缩小 startTime 与 endTime 范围");
+        }
+    }
+
     /**
      * 构建查询条件
      */
@@ -359,7 +388,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
     @Override
     public java.util.List<Map<String, Object>> getModelPerformanceStats(LocalDateTime startTime, LocalDateTime endTime) {
-        // 构建查询条件
+        validateTimeRange(startTime, endTime);
         Specification<AppLog> spec = buildSpecification(startTime, endTime, null, null, null);
         List<AppLog> logs = appLogRepository.findAll(spec);
 
@@ -415,7 +444,9 @@ public class MonitoringServiceImpl implements MonitoringService {
                     .map(AppLog::getCost)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            double costPerRequest = totalRequests > 0 ? totalCost.doubleValue() / totalRequests : 0.0;
+            BigDecimal costPerRequest = totalRequests > 0 
+                    ? totalCost.divide(new BigDecimal(totalRequests), 6, java.math.RoundingMode.HALF_UP)
+                    : BigDecimal.ZERO;
 
             // 综合评分计算
             // 成功率权重40%，响应时间权重30%，成本权重30%
@@ -428,9 +459,9 @@ public class MonitoringServiceImpl implements MonitoringService {
             }
             // 成本分数（成本越低分数越高）
             double scoreCost = 0.0;
-            if (costPerRequest > 0) {
+            if (costPerRequest.doubleValue() > 0) {
                 // 假设0.1元为基准，成本越低分数越高
-                scoreCost = Math.max(0, (0.1 - costPerRequest) / 0.1) * 100 * 0.3;
+                scoreCost = Math.max(0, (0.1 - costPerRequest.doubleValue()) / 0.1) * 100 * 0.3;
             }
 
             double performanceScore = scoreRate + scoreTime + scoreCost;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.annotation.AppLog;
 import com.sinosoft.testdesign.entity.AppLog;
 import com.sinosoft.testdesign.service.AppLogService;
+import com.sinosoft.testdesign.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -278,16 +279,14 @@ public class AppLogAspect {
      * 获取当前用户ID
      */
     private Long getCurrentUserId() {
-        // TODO: 从SecurityContext或Session获取当前用户ID
-        return null;
+        return SecurityUtils.getCurrentUserId();
     }
     
     /**
      * 获取当前用户名
      */
     private String getCurrentUserName() {
-        // TODO: 从SecurityContext或Session获取当前用户名
-        return "SYSTEM";
+        return SecurityUtils.getCurrentUserName();
     }
     
     /**

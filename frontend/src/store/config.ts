@@ -11,6 +11,11 @@ export interface SystemConfig {
   pageSizes: number[]
   theme: 'light' | 'dark'
   language: 'zh-CN' | 'en-US'
+  selectedModel?: {
+    modelCode: string
+    modelName: string
+    provider: string
+  }
 }
 
 /**
@@ -52,6 +57,7 @@ export const useConfigStore = defineStore('config', () => {
   const pageSizes = computed(() => config.value.pageSizes)
   const theme = computed(() => config.value.theme)
   const language = computed(() => config.value.language)
+  const selectedModel = computed(() => config.value.selectedModel)
 
   // 更新配置
   const updateConfig = (newConfig: Partial<SystemConfig>) => {
@@ -93,6 +99,7 @@ export const useConfigStore = defineStore('config', () => {
     pageSizes,
     theme,
     language,
+    selectedModel,
     // 方法
     updateConfig,
     resetConfig,

@@ -111,6 +111,15 @@ app:
     base-path: ./uploads
     url-prefix: /api/v1/files
   
+  # 性能调优（第四阶段 4.5）
+  performance:
+    monitoring-max-range-days: 90   # 监控/日志查询允许的最大时间跨度（天）
+
+  # 模型限流与配额（第四阶段 4.2）
+  model-rate-limit:
+    per-window: 10   # 每窗口（1秒）最大请求数，Redis 限流
+    # 每日配额取自 ModelConfig.daily_limit，由调用方传入 tryAcquire
+
   # 功能开关配置
   feature-flag:
     model-fallback-enabled: true  # 是否启用模型降级策略

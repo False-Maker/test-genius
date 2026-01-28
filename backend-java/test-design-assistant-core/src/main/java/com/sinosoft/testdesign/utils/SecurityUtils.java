@@ -1,5 +1,12 @@
 package com.sinosoft.testdesign.utils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.MDC;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import java.util.regex.Pattern;
 
 /**
@@ -158,6 +165,124 @@ public class SecurityUtils {
         
         // 清理XSS风险
         return sanitizeXss(input);
+    }
+    
+    /**
+     * 获取当前用户ID
+     * 优先从SecurityContext获取，其次从请求头获取，最后从MDC获取
+     * 
+     * @return 用户ID，如果未认证返回null
+     */
+    public static Long getCurrentUserId() {
+        // 1. 尝试从SecurityContext获取
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()) {
+                Object principal = authentication.getPrincipal();
+                if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+                    org.springframework.security.core.userdetails.UserDetails userDetails = 
+                        (org.springframework.security.core.userdetails.UserDetails) principal;
+                    // 如果UserDetails包含用户ID字段，可以在这里提取
+                    // 例如：return ((CustomUserDetails) userDetails).getUserId();
+                }
+                // 如果principal是字符串（用户名），可以尝试解析
+                if (principal instanceof String) {
+                    try {
+                        return Long.parseLong((String) principal);
+                    } catch (NumberFormatException e) {
+                        // 忽略，继续其他方式
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 如果SecurityContext不可用，继续其他方式
+        }
+        
+        // 2. 尝试从请求头获取
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String userIdHeader = request.getHeader("X-User-Id");
+                if (userIdHeader != null && !userIdHeader.isEmpty()) {
+                    try {
+                        return Long.parseLong(userIdHeader);
+                    } catch (NumberFormatException e) {
+                        // 忽略
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 忽略
+        }
+        
+        // 3. 尝试从MDC获取
+        try {
+            String userIdStr = MDC.get("userId");
+            if (userIdStr != null && !userIdStr.isEmpty() && !"anonymous".equals(userIdStr)) {
+                try {
+                    return Long.parseLong(userIdStr);
+                } catch (NumberFormatException e) {
+                    // 忽略
+                }
+            }
+        } catch (Exception e) {
+            // 忽略
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 获取当前用户名
+     * 优先从SecurityContext获取，其次从请求头获取，最后从MDC获取
+     * 
+     * @return 用户名，如果未认证返回"SYSTEM"或"anonymous"
+     */
+    public static String getCurrentUserName() {
+        // 1. 尝试从SecurityContext获取
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()) {
+                Object principal = authentication.getPrincipal();
+                if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+                    org.springframework.security.core.userdetails.UserDetails userDetails = 
+                        (org.springframework.security.core.userdetails.UserDetails) principal;
+                    return userDetails.getUsername();
+                }
+                if (principal instanceof String) {
+                    return (String) principal;
+                }
+            }
+        } catch (Exception e) {
+            // 如果SecurityContext不可用，继续其他方式
+        }
+        
+        // 2. 尝试从请求头获取
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String userNameHeader = request.getHeader("X-User-Name");
+                if (userNameHeader != null && !userNameHeader.isEmpty()) {
+                    return userNameHeader;
+                }
+            }
+        } catch (Exception e) {
+            // 忽略
+        }
+        
+        // 3. 尝试从MDC获取
+        try {
+            String userName = MDC.get("userName");
+            if (userName != null && !userName.isEmpty() && !"anonymous".equals(userName)) {
+                return userName;
+            }
+        } catch (Exception e) {
+            // 忽略
+        }
+        
+        return "SYSTEM";
     }
 }
 

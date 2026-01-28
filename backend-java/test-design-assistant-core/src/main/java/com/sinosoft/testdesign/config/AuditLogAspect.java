@@ -3,6 +3,7 @@ package com.sinosoft.testdesign.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.entity.AuditLog;
 import com.sinosoft.testdesign.service.AuditLogService;
+import com.sinosoft.testdesign.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -202,31 +203,14 @@ public class AuditLogAspect {
      * 获取当前用户ID
      */
     private Long getCurrentUserId() {
-        // 注意：如果后续有认证系统（如Spring Security），可以从SecurityContext或Session获取当前用户ID
-        // 示例代码（需要引入Spring Security）：
-        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // if (authentication != null && authentication.isAuthenticated()) {
-        //     Object principal = authentication.getPrincipal();
-        //     if (principal instanceof UserDetails) {
-        //         UserDetails userDetails = (UserDetails) principal;
-        //         // 从UserDetails中获取用户ID
-        //     }
-        // }
-        // 或者从JWT Token中解析用户ID
-        return null;
+        return SecurityUtils.getCurrentUserId();
     }
     
     /**
      * 获取当前用户名
      */
     private String getCurrentUserName() {
-        // 注意：如果后续有认证系统（如Spring Security），可以从SecurityContext或Session获取当前用户名
-        // 示例代码（需要引入Spring Security）：
-        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // if (authentication != null && authentication.isAuthenticated()) {
-        //     return authentication.getName();
-        // }
-        return "SYSTEM";
+        return SecurityUtils.getCurrentUserName();
     }
     
     /**

@@ -137,7 +137,11 @@ public class KnowledgeBaseManageServiceImpl implements KnowledgeBaseManageServic
                 .orElseThrow(() -> new BusinessException("知识库不存在: " + id));
         
         // 检查是否有文档
-        // TODO: 添加文档数量检查逻辑
+        // 添加文档数量检查逻辑
+        long documentCount = countDocumentsByKbId(id);
+        if (documentCount > 0) {
+            throw new BusinessException("知识库中存在 " + documentCount + " 个文档，请先删除所有文档后再删除知识库");
+        }
         
         // 删除权限
         permissionRepository.deleteByKbIdAndUserId(id, null);
@@ -400,7 +404,28 @@ public class KnowledgeBaseManageServiceImpl implements KnowledgeBaseManageServic
         dto.setCreateTime(kb.getCreateTime());
         dto.setUpdateTime(kb.getUpdateTime());
         
-        // TODO: 查询文档数量、分块数量、最后同步时间
+        // 查询文档数量、分块数量、最后同步时间
+        try {
+            Map<String, Object> statistics = getKnowledgeBaseStatistics(kb.getId());
+            if (statistics != null) {
+                dto.setDocumentCount((Integer) statistics.getOrDefault("document_count", 0));
+                dto.setChunkCount((Integer) statistics.getOrDefault("chunk_count", 0));
+                
+                String lastSyncTimeStr = (String) statistics.get("last_sync_time");
+                if (lastSyncTimeStr != null && !lastSyncTimeStr.isEmpty()) {
+                    try {
+                        dto.setLastSyncTime(LocalDateTime.parse(lastSyncTimeStr.replace("Z", "")));
+                    } catch (Exception e) {
+                        log.warn("解析最后同步时间失败: {}", lastSyncTimeStr);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("查询知识库统计信息失败: kbId={}, 错误={}", kb.getId(), e.getMessage());
+            // 设置默认值
+            dto.setDocumentCount(0);
+            dto.setChunkCount(0);
+        }
         
         return dto;
     }
@@ -416,7 +441,21 @@ public class KnowledgeBaseManageServiceImpl implements KnowledgeBaseManageServic
         dto.setPermissionType(permission.getPermissionType());
         dto.setCreateTime(permission.getCreateTime());
         
-        // TODO: 查询知识库名称、用户名
+        // 查询知识库名称、用户名
+        try {
+            // 查询知识库信息
+            Optional<KnowledgeBase> kb = knowledgeBaseRepository.findById(permission.getKbId());
+            if (kb.isPresent()) {
+                dto.setKbCode(kb.get().getKbCode());
+                dto.setKbName(kb.get().getKbName());
+            }
+            
+            // 查询用户名（这里需要根据实际的用户服务来获取）
+            // 暂时使用用户ID作为用户名，实际应该调用用户服务
+            dto.setUserName("用户" + permission.getUserId());
+        } catch (Exception e) {
+            log.warn("查询权限相关信息失败: permissionId={}, 错误={}", permission.getId(), e.getMessage());
+        }
         
         return dto;
     }
@@ -447,6 +486,65 @@ public class KnowledgeBaseManageServiceImpl implements KnowledgeBaseManageServic
         }
         
         return dto;
+    }
+    
+    /**
+     * 统计知识库中的文档数量
+     */
+    private long countDocumentsByKbId(Long kbId) {
+        try {
+            // 通过AI服务查询文档数量
+            String url = aiServiceUrl + "/api/v1/knowledge/documents/count";
+            
+            Map<String, Object> request = new HashMap<>();
+            request.put("kb_id", kbId);
+            
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            org.springframework.http.HttpEntity<Map<String, Object>> entity = 
+                new org.springframework.http.HttpEntity<>(request, headers);
+            
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
+            
+            if (response != null && Boolean.TRUE.equals(response.get("success")) && response.containsKey("count")) {
+                return ((Number) response.get("count")).longValue();
+            }
+            
+            return 0L;
+        } catch (Exception e) {
+            log.error("查询知识库文档数量失败: kbId={}, 错误={}", kbId, e.getMessage());
+            // 如果查询失败，返回一个较大的值来阻止删除，保证数据安全
+            return Long.MAX_VALUE;
+        }
+    }
+    
+    /**
+     * 获取知识库统计信息
+     */
+    private Map<String, Object> getKnowledgeBaseStatistics(Long kbId) {
+        try {
+            // 通过AI服务查询统计信息
+            String url = aiServiceUrl + "/api/v1/knowledge/statistics";
+            
+            Map<String, Object> request = new HashMap<>();
+            request.put("kb_id", kbId);
+            
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            org.springframework.http.HttpEntity<Map<String, Object>> entity = 
+                new org.springframework.http.HttpEntity<>(request, headers);
+            
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
+            
+            if (response != null && Boolean.TRUE.equals(response.get("success"))) {
+                return response;
+            }
+            
+            return null;
+        } catch (Exception e) {
+            log.error("查询知识库统计信息失败: kbId={}, 错误={}", kbId, e.getMessage());
+            return null;
+        }
     }
 }
 

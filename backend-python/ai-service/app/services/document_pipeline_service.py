@@ -360,16 +360,64 @@ class DocumentPipelineService:
     
     def _build_document_index(self, doc_id: int, chunks: List[Dict]) -> bool:
         """步骤7：构建文档索引（用于快速检索）"""
-        logger.info("步骤7: 构建文档索引")
+        logger.info(f"步骤7: 构建文档索引, doc_id={doc_id}")
         
         try:
-            # 这里可以添加构建BM25索引的逻辑
-            # 暂时返回True
-            logger.info("文档索引构建完成")
+            # 简单实现：提取关键词并更新到metadata中
+            # 如果使用了Postgres pgvector, 向量索引已经在插入时建立
+            # 这里主要为了混合检索补充关键词
+            
+            for chunk in chunks:
+                content = chunk.get("content", "")
+                if not content:
+                    continue
+                    
+                # 提取关键词 (复用简单的频率提取逻辑)
+                keywords = self._extract_keywords(content)
+                
+                # 更新metadata
+                chunk_id = chunk.get("chunk_id")
+                if chunk_id:
+                    update_sql = """
+                    UPDATE knowledge_document_chunk
+                    SET metadata = jsonb_set(metadata, '{keywords}', :keywords::jsonb)
+                    WHERE chunk_id = :chunk_id
+                    """
+                    
+                    self.db.execute(
+                        text(update_sql),
+                        {
+                            "keywords": str(keywords).replace("'", '"'),
+                            "chunk_id": chunk_id
+                        }
+                    )
+            
+            self.db.commit()
+            logger.info("文档索引构建完成 (关键词提取)")
             return True
         except Exception as e:
             logger.error(f"文档索引构建失败: {str(e)}")
+            self.db.rollback()
             return False
+
+    def _extract_keywords(self, content: str, top_k: int = 10) -> List[str]:
+        """提取关键词 (简单实现)"""
+        import re
+        from collections import Counter
+        
+        # 提取中文词汇 (长度2-6)
+        words = re.findall(r'[\u4e00-\u9fa5]{2,6}', content)
+        # 提取英文单词 (长度3+)
+        words.extend(re.findall(r'\b[a-zA-Z]{3,}\b', content.lower()))
+        
+        # 过滤常用停用词 (简单列表)
+        stop_words = {'the', 'and', 'is', 'for', 'with', 'that', 'this', 'are', 
+                     '我们', '可以', '这个', '那个', '因为', '所以', '如果', '但是',
+                     '文档', '内容', '分块', '包含'}
+        words = [w for w in words if w not in stop_words]
+        
+        counter = Counter(words)
+        return [w for w, _ in counter.most_common(top_k)]
     
     def batch_process_documents(
         self,
