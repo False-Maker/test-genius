@@ -286,4 +286,425 @@ class KnowledgeBaseService:
         except Exception as e:
             logger.error(f"关键词检索失败: {str(e)}")
             return []
+    
+    def search_multi_kb(
+        self,
+        query_text: str,
+        kb_ids: List[int],
+        top_k: int = 10,
+        similarity_threshold: float = 0.7,
+        use_hybrid: bool = True,
+        use_rerank: bool = True,
+        doc_type: Optional[str] = None
+    ) -> List[Dict]:
+        """
+        多路召回（从多个知识库检索）
+        
+        Args:
+            query_text: 查询文本
+            kb_ids: 知识库ID列表
+            top_k: 每个知识库返回前K个结果（最终合并后取top_k）
+            similarity_threshold: 相似度阈值
+            use_hybrid: 是否使用混合检索（如果可用）
+            use_rerank: 是否使用重排序（如果可用）
+            doc_type: 文档类型过滤
+            
+        Returns:
+            合并后的检索结果列表
+        """
+        logger.info(f"开始多路召回: 查询='{query_text}', 知识库数={len(kb_ids)}, top_k={top_k}")
+        
+        if not kb_ids:
+            logger.warning("知识库ID列表为空")
+            return []
+        
+        # 获取每个知识库的检索结果
+        results_list = []
+        for kb_id in kb_ids:
+            try:
+                # 从单个知识库检索
+                kb_results = self._search_by_kb_id(
+                    query_text=query_text,
+                    kb_id=kb_id,
+                    top_k=top_k * 2,  # 获取更多结果以便合并
+                    similarity_threshold=similarity_threshold,
+                    use_hybrid=use_hybrid,
+                    doc_type=doc_type
+                )
+                results_list.append(kb_results)
+                logger.info(f"知识库{kb_id}检索到{len(kb_results)}个结果")
+            except Exception as e:
+                logger.error(f"从知识库{kb_id}检索失败: {str(e)}")
+                results_list.append([])
+        
+        # 合并多个检索结果
+        if len(results_list) > 1:
+            # 使用RRF方法合并结果
+            merged_results = self.merge_results(results_list, method="rrf")
+            # 限制最终返回数量
+            merged_results = merged_results[:top_k]
+        else:
+            merged_results = results_list[0] if results_list else []
+        
+        # 使用重排序（如果启用）
+        if use_rerank and merged_results:
+            try:
+                # 导入重排序服务
+                from app.services.reranker_service import RerankerService
+                
+                # 创建重排序器（如果尚未创建）
+                if not hasattr(self, 'reranker_service'):
+                    self.reranker_service = RerankerService()
+                
+                # 重排序
+                merged_results = self.reranker_service.rerank(
+                    query=query_text,
+                    documents=merged_results,
+                    top_k=top_k
+                )
+                logger.info(f"重排序完成")
+            except Exception as e:
+                logger.warning(f"重排序失败: {str(e)}，跳过重排序")
+        
+        logger.info(f"多路召回完成，最终返回{len(merged_results)}个结果")
+        return merged_results
+    
+    def _search_by_kb_id(
+        self,
+        query_text: str,
+        kb_id: int,
+        top_k: int = 10,
+        similarity_threshold: float = 0.7,
+        use_hybrid: bool = True,
+        doc_type: Optional[str] = None
+    ) -> List[Dict]:
+        """
+        从指定知识库检索
+        
+        Args:
+            query_text: 查询文本
+            kb_id: 知识库ID
+            top_k: 返回前K个结果
+            similarity_threshold: 相似度阈值
+            use_hybrid: 是否使用混合检索
+            doc_type: 文档类型过滤
+            
+        Returns:
+            检索结果列表
+        """
+        try:
+            # 构建SQL查询（带kb_id过滤）
+            search_sql = """
+            SELECT 
+                id, doc_code, doc_name, doc_type, doc_category, 
+                doc_content, doc_url, create_time,
+                1 - (embedding <=> :query_embedding::vector) as similarity
+            FROM knowledge_document
+            WHERE is_active = '1'
+            AND kb_id = :kb_id
+            """
+            
+            # 获取查询向量
+            query_embedding = self.embedding_service.get_embedding(query_text)
+            
+            if query_embedding is None:
+                logger.warning(f"查询文本向量化失败，使用关键词检索: kb_id={kb_id}")
+                # 降级到关键词检索
+                return self._search_by_kb_id_keyword(query_text, kb_id, top_k, doc_type)
+            
+            params = {
+                "kb_id": kb_id,
+                "query_embedding": str(query_embedding),
+                "similarity_threshold": similarity_threshold,
+                "top_k": top_k
+            }
+            
+            if doc_type:
+                search_sql += " AND doc_type = :doc_type"
+                params["doc_type"] = doc_type
+            
+            search_sql += """
+            AND (1 - (embedding <=> :query_embedding::vector)) >= :similarity_threshold
+            ORDER BY embedding <=> :query_embedding::vector
+            LIMIT :top_k
+            """
+            
+            result = self.db.execute(text(search_sql), params)
+            rows = result.fetchall()
+            
+            documents = []
+            for row in rows:
+                documents.append({
+                    "id": row[0],
+                    "doc_code": row[1],
+                    "doc_name": row[2],
+                    "doc_type": row[3],
+                    "doc_category": row[4],
+                    "doc_content": row[5],
+                    "doc_url": row[6],
+                    "create_time": row[7],
+                    "similarity": float(row[8]) if row[8] else 0.0,
+                    "kb_id": kb_id
+                })
+            
+            logger.info(f"知识库{kb_id}语义检索完成: 找到{len(documents)}个文档")
+            return documents
+            
+        except Exception as e:
+            logger.error(f"知识库{kb_id}检索失败: {str(e)}")
+            # 降级到关键词检索
+            return self._search_by_kb_id_keyword(query_text, kb_id, top_k, doc_type)
+    
+    def _search_by_kb_id_keyword(
+        self,
+        query_text: str,
+        kb_id: int,
+        top_k: int = 10,
+        doc_type: Optional[str] = None
+    ) -> List[Dict]:
+        """
+        从指定知识库关键词检索（降级方案）
+        
+        Args:
+            query_text: 查询文本
+            kb_id: 知识库ID
+            top_k: 返回前K个结果
+            doc_type: 文档类型过滤
+            
+        Returns:
+            检索结果列表
+        """
+        try:
+            search_sql = """
+            SELECT 
+                id, doc_code, doc_name, doc_type, doc_category, 
+                doc_content, doc_url, create_time
+            FROM knowledge_document
+            WHERE is_active = '1'
+            AND kb_id = :kb_id
+            AND (doc_name LIKE :keyword OR doc_content LIKE :keyword)
+            """
+            
+            params = {
+                "kb_id": kb_id,
+                "keyword": f"%{query_text}%",
+                "top_k": top_k
+            }
+            
+            if doc_type:
+                search_sql += " AND doc_type = :doc_type"
+                params["doc_type"] = doc_type
+            
+            search_sql += " ORDER BY create_time DESC LIMIT :top_k"
+            
+            result = self.db.execute(text(search_sql), params)
+            rows = result.fetchall()
+            
+            documents = []
+            for row in rows:
+                documents.append({
+                    "id": row[0],
+                    "doc_code": row[1],
+                    "doc_name": row[2],
+                    "doc_type": row[3],
+                    "doc_category": row[4],
+                    "doc_content": row[5],
+                    "doc_url": row[6],
+                    "create_time": row[7],
+                    "similarity": 0.0,  # 关键词检索没有相似度
+                    "kb_id": kb_id
+                })
+            
+            logger.info(f"知识库{kb_id}关键词检索完成: 找到{len(documents)}个文档")
+            return documents
+            
+        except Exception as e:
+            logger.error(f"知识库{kb_id}关键词检索失败: {str(e)}")
+            return []
+    
+    def merge_results(
+        self,
+        results_list: List[List[Dict]],
+        method: str = "rrf",
+        k: int = 60
+    ) -> List[Dict]:
+        """
+        合并多个检索结果
+        
+        Args:
+            results_list: 检索结果列表（每个元素是一个知识库的结果）
+            method: 合并方法（rrf/weighted/max）
+            k: RRF常数
+            
+        Returns:
+            合并后的结果列表
+        """
+        if not results_list:
+            return []
+        
+        logger.info(f"开始合并{len(results_list)}个检索结果，方法={method}")
+        
+        if method == "rrf":
+            merged = self._merge_rrf(results_list, k)
+        elif method == "weighted":
+            merged = self._merge_weighted(results_list)
+        elif method == "max":
+            merged = self._merge_max(results_list)
+        else:
+            logger.warning(f"未知的合并方法: {method}，使用rrf")
+            merged = self._merge_rrf(results_list, k)
+        
+        logger.info(f"合并完成，结果数={len(merged)}")
+        return merged
+    
+    def _merge_rrf(
+        self,
+        results_list: List[List[Dict]],
+        k: int = 60
+    ) -> List[Dict]:
+        """
+        使用Reciprocal Rank Fusion合并结果
+        
+        Args:
+            results_list: 检索结果列表
+            k: RRF常数
+            
+        Returns:
+            合并后的结果
+        """
+        # 构建文档RRF分数映射
+        doc_rrf_scores = {}  # doc_id -> (rrf_score, document, sources)
+        
+        # 处理每个知识库的结果
+        for kb_idx, results in enumerate(results_list):
+            for rank, result in enumerate(results):
+                doc_id = result["id"]
+                rrf_score = 1.0 / (k + rank + 1)
+                
+                if doc_id not in doc_rrf_scores:
+                    doc_rrf_scores[doc_id] = {
+                        "score": rrf_score,
+                        "document": result.copy(),
+                        "sources": [kb_idx]
+                    }
+                else:
+                    doc_rrf_scores[doc_id]["score"] += rrf_score
+                    doc_rrf_scores[doc_id]["sources"].append(kb_idx)
+        
+        # 按RRF分数排序
+        sorted_docs = sorted(
+            doc_rrf_scores.items(),
+            key=lambda x: x[1]["score"],
+            reverse=True
+        )
+        
+        # 返回结果
+        merged_results = []
+        for doc_id, data in sorted_docs:
+            result = data["document"]
+            result["rrf_score"] = data["score"]
+            result["kb_sources"] = data["sources"]  # 来源知识库索引列表
+            merged_results.append(result)
+        
+        return merged_results
+    
+    def _merge_weighted(self, results_list: List[List[Dict]]) -> List[Dict]:
+        """
+        使用加权融合合并结果
+        
+        Args:
+            results_list: 检索结果列表
+            
+        Returns:
+            合并后的结果
+        """
+        weight = 1.0 / len(results_list)  # 每个知识库的权重
+        
+        # 构建文档分数映射
+        doc_scores = {}  # doc_id -> (score, document, sources)
+        
+        # 处理每个知识库的结果
+        for kb_idx, results in enumerate(results_list):
+            for result in results:
+                doc_id = result["id"]
+                # 使用相似度或默认分数
+                score = result.get("similarity", 0.0) * weight
+                
+                if doc_id not in doc_scores:
+                    doc_scores[doc_id] = {
+                        "score": score,
+                        "document": result.copy(),
+                        "sources": [kb_idx]
+                    }
+                else:
+                    doc_scores[doc_id]["score"] += score
+                    if kb_idx not in doc_scores[doc_id]["sources"]:
+                        doc_scores[doc_id]["sources"].append(kb_idx)
+        
+        # 按分数排序
+        sorted_docs = sorted(
+            doc_scores.items(),
+            key=lambda x: x[1]["score"],
+            reverse=True
+        )
+        
+        # 返回结果
+        merged_results = []
+        for doc_id, data in sorted_docs:
+            result = data["document"]
+            result["weighted_score"] = data["score"]
+            result["kb_sources"] = data["sources"]
+            merged_results.append(result)
+        
+        return merged_results
+    
+    def _merge_max(self, results_list: List[List[Dict]]) -> List[Dict]:
+        """
+        使用最大分数融合合并结果
+        
+        Args:
+            results_list: 检索结果列表
+            
+        Returns:
+            合并后的结果
+        """
+        # 构建文档最大分数映射
+        doc_max_scores = {}  # doc_id -> (max_score, document, sources)
+        
+        # 处理每个知识库的结果
+        for kb_idx, results in enumerate(results_list):
+            for result in results:
+                doc_id = result["id"]
+                score = result.get("similarity", 0.0)
+                
+                if doc_id not in doc_max_scores:
+                    doc_max_scores[doc_id] = {
+                        "score": score,
+                        "document": result.copy(),
+                        "sources": [kb_idx]
+                    }
+                else:
+                    # 取最大值
+                    if score > doc_max_scores[doc_id]["score"]:
+                        doc_max_scores[doc_id]["score"] = score
+                        doc_max_scores[doc_id]["document"] = result.copy()
+                    if kb_idx not in doc_max_scores[doc_id]["sources"]:
+                        doc_max_scores[doc_id]["sources"].append(kb_idx)
+        
+        # 按最大分数排序
+        sorted_docs = sorted(
+            doc_max_scores.items(),
+            key=lambda x: x[1]["score"],
+            reverse=True
+        )
+        
+        # 返回结果
+        merged_results = []
+        for doc_id, data in sorted_docs:
+            result = data["document"]
+            result["max_score"] = data["score"]
+            result["kb_sources"] = data["sources"]
+            merged_results.append(result)
+        
+        return merged_results
 

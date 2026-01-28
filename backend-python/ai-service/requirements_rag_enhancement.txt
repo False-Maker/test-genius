@@ -1,0 +1,44 @@
+# RAG增强功能依赖包
+# 安装命令: pip install -r requirements_rag_enhancement.txt
+
+# 文档解析
+python-pptx>=0.6.21        # PPT/PPTX解析
+markdown>=3.5.0            # Markdown解析
+beautifulsoup4>=4.12.0      # HTML解析
+lxml>=4.9.0                # BeautifulSoup解析器
+
+# 文本分块
+spacy>=3.7.0                # NLP处理（语义分块）
+# 需要单独安装中文模型: python -m spacy download zh_core_web_sm
+
+# BM25检索
+jieba>=0.42.1               # 中文分词
+
+# 重排序（可选）
+sentence-transformers>=2.2.0  # 交叉编码器（用于重排序）
+# 建议使用的模型:
+# - BAAI/bge-reranker-large（推荐，中文效果好）
+# - BAAI/bge-reranker-base（较小）
+# - cross-encoder/ms-marco-MiniLM-L-6-v2（英文）
+
+# OCR（可选）
+pytesseract>=0.3.10         # OCR文字识别
+Pillow>=10.0.0              # 图像处理
+
+# 现有依赖（保持兼容）
+python-docx>=1.1.0          # Word文档解析
+PyPDF2>=3.0.0              # PDF文档解析
+
+# 注意事项:
+# 1. spacy中文模型需要单独安装:
+#    python -m spacy download zh_core_web_sm
+#
+# 2. sentence-transformers需要较新的PyTorch版本
+#
+# 3. 如果使用GPU，需要安装CUDA版本的PyTorch
+#
+# 4. OCR功能需要安装tesseract:
+#    Windows: 下载并安装 https://github.com/UB-Mannheim/tesseract/wiki
+#    Linux: sudo apt-get install tesseract-ocr
+#    Mac: brew install tesseract
+
