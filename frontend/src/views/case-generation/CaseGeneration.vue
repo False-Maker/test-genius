@@ -358,6 +358,142 @@
 
     </el-card>
 
+
+    <!-- 用例生成任务列表 -->
+    <el-card class="task-list-card" style="margin-top: 20px">
+      <template #header>
+        <div class="card-header">
+          <span>用例生成任务列表</span>
+          <el-button link type="primary" @click="handleRefreshTaskList">
+            刷新列表
+          </el-button>
+        </div>
+      </template>
+
+      <el-table
+        v-loading="taskListLoading"
+        :data="taskList"
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column prop="taskCode" label="任务编号" width="180" />
+        <el-table-column prop="requirementName" label="需求名称" min-width="200" show-overflow-tooltip />
+        <el-table-column label="生成信息" min-width="200">
+          <template #default="scope">
+            {{ scope.row.layerName }} | {{ scope.row.methodName }} | {{ scope.row.modelCode }}
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="scope">
+            <el-tag :type="getTaskStatusType(scope.row.taskStatus)">
+              {{ getTaskStatusText(scope.row.taskStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="用例数" width="120">
+          <template #default="scope">
+            {{ scope.row.successCases }}/{{ scope.row.totalCases }}
+            <span v-if="scope.row.failCases > 0" style="color: #F56C6C; margin-left: 5px;">
+              (失败{{ scope.row.failCases }})
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column label="操作" width="250" fixed="right">
+          <template #default="scope">
+            <el-button size="small" link type="primary" @click="viewTaskDetail(scope.row)">
+              查看详情
+            </el-button>
+            <el-button
+              size="small"
+              link
+              type="success"
+              :disabled="scope.row.taskStatus !== 'SUCCESS'"
+              @click="exportTaskToExcel(scope.row)"
+            >
+              导出Excel
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination">
+        <el-pagination
+          v-model:current-page="taskPagination.page"
+          v-model:page-size="taskPagination.size"
+          :total="taskPagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
+      </div>
+    </el-card>
+
+
+    <!-- 任务详情对话框 -->
+    <el-dialog
+      v-model="taskDetailDialogVisible"
+      title="任务详情"
+      width="1000px"
+      @close="currentTaskDetail = null"
+    >
+      <el-descriptions v-loading="taskDetailLoading" :column="2" border>
+        <el-descriptions-item label="任务编号">{{ currentTaskDetail?.taskCode }}</el-descriptions-item>
+        <el-descriptions-item label="任务状态">
+          <el-tag :type="getTaskStatusType(currentTaskDetail?.taskStatus)">
+            {{ getTaskStatusText(currentTaskDetail?.taskStatus) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="需求编号">{{ currentTaskDetail?.requirementCode }}</el-descriptions-item>
+        <el-descriptions-item label="需求名称">{{ currentTaskDetail?.requirementName }}</el-descriptions-item>
+        <el-descriptions-item label="测试分层">{{ currentTaskDetail?.layerName }}</el-descriptions-item>
+        <el-descriptions-item label="测试方法">{{ currentTaskDetail?.methodName }}</el-descriptions-item>
+        <el-descriptions-item label="模型配置">{{ currentTaskDetail?.modelCode }}</el-descriptions-item>
+        <el-descriptions-item label="用例统计">
+          {{ currentTaskDetail?.totalCases }}个
+          (成功: {{ currentTaskDetail?.successCases }}, 失败: {{ currentTaskDetail?.failCases }})
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ currentTaskDetail?.createTime }}</el-descriptions-item>
+        <el-descriptions-item label="完成时间">{{ currentTaskDetail?.completeTime || '-' }}</el-descriptions-item>
+      </el-descriptions>
+
+      <el-divider content-position="left">生成的用例列表</el-divider>
+
+      <el-table
+        :data="currentTaskDetail?.cases || []"
+        stripe
+        style="width: 100%"
+        max-height="400"
+      >
+        <el-table-column prop="caseCode" label="用例编码" width="150" />
+        <el-table-column prop="caseName" label="用例名称" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="caseType" label="用例类型" width="100" />
+        <el-table-column prop="casePriority" label="优先级" width="100">
+          <template #default="scope">
+            <el-tag v-if="scope.row.casePriority" :type="getPriorityType(scope.row.casePriority)">
+              {{ scope.row.casePriority }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="preCondition" label="前置条件" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="testStep" label="测试步骤" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="expectedResult" label="预期结果" min-width="150" show-overflow-tooltip />
+      </el-table>
+
+      <template #footer>
+        <el-button @click="taskDetailDialogVisible = false">关闭</el-button>
+        <el-button
+          type="primary"
+          :disabled="currentTaskDetail?.taskStatus !== 'SUCCESS'"
+          @click="currentTaskDetail && exportTaskToExcel(currentTaskDetail)"
+        >
+          导出Excel
+        </el-button>
+      </template>
+    </el-dialog>
+
   </div>
 
 </template>
@@ -372,7 +508,7 @@ import { useRouter } from 'vue-router'
 
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
-import { caseGenerationApi, type CaseGenerationRequest, type GenerationTask } from '@/api/caseGeneration'
+import { caseGenerationApi, type CaseGenerationRequest, type GenerationTask, type TaskListItem, type TaskDetail, type TaskListQuery } from '@/api/caseGeneration'
 
 import { workflowApi, type WorkflowDefinition } from '@/api/workflow'
 
@@ -448,6 +584,21 @@ const router = useRouter()
 
 const generationResult = ref<GenerationTask | null>(null)
 
+// 任务列表相关
+const taskList = ref<TaskListItem[]>([])
+const taskListLoading = ref(false)
+const taskPagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+
+// 任务详情对话框
+const taskDetailDialogVisible = ref(false)
+const taskDetailLoading = ref(false)
+const currentTaskDetail = ref<TaskDetail | null>(null)
+
+
 let pollTimer: number | null = null
 
 
@@ -508,6 +659,112 @@ const getStatusType = (status?: string) => {
 
 }
 
+// 获取任务状态文本
+const getTaskStatusText = (status?: string) => {
+  const statusMap: Record<string, string> = {
+    PENDING: '待处理',
+    PROCESSING: '处理中',
+    SUCCESS: '成功',
+    FAILED: '失败'
+  }
+  return statusMap[status || ''] || status || '-'
+}
+
+// 获取任务状态类型
+const getTaskStatusType = (status?: string) => {
+  const typeMap: Record<string, string> = {
+    PENDING: 'info',
+    PROCESSING: 'warning',
+    SUCCESS: 'success',
+    FAILED: 'danger'
+  }
+  return typeMap[status || ''] || ''
+}
+
+// 获取优先级类型
+const getPriorityType = (priority?: string) => {
+  const typeMap: Record<string, string> = {
+    高: 'danger',
+    中: 'warning',
+    低: 'info'
+  }
+  return typeMap[priority || ''] || ''
+}
+
+// 加载任务列表
+const loadTaskList = async () => {
+  taskListLoading.value = true
+  try {
+    const query: TaskListQuery = {
+      page: taskPagination.page,
+      size: taskPagination.size
+    }
+
+    const response = await caseGenerationApi.getTaskList(query)
+    if (response.data) {
+      taskList.value = response.data.list || []
+      taskPagination.total = response.data.total
+    }
+  } catch (error) {
+    console.error('加载任务列表失败:', error)
+    ElMessage.error('加载任务列表失败')
+  } finally {
+    taskListLoading.value = false
+  }
+}
+
+// 查看任务详情
+const viewTaskDetail = async (task: TaskListItem) => {
+  taskDetailDialogVisible.value = true
+  taskDetailLoading.value = true
+  try {
+    const response = await caseGenerationApi.getTaskDetail(task.id)
+    if (response.data) {
+      currentTaskDetail.value = response.data
+    }
+  } catch (error) {
+    console.error('加载任务详情失败:', error)
+    ElMessage.error('加载任务详情失败')
+  } finally {
+    taskDetailLoading.value = false
+  }
+}
+
+// 导出任务用例到Excel
+const exportTaskToExcel = async (task: TaskListItem) => {
+  try {
+    const response = await caseGenerationApi.exportTaskToExcel(task.id)
+
+    // 创建Blob对象并下载
+    const blob = new Blob([response], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `用例生成任务_${task.taskCode}.xlsx`
+    link.click()
+
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败，请稍后重试')
+  }
+}
+
+// 分页变化
+const handlePageChange = (page: number) => {
+  taskPagination.page = page
+  loadTaskList()
+}
+
+const handleSizeChange = (size: number) => {
+  taskPagination.size = size
+  taskPagination.page = 1
+  loadTaskList()
+}
 
 
 // 加载所有数据（使用store的缓存机制）

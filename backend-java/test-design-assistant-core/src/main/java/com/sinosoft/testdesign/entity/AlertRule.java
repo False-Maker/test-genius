@@ -73,7 +73,10 @@ public class AlertRule {
     
     @Column(name = "notification_recipients", columnDefinition = "TEXT")
     private String notificationRecipients; // 通知接收人（JSON格式）
-    
+
+    @Column(name = "webhook_url", length = 500)
+    private String webhookUrl; // Webhook URL（可选）
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description; // 描述
     

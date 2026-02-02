@@ -1,17 +1,20 @@
 package com.sinosoft.testdesign.controller;
 
 import com.sinosoft.testdesign.common.Result;
-import com.sinosoft.testdesign.dto.BatchCaseGenerationRequest;
-import com.sinosoft.testdesign.dto.BatchCaseGenerationResult;
-import com.sinosoft.testdesign.dto.CaseGenerationRequest;
-import com.sinosoft.testdesign.dto.CaseGenerationResult;
-import com.sinosoft.testdesign.dto.GenerationTaskDTO;
+import com.sinosoft.testdesign.dto.*;
 import com.sinosoft.testdesign.service.IntelligentCaseGenerationService;
+import com.sinosoft.testdesign.util.CaseExportUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -54,6 +57,44 @@ public class CaseGenerationController {
     public Result<List<GenerationTaskDTO>> getBatchGenerationTasks(@RequestBody List<Long> taskIds) {
         List<GenerationTaskDTO> tasks = caseGenerationService.getBatchGenerationTasks(taskIds);
         return Result.success(tasks);
+    }
+
+    @Operation(summary = "查询任务列表", description = "分页查询用例生成任务列表")
+    @PostMapping("/tasks/list")
+    public Result<PageResult<TaskListDTO>> getTaskList(@RequestBody TaskListQueryDTO query) {
+        PageResult<TaskListDTO> result = caseGenerationService.getTaskList(query);
+        return Result.success(result);
+    }
+
+    @Operation(summary = "查询任务详情", description = "查询用例生成任务详情，包含生成的用例列表")
+    @GetMapping("/tasks/{taskId}")
+    public Result<TaskDetailDTO> getTaskDetail(@PathVariable Long taskId) {
+        TaskDetailDTO detail = caseGenerationService.getTaskDetail(taskId);
+        return Result.success(detail);
+    }
+
+    @Operation(summary = "导出任务用例到Excel", description = "将指定任务生成的用例导出为Excel文件")
+    @GetMapping("/tasks/{taskId}/export-excel")
+    public void exportTaskToExcel(@PathVariable Long taskId, HttpServletResponse response) throws IOException {
+        // 查询任务详情
+        TaskDetailDTO taskDetail = caseGenerationService.getTaskDetail(taskId);
+
+        // 生成Excel
+        byte[] excelData = CaseExportUtil.exportTaskToExcel(taskDetail);
+
+        // 设置响应头
+        String fileName = URLEncoder.encode(
+                "用例生成任务_" + taskDetail.getTaskCode() + ".xlsx",
+                StandardCharsets.UTF_8
+        );
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + fileName + "\"");
+        response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(excelData.length));
+
+        // 写入响应
+        response.getOutputStream().write(excelData);
+        response.getOutputStream().flush();
     }
 }
 

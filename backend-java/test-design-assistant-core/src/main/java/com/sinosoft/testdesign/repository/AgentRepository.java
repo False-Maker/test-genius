@@ -21,6 +21,11 @@ public interface AgentRepository extends JpaRepository<Agent, Long> {
     Optional<Agent> findByAgentCode(String agentCode);
     
     /**
+     * 根据启用状态查询
+     */
+    java.util.List<Agent> findByIsActive(String isActive);
+
+    /**
      * 根据Agent类型查询
      */
     java.util.List<Agent> findByAgentTypeAndIsActive(String agentType, String isActive);

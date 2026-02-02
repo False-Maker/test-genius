@@ -72,7 +72,7 @@ class ModelRateLimitServiceImplTest {
     @Test
     @DisplayName("tryAcquire-配额用尽拒绝")
     void tryAcquire_QuotaExceeded_Rejected() {
-        when(valueOps.get(argThat(s -> s != null && s.contains("quota")))).thenReturn("100");
+        when(valueOps.get(argThat((String s) -> s != null && s.contains("quota")))).thenReturn("100");
 
         boolean allowed = modelRateLimitService.tryAcquire(1L, "deepseek", 100);
 

@@ -1,10 +1,7 @@
 package com.sinosoft.testdesign.service;
 
-import com.sinosoft.testdesign.dto.BatchCaseGenerationRequest;
-import com.sinosoft.testdesign.dto.BatchCaseGenerationResult;
-import com.sinosoft.testdesign.dto.CaseGenerationRequest;
-import com.sinosoft.testdesign.dto.CaseGenerationResult;
-import com.sinosoft.testdesign.dto.GenerationTaskDTO;
+import com.sinosoft.testdesign.dto.*;
+import com.sinosoft.testdesign.entity.TestCase;
 
 import java.util.List;
 
@@ -49,5 +46,19 @@ public interface IntelligentCaseGenerationService {
      * @param taskId 任务ID
      */
     void executeGenerationTask(Long taskId);
+
+    /**
+     * 查询用例生成任务列表（分页）
+     * @param query 查询条件
+     * @return 任务列表
+     */
+    PageResult<TaskListDTO> getTaskList(TaskListQueryDTO query);
+
+    /**
+     * 查询用例生成任务详情
+     * @param taskId 任务ID
+     * @return 任务详情（包含生成的用例列表）
+     */
+    TaskDetailDTO getTaskDetail(Long taskId);
 }
 

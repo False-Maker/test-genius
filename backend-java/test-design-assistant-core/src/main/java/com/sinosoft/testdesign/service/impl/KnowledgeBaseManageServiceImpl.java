@@ -375,7 +375,7 @@ public class KnowledgeBaseManageServiceImpl implements KnowledgeBaseManageServic
         if (!existingKbs.isEmpty()) {
             String lastCode = existingKbs.get(0).getKbCode();
             try {
-                lastSeq = Integer.parseInt(lastCode.substring(lastCode.lastIndexOf("-") + 1));
+                int lastSeq = Integer.parseInt(lastCode.substring(lastCode.lastIndexOf("-") + 1));
                 nextSeq = lastSeq + 1;
             } catch (Exception e) {
                 log.warn("解析最后一个编码失败，使用默认序号: {}", lastCode, e);

@@ -55,7 +55,7 @@
             >
               <div class="message-header">
                 <el-icon v-if="message.role === 'user'"><User /></el-icon>
-                <el-icon v-else><Robot /></el-icon>
+                <el-icon v-else><Service /></el-icon>
                 <span class="message-role">
                   {{ message.role === 'user' ? '用户' : message.role === 'assistant' ? 'Agent' : '工具' }}
                 </span>

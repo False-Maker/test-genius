@@ -36,7 +36,7 @@ public class ModelRateLimitServiceImpl implements ModelRateLimitService {
     public boolean tryAcquire(Long userId, String modelCode, int dailyLimit) {
         String uid = userId != null ? String.valueOf(userId) : "anon";
         String rateKey = PREFIX_RATE + uid + ":" + modelCode;
-        String quotaKey = PREFIX_QUOTA + uid + ":" + modelCode + ":" + LocalDate.now());
+        String quotaKey = PREFIX_QUOTA + uid + ":" + modelCode + ":" + LocalDate.now();
 
         try {
             if (dailyLimit > 0) {

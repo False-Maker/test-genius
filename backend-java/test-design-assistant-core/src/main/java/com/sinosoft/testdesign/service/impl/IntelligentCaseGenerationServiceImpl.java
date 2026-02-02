@@ -3,11 +3,8 @@ package com.sinosoft.testdesign.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.BusinessException;
-import com.sinosoft.testdesign.dto.BatchCaseGenerationRequest;
-import com.sinosoft.testdesign.dto.BatchCaseGenerationResult;
-import com.sinosoft.testdesign.dto.CaseGenerationRequest;
-import com.sinosoft.testdesign.dto.CaseGenerationResult;
-import com.sinosoft.testdesign.dto.GenerationTaskDTO;
+import com.sinosoft.testdesign.dto.*;
+import com.sinosoft.testdesign.entity.*;
 import com.sinosoft.testdesign.entity.*;
 import com.sinosoft.testdesign.enums.CaseStatus;
 import com.sinosoft.testdesign.repository.*;
@@ -569,6 +566,167 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
         }
         
         throw new BusinessException("创建任务失败");
+    }
+
+    @Override
+    public PageResult<TaskListDTO> getTaskList(TaskListQueryDTO query) {
+        log.info("查询用例生成任务列表: {}", query);
+
+        // 构建查询条件
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                query.getPage() - 1, query.getSize(),
+                org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Direction.DESC, "createTime"
+                )
+        );
+
+        // 使用JPA的Specification动态查询
+        org.springframework.data.jpa.domain.Specification<CaseGenerationTask> spec = (root, criteriaQuery, criteriaBuilder) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+            if (StringUtils.hasText(query.getTaskStatus())) {
+                predicates.add(criteriaBuilder.equal(root.get("taskStatus"), query.getTaskStatus()));
+            }
+
+            if (query.getRequirementId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("requirementId"), query.getRequirementId().longValue()));
+            }
+
+            if (StringUtils.hasText(query.getTaskCode())) {
+                predicates.add(criteriaBuilder.like(root.get("taskCode"), "%" + query.getTaskCode() + "%"));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        org.springframework.data.domain.Page<CaseGenerationTask> taskPage = taskRepository.findAll(spec, pageable);
+
+        // 转换为DTO列表
+        List<TaskListDTO> dtoList = new ArrayList<>();
+        for (CaseGenerationTask task : taskPage.getContent()) {
+            TaskListDTO dto = convertToTaskListDTO(task);
+            dtoList.add(dto);
+        }
+
+        PageResult<TaskListDTO> result = new PageResult<>();
+        result.setList(dtoList);
+        result.setTotal(taskPage.getTotalElements());
+        result.setPage(query.getPage());
+        result.setSize(query.getSize());
+
+        return result;
+    }
+
+    @Override
+    public TaskDetailDTO getTaskDetail(Long taskId) {
+        log.info("查询用例生成任务详情: taskId={}", taskId);
+
+        // 查询任务
+        CaseGenerationTask task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new BusinessException("任务不存在: " + taskId));
+
+        // 转换为DTO
+        TaskDetailDTO dto = new TaskDetailDTO();
+        dto.setId(task.getId());
+        dto.setTaskCode(task.getTaskCode());
+        dto.setRequirementId(task.getRequirementId());
+        dto.setLayerId(task.getLayerId());
+        dto.setMethodId(task.getMethodId());
+        dto.setTemplateId(task.getTemplateId());
+        dto.setModelCode(task.getModelCode());
+        dto.setTaskStatus(task.getTaskStatus());
+        dto.setProgress(task.getProgress());
+        dto.setTotalCases(task.getTotalCases());
+        dto.setSuccessCases(task.getSuccessCases());
+        dto.setFailCases(task.getFailCases());
+        dto.setErrorMessage(task.getErrorMessage());
+        dto.setCreateTime(task.getCreateTime());
+        dto.setUpdateTime(task.getUpdateTime());
+        dto.setCompleteTime(task.getCompleteTime());
+
+        // 查询需求信息
+        if (task.getRequirementId() != null) {
+            TestRequirement requirement = requirementRepository.findById(task.getRequirementId()).orElse(null);
+            if (requirement != null) {
+                dto.setRequirementName(requirement.getRequirementName());
+                dto.setRequirementCode(requirement.getRequirementCode());
+                dto.setRequirementDescription(requirement.getRequirementDescription());
+            }
+        }
+
+        // 查询测试分层信息
+        if (task.getLayerId() != null) {
+            TestLayer layer = layerRepository.findById(task.getLayerId()).orElse(null);
+            if (layer != null) {
+                dto.setLayerName(layer.getLayerName());
+                dto.setLayerCode(layer.getLayerCode());
+            }
+        }
+
+        // 查询测试方法信息
+        if (task.getMethodId() != null) {
+            TestDesignMethod method = methodRepository.findById(task.getMethodId()).orElse(null);
+            if (method != null) {
+                dto.setMethodName(method.getMethodName());
+                dto.setMethodCode(method.getMethodCode());
+            }
+        }
+
+        // 查询生成的用例列表
+        List<TestCase> cases = testCaseRepository.findByRequirementId(task.getRequirementId());
+        dto.setCases(cases);
+
+        return dto;
+    }
+
+    /**
+     * 转换为任务列表DTO
+     */
+    private TaskListDTO convertToTaskListDTO(CaseGenerationTask task) {
+        TaskListDTO dto = new TaskListDTO();
+        dto.setId(task.getId());
+        dto.setTaskCode(task.getTaskCode());
+        dto.setRequirementId(task.getRequirementId());
+        dto.setLayerId(task.getLayerId());
+        dto.setMethodId(task.getMethodId());
+        dto.setModelCode(task.getModelCode());
+        dto.setTaskStatus(task.getTaskStatus());
+        dto.setProgress(task.getProgress());
+        dto.setTotalCases(task.getTotalCases());
+        dto.setSuccessCases(task.getSuccessCases());
+        dto.setFailCases(task.getFailCases());
+        dto.setErrorMessage(task.getErrorMessage());
+        dto.setCreateTime(task.getCreateTime());
+        dto.setCompleteTime(task.getCompleteTime());
+
+        // 查询需求信息
+        if (task.getRequirementId() != null) {
+            TestRequirement requirement = requirementRepository.findById(task.getRequirementId()).orElse(null);
+            if (requirement != null) {
+                dto.setRequirementName(requirement.getRequirementName());
+                dto.setRequirementCode(requirement.getRequirementCode());
+            }
+        }
+
+        // 查询测试分层信息
+        if (task.getLayerId() != null) {
+            TestLayer layer = layerRepository.findById(task.getLayerId()).orElse(null);
+            if (layer != null) {
+                dto.setLayerName(layer.getLayerName());
+                dto.setLayerCode(layer.getLayerCode());
+            }
+        }
+
+        // 查询测试方法信息
+        if (task.getMethodId() != null) {
+            TestDesignMethod method = methodRepository.findById(task.getMethodId()).orElse(null);
+            if (method != null) {
+                dto.setMethodName(method.getMethodName());
+                dto.setMethodCode(method.getMethodCode());
+            }
+        }
+
+        return dto;
     }
 }
 

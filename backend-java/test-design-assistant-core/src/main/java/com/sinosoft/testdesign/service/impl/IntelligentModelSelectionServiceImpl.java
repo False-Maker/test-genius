@@ -101,7 +101,7 @@ public class IntelligentModelSelectionServiceImpl implements IntelligentModelSel
     @Override
     public List<ModelConfig> getCandidateModels(String taskType) {
         // 获取所有启用的模型
-        List<ModelConfig> allModels = modelConfigRepository.findByIsActive("1");
+        List<ModelConfig> allModels = modelConfigRepository.findByIsActiveOrderByPriorityAsc("1");
 
         // 过滤出支持该任务类型的模型
         return allModels.stream()
@@ -124,7 +124,7 @@ public class IntelligentModelSelectionServiceImpl implements IntelligentModelSel
 
         try {
             // 获取所有启用的模型
-            List<ModelConfig> models = modelConfigRepository.findByIsActive("1");
+            List<ModelConfig> models = modelConfigRepository.findByIsActiveOrderByPriorityAsc("1");
 
             for (ModelConfig model : models) {
                 try {

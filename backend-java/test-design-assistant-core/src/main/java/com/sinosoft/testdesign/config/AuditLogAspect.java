@@ -3,7 +3,6 @@ package com.sinosoft.testdesign.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.entity.AuditLog;
 import com.sinosoft.testdesign.service.AuditLogService;
-import com.sinosoft.testdesign.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -203,14 +202,16 @@ public class AuditLogAspect {
      * 获取当前用户ID
      */
     private Long getCurrentUserId() {
-        return SecurityUtils.getCurrentUserId();
+        // TODO: 实现用户认证后，从认证上下文获取
+        return null;
     }
-    
+
     /**
      * 获取当前用户名
      */
     private String getCurrentUserName() {
-        return SecurityUtils.getCurrentUserName();
+        // TODO: 实现用户认证后，从认证上下文获取
+        return "SYSTEM";
     }
     
     /**

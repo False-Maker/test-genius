@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * Agent会话管理控制器
- * 
+ *
  * @author sinosoft
  * @date 2026-01-27
  */
@@ -20,10 +20,10 @@ import java.util.List;
 @RequestMapping("/v1/agent-sessions")
 @Tag(name = "Agent会话管理")
 public class AgentSessionController {
-    
+
     @Autowired
     private AgentSessionService sessionService;
-    
+
     /**
      * 创建会话
      */
@@ -32,12 +32,12 @@ public class AgentSessionController {
     public Result<AgentSession> createSession(@RequestBody AgentSession session) {
         try {
             AgentSession createdSession = sessionService.createSession(session);
-            return Result.success(createdSession, "创建成功");
+            return Result.success("创建成功", createdSession);
         } catch (Exception e) {
             return Result.error("创建失败: " + e.getMessage());
         }
     }
-    
+
     /**
      * 根据ID查询会话
      */
@@ -48,7 +48,7 @@ public class AgentSessionController {
                 .map(session -> Result.success(session))
                 .orElse(Result.error("会话不存在"));
     }
-    
+
     /**
      * 根据编码查询会话
      */
@@ -59,7 +59,7 @@ public class AgentSessionController {
                 .map(session -> Result.success(session))
                 .orElse(Result.error("会话不存在"));
     }
-    
+
     /**
      * 查询Agent的所有会话
      */
@@ -69,7 +69,7 @@ public class AgentSessionController {
         List<AgentSession> sessions = sessionService.getSessionsByAgentId(agentId);
         return Result.success(sessions);
     }
-    
+
     /**
      * 查询用户的所有会话
      */
@@ -79,19 +79,19 @@ public class AgentSessionController {
         List<AgentSession> sessions = sessionService.getSessionsByUserId(userId);
         return Result.success(sessions);
     }
-    
+
     /**
      * 查询Agent和用户的所有会话
      */
     @GetMapping("/agent/{agentId}/user/{userId}")
     @Operation(summary = "查询Agent和用户的所有会话")
     public Result<List<AgentSession>> getSessionsByAgentIdAndUserId(
-            @PathVariable Long agentId, 
+            @PathVariable Long agentId,
             @PathVariable Long userId) {
         List<AgentSession> sessions = sessionService.getSessionsByAgentIdAndUserId(agentId, userId);
         return Result.success(sessions);
     }
-    
+
     /**
      * 关闭会话
      */
@@ -100,12 +100,12 @@ public class AgentSessionController {
     public Result<AgentSession> closeSession(@PathVariable Long id) {
         try {
             AgentSession session = sessionService.closeSession(id);
-            return Result.success(session, "关闭成功");
+            return Result.success("关闭成功", session);
         } catch (Exception e) {
             return Result.error("关闭失败: " + e.getMessage());
         }
     }
-    
+
     /**
      * 删除会话
      */
@@ -114,10 +114,9 @@ public class AgentSessionController {
     public Result<Void> deleteSession(@PathVariable Long id) {
         try {
             sessionService.deleteSession(id);
-            return Result.success(null, "删除成功");
+            return Result.success("删除成功", null);
         } catch (Exception e) {
             return Result.error("删除失败: " + e.getMessage());
         }
     }
 }
-

@@ -61,7 +61,7 @@ public class IntelligentModelSelectionController {
     @PostMapping("/refresh-scores")
     public Result<Void> refreshScores() {
         intelligentModelSelectionService.refreshModelScores();
-        return Result.success(null, "模型评分刷新成功");
+        return Result.success("模型评分刷新成功", null);
     }
 }
 
