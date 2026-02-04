@@ -1,30 +1,111 @@
 """
 文本向量化服务
 使用Embedding模型将文本转换为向量，支持语义检索
+
+支持两种模式：
+1. 本地模式 (EMBEDDING_PROVIDER=local): 使用 sentence-transformers
+2. OpenAI模式 (EMBEDDING_PROVIDER=openai): 使用 OpenAI Embeddings API
 """
 import logging
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from app import config
 
 logger = logging.getLogger(__name__)
+
+# 延迟加载模型，避免启动时阻塞
+_local_model = None
+_openai_client = None
+
+
+def _get_local_model():
+    """
+    延迟加载本地 sentence-transformers 模型
+    """
+    global _local_model
+    if _local_model is None:
+        try:
+            from sentence_transformers import SentenceTransformer
+            model_name = config.EMBEDDING_MODEL_NAME
+            logger.info(f"正在加载本地嵌入模型: {model_name}")
+            _local_model = SentenceTransformer(model_name)
+            logger.info(f"本地嵌入模型加载成功: {model_name}, 维度: {_local_model.get_sentence_embedding_dimension()}")
+        except ImportError:
+            logger.error("sentence-transformers 未安装，请运行: pip install sentence-transformers")
+            raise
+        except Exception as e:
+            logger.error(f"加载本地嵌入模型失败: {str(e)}")
+            raise
+    return _local_model
+
+
+def _get_openai_client():
+    """
+    延迟加载 OpenAI 客户端
+    """
+    global _openai_client
+    if _openai_client is None:
+        try:
+            import openai
+            if not config.EMBEDDING_API_KEY:
+                raise ValueError("使用 OpenAI 嵌入需要设置 EMBEDDING_API_KEY 环境变量")
+            _openai_client = openai.OpenAI(
+                api_key=config.EMBEDDING_API_KEY,
+                base_url=config.EMBEDDING_API_BASE
+            )
+            logger.info(f"OpenAI 客户端初始化成功，API Base: {config.EMBEDDING_API_BASE}")
+        except ImportError:
+            logger.error("openai 未安装，请运行: pip install openai")
+            raise
+        except Exception as e:
+            logger.error(f"初始化 OpenAI 客户端失败: {str(e)}")
+            raise
+    return _openai_client
 
 
 class EmbeddingService:
     """文本向量化服务"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session = None):
         """
         初始化向量化服务
         
         Args:
-            db: 数据库会话
+            db: 数据库会话（可选，用于 pgvector 操作）
         """
         self.db = db
-        # 默认使用OpenAI兼容的Embedding API
-        # 实际使用时可以通过配置选择不同的Embedding模型
-        self.embedding_model = "text-embedding-ada-002"
-        self.embedding_dimension = 1536  # OpenAI ada-002的向量维度
+        self.provider = config.EMBEDDING_PROVIDER
+        
+        # 根据提供者设置模型名称和维度
+        if self.provider == "local":
+            self.embedding_model = config.EMBEDDING_MODEL_NAME
+            # 常见模型维度映射
+            dimension_map = {
+                "all-MiniLM-L6-v2": 384,
+                "all-MiniLM-L12-v2": 384,
+                "all-mpnet-base-v2": 768,
+                "paraphrase-multilingual-MiniLM-L12-v2": 384,
+                "distiluse-base-multilingual-cased-v2": 512,
+            }
+            self.embedding_dimension = dimension_map.get(
+                self.embedding_model, 
+                config.EMBEDDING_DIMENSION
+            )
+        else:  # openai
+            self.embedding_model = config.OPENAI_EMBEDDING_MODEL
+            # OpenAI 模型维度映射
+            openai_dimension_map = {
+                "text-embedding-ada-002": 1536,
+                "text-embedding-3-small": 1536,
+                "text-embedding-3-large": 3072,
+            }
+            self.embedding_dimension = openai_dimension_map.get(
+                self.embedding_model,
+                config.EMBEDDING_DIMENSION
+            )
+        
+        logger.info(f"EmbeddingService 初始化: provider={self.provider}, model={self.embedding_model}, dimension={self.embedding_dimension}")
     
     def get_embedding(self, text: str) -> Optional[List[float]]:
         """
@@ -36,30 +117,37 @@ class EmbeddingService:
         Returns:
             向量列表，如果失败返回None
         """
+        if not text or not text.strip():
+            logger.warning("输入文本为空")
+            return None
+        
         try:
-            # 这里使用简单的模拟实现
-            # 实际使用时需要调用Embedding API（如OpenAI、通义千问等）
-            # 或者使用本地模型（如sentence-transformers）
-            
-            # 模拟向量生成（实际应该调用API）
-            # 为了演示，这里返回一个固定维度的零向量
-            # 实际使用时需要替换为真实的Embedding API调用
-            logger.warning("使用模拟向量生成，实际使用时需要替换为真实的Embedding API")
-            
-            # 示例：调用OpenAI Embedding API
-            # import openai
-            # response = openai.embeddings.create(
-            #     model=self.embedding_model,
-            #     input=text
-            # )
-            # return response.data[0].embedding
-            
-            # 临时返回模拟向量
-            return [0.0] * self.embedding_dimension
-            
+            if self.provider == "local":
+                return self._get_local_embedding(text)
+            else:
+                return self._get_openai_embedding(text)
         except Exception as e:
             logger.error(f"向量化失败: {str(e)}")
             return None
+    
+    def _get_local_embedding(self, text: str) -> List[float]:
+        """
+        使用本地 sentence-transformers 模型获取向量
+        """
+        model = _get_local_model()
+        embedding = model.encode(text, convert_to_numpy=True)
+        return embedding.tolist()
+    
+    def _get_openai_embedding(self, text: str) -> List[float]:
+        """
+        使用 OpenAI API 获取向量
+        """
+        client = _get_openai_client()
+        response = client.embeddings.create(
+            model=self.embedding_model,
+            input=text
+        )
+        return response.data[0].embedding
     
     def batch_get_embeddings(self, texts: List[str]) -> List[Optional[List[float]]]:
         """
@@ -71,10 +159,41 @@ class EmbeddingService:
         Returns:
             向量列表，每个元素对应一个文本的向量
         """
-        embeddings = []
-        for text_item in texts:
-            embedding = self.get_embedding(text_item)
-            embeddings.append(embedding)
+        if not texts:
+            return []
+        
+        try:
+            if self.provider == "local":
+                return self._batch_get_local_embeddings(texts)
+            else:
+                return self._batch_get_openai_embeddings(texts)
+        except Exception as e:
+            logger.error(f"批量向量化失败: {str(e)}")
+            # 降级为逐个处理
+            return [self.get_embedding(text) for text in texts]
+    
+    def _batch_get_local_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """
+        批量使用本地模型获取向量
+        """
+        model = _get_local_model()
+        # sentence-transformers 原生支持批量编码
+        embeddings = model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
+        return [emb.tolist() for emb in embeddings]
+    
+    def _batch_get_openai_embeddings(self, texts: List[str]) -> List[List[float]]:
+        """
+        批量使用 OpenAI API 获取向量
+        """
+        client = _get_openai_client()
+        response = client.embeddings.create(
+            model=self.embedding_model,
+            input=texts
+        )
+        # 按照输入顺序排列结果
+        embeddings = [None] * len(texts)
+        for item in response.data:
+            embeddings[item.index] = item.embedding
         return embeddings
     
     def check_pgvector_extension(self) -> bool:
@@ -84,6 +203,10 @@ class EmbeddingService:
         Returns:
             是否已安装pgvector扩展
         """
+        if not self.db:
+            logger.warning("数据库会话未初始化")
+            return False
+        
         try:
             result = self.db.execute(text("SELECT 1 FROM pg_extension WHERE extname = 'vector'"))
             return result.fetchone() is not None
@@ -98,6 +221,10 @@ class EmbeddingService:
         Returns:
             是否安装成功
         """
+        if not self.db:
+            logger.warning("数据库会话未初始化")
+            return False
+        
         try:
             if not self.check_pgvector_extension():
                 self.db.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
@@ -134,4 +261,30 @@ class EmbeddingService:
             return 0.0
         
         return dot_product / (magnitude1 * magnitude2)
+    
+    def get_model_info(self) -> dict:
+        """
+        获取当前嵌入模型信息
+        
+        Returns:
+            模型信息字典
+        """
+        return {
+            "provider": self.provider,
+            "model_name": self.embedding_model,
+            "embedding_dimension": self.embedding_dimension
+        }
 
+
+# 工厂函数，便于创建服务实例
+def create_embedding_service(db: Session = None) -> EmbeddingService:
+    """
+    创建 EmbeddingService 实例
+    
+    Args:
+        db: 数据库会话（可选）
+        
+    Returns:
+        EmbeddingService 实例
+    """
+    return EmbeddingService(db=db)

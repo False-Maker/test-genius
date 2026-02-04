@@ -1,6 +1,7 @@
 """
 用例生成服务
 协调需求分析、提示词生成、模型调用等步骤
+支持 RAG (Retrieval-Augmented Generation) 增强
 """
 import re
 import json
@@ -9,6 +10,17 @@ from typing import List, Dict, Optional, Any
 from sqlalchemy.orm import Session
 from app.services.prompt_service import PromptService
 from app.services.llm_service import LLMService
+from app import config
+
+# RAG相关服务导入
+try:
+    from app.services.knowledge_base_service import KnowledgeBaseService
+    from app.services.bm25_retriever import BM25Retriever
+    from app.services.hybrid_retriever import HybridRetriever
+    RAG_SERVICES_AVAILABLE = True
+except ImportError as e:
+    RAG_SERVICES_AVAILABLE = False
+    logging.warning(f"RAG服务导入失败，将禁用RAG功能: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +38,25 @@ class CaseGenerationService:
         self.db = db
         self.prompt_service = PromptService(db)
         self.llm_service = LLMService(db)
+        
+        # 初始化RAG服务
+        self.rag_enabled = config.RAG_ENABLED and RAG_SERVICES_AVAILABLE
+        self.hybrid_retriever = None
+        
+        if self.rag_enabled:
+            try:
+                self.knowledge_base_service = KnowledgeBaseService(db)
+                self.bm25_retriever = BM25Retriever()
+                self.hybrid_retriever = HybridRetriever(
+                    knowledge_base_service=self.knowledge_base_service,
+                    bm25_retriever=self.bm25_retriever,
+                    vector_weight=0.7,
+                    bm25_weight=0.3
+                )
+                logger.info("RAG服务初始化成功")
+            except Exception as e:
+                logger.warning(f"RAG服务初始化失败，将禁用RAG: {e}")
+                self.rag_enabled = False
     
     def generate_cases(
         self,
@@ -74,7 +105,19 @@ class CaseGenerationService:
                 if not template:
                     raise ValueError(f"模板不存在或未启用: {template_id}")
             
-            # 3. 生成提示词
+            # 3. RAG检索：获取相关上下文
+            rag_context = ""
+            if self.rag_enabled:
+                rag_context = self._retrieve_relevant_context(
+                    query=requirement_text,
+                    requirement_id=requirement_id
+                )
+                if rag_context:
+                    logger.info(f"RAG检索成功，上下文长度: {len(rag_context)}")
+                else:
+                    logger.info("RAG检索未返回相关上下文，将使用原始需求文本")
+            
+            # 4. 生成提示词
             variables = self._build_prompt_variables(
                 requirement_text=requirement_text,
                 requirement_info=requirement_info,
@@ -83,13 +126,22 @@ class CaseGenerationService:
                 requirement_id=requirement_id
             )
             
+            # 将RAG上下文添加到变量中
+            if rag_context:
+                variables["rag_context"] = rag_context
+                # 增强需求描述，添加相关上下文
+                variables["requirement_description"] = self._enhance_requirement_with_context(
+                    requirement_text=requirement_text,
+                    rag_context=rag_context
+                )
+            
             prompt = self.prompt_service.generate_prompt(
                 template_id=template_id,
                 variables=variables
             )
             logger.info(f"提示词生成完成，长度: {len(prompt)}")
             
-            # 4. 调用大模型生成用例
+            # 5. 调用大模型生成用例
             logger.info(f"开始调用模型生成用例: {model_code}")
             model_response = self.llm_service.call_model(
                 model_code=model_code,
@@ -99,15 +151,15 @@ class CaseGenerationService:
             content = model_response.get("content", "")
             logger.info(f"模型响应完成，内容长度: {len(content)}")
             
-            # 5. 解析和结构化用例
+            # 6. 解析和结构化用例
             cases = self.parse_cases(content)
             logger.info(f"用例解析完成，共生成 {len(cases)} 个用例")
             
-            # 6. 用例去重和合并
+            # 7. 用例去重和合并
             cases = self._deduplicate_and_merge_cases(cases)
             logger.info(f"用例去重后，剩余 {len(cases)} 个用例")
             
-            # 7. 用例质量初步检查
+            # 8. 用例质量初步检查
             cases = self._quality_check_cases(cases)
             logger.info(f"用例质量检查后，剩余 {len(cases)} 个用例")
             
@@ -614,3 +666,124 @@ class CaseGenerationService:
             quality_cases.append(case)
         
         return quality_cases
+    
+    # =========================================================================
+    # RAG (Retrieval-Augmented Generation) 相关方法
+    # =========================================================================
+    
+    def _retrieve_relevant_context(
+        self,
+        query: str,
+        requirement_id: Optional[int] = None,
+        top_k: Optional[int] = None,
+        similarity_threshold: Optional[float] = None
+    ) -> str:
+        """
+        从知识库检索与查询相关的上下文
+        
+        Args:
+            query: 查询文本（通常是需求描述）
+            requirement_id: 需求ID（可选，用于过滤相关文档）
+            top_k: 返回前K个结果（默认使用配置值）
+            similarity_threshold: 相似度阈值（默认使用配置值）
+            
+        Returns:
+            格式化的上下文字符串，如果没有找到相关内容则返回空字符串
+        """
+        if not self.rag_enabled or not self.hybrid_retriever:
+            return ""
+        
+        # 使用配置的默认值
+        if top_k is None:
+            top_k = config.RAG_TOP_K
+        if similarity_threshold is None:
+            similarity_threshold = config.RAG_SIMILARITY_THRESHOLD
+        
+        try:
+            # 使用混合检索（向量 + BM25）
+            retrieved_docs = self.hybrid_retriever.search(
+                query=query,
+                top_k=top_k,
+                similarity_threshold=similarity_threshold,
+                method="weighted"  # 使用加权融合
+            )
+            
+            if not retrieved_docs:
+                logger.debug("RAG检索未返回任何结果")
+                return ""
+            
+            logger.info(f"RAG检索返回 {len(retrieved_docs)} 个相关文档片段")
+            
+            # 格式化检索结果
+            return self._format_rag_context(retrieved_docs)
+            
+        except Exception as e:
+            logger.warning(f"RAG检索失败: {e}")
+            return ""
+    
+    def _format_rag_context(self, documents: List[Dict]) -> str:
+        """
+        将检索到的文档格式化为上下文字符串
+        
+        Args:
+            documents: 检索到的文档列表
+            
+        Returns:
+            格式化的上下文字符串
+        """
+        if not documents:
+            return ""
+        
+        context_parts = []
+        for i, doc in enumerate(documents, 1):
+            # 提取文档内容
+            content = doc.get("content") or doc.get("doc_content") or doc.get("chunk_content", "")
+            if not content:
+                continue
+            
+            # 提取文档元信息
+            doc_name = doc.get("doc_name") or doc.get("document_name", f"文档{i}")
+            score = doc.get("score") or doc.get("similarity", 0)
+            
+            # 格式化单个文档片段
+            context_parts.append(
+                f"[参考{i}] {doc_name} (相关度: {score:.2f})\n{content.strip()}"
+            )
+        
+        if not context_parts:
+            return ""
+        
+        # 组合所有上下文片段
+        return "\n\n".join(context_parts)
+    
+    def _enhance_requirement_with_context(
+        self,
+        requirement_text: str,
+        rag_context: str
+    ) -> str:
+        """
+        将RAG上下文与原始需求文本结合，生成增强的需求描述
+        
+        Args:
+            requirement_text: 原始需求文本
+            rag_context: RAG检索到的上下文
+            
+        Returns:
+            增强后的需求描述
+        """
+        if not rag_context:
+            return requirement_text
+        
+        # 构建增强的需求描述
+        enhanced_text = f"""## 需求描述
+{requirement_text}
+
+## 相关参考信息
+以下是从知识库中检索到的与本需求相关的参考信息，请在生成测试用例时参考：
+
+{rag_context}
+
+## 生成要求
+请基于上述需求描述和参考信息，生成全面、准确的测试用例。
+"""
+        return enhanced_text
