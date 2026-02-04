@@ -42,7 +42,7 @@ class CaseReuseService:
             try:
                 add_column_sql = """
                 ALTER TABLE test_case 
-                ADD COLUMN IF NOT EXISTS embedding vector(1536);
+                ADD COLUMN IF NOT EXISTS embedding vector(512);  -- BAAI/bge-small-zh-v1.5
                 """
                 self.db.execute(text(add_column_sql))
                 self.db.commit()

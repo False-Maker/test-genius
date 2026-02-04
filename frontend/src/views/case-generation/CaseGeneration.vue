@@ -1,517 +1,381 @@
 <template>
-
-  <div class="case-generation">
-
-    <el-card>
-
-      <template #header>
-
-        <div class="card-header">
-
-          <h2>智能用例生成管理</h2>
-
-        </div>
-
-      </template>
-
-
-
-      <el-form :model="form" :rules="formRules" ref="formRef" label-width="120px">
-
-        <el-form-item label="需求ID" prop="requirementId">
-
-          <el-select
-
-            v-model="form.requirementId"
-
-            placeholder="请选择需求ID"
-
-            filterable
-
-            clearable
-
-            style="width: 100%"
-
-            :loading="requirementLoading"
-
-          >
-
-            <el-option
-
-              v-for="req in requirementList"
-
-              :key="req.id"
-
-              :label="`${req.requirementCode} - ${req.requirementName}`"
-
-              :value="req.id"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-
-
-        <el-form-item label="测试分层" prop="layerCode">
-
-          <el-select
-
-            v-model="form.layerCode"
-
-            placeholder="请选择测试分层"
-
-            clearable
-
-            style="width: 100%"
-
-            :loading="layerLoading"
-
-          >
-
-            <el-option
-
-              v-for="layer in layerList"
-
-              :key="layer.layerCode"
-
-              :label="layer.layerName"
-
-              :value="layer.layerCode"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-
-
-        <el-form-item label="测试方法" prop="methodCode">
-
-          <el-select
-
-            v-model="form.methodCode"
-
-            placeholder="请选择测试方法"
-
-            clearable
-
-            style="width: 100%"
-
-            :loading="methodLoading"
-
-          >
-
-            <el-option
-
-              v-for="method in methodList"
-
-              :key="method.methodCode"
-
-              :label="method.methodName"
-
-              :value="method.methodCode"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-
-
-        <el-form-item label="提示词模板">
-
-          <el-select
-
-            v-model="form.templateId"
-
-            placeholder="请选择提示词模板（可选）"
-
-            filterable
-
-            clearable
-
-            style="width: 100%"
-
-            :loading="templateLoading"
-
-          >
-
-            <el-option
-
-              v-for="template in templateList"
-
-              :key="template.id"
-
-              :label="template.templateName"
-
-              :value="template.id"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-
-
-        <el-form-item label="模型配置">
-
-          <el-select
-
-            v-model="form.modelCode"
-
-            placeholder="请选择模型配置（可选，默认使用优先级最高的模型）"
-
-            filterable
-
-            clearable
-
-            style="width: 100%"
-
-            :loading="modelLoading"
-
-          >
-
-            <el-option
-
-              v-for="model in modelList"
-
-              :key="model.modelCode"
-
-              :label="model.modelName"
-
-              :value="model.modelCode"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-
-
-        <el-form-item label="工作流">
-
-          <el-select
-
-            v-model="form.workflowId"
-
-            placeholder="请选择工作流（可选，使用工作流将替代默认流程）"
-
-            filterable
-
-            clearable
-
-            style="width: 100%"
-
-            :loading="workflowLoading"
-
-          >
-
-            <el-option
-
-              v-for="workflow in workflowList"
-
-              :key="workflow.id"
-
-              :label="`${workflow.workflowName} (${workflow.workflowCode})`"
-
-              :value="workflow.id"
-
-            />
-
-          </el-select>
-
-          <div style="margin-top: 5px; font-size: 12px; color: #909399">
-
-            <el-link type="primary" :underline="false" @click="handleOpenWorkflowEditor">
-
-              创建工作流
-
-            </el-link>
-
-            <span style="margin: 0 8px">|</span>
-
-            <el-link type="primary" :underline="false" @click="loadWorkflows">
-
-              刷新列表
-
-            </el-link>
-
-          </div>
-
-        </el-form-item>
-
-
-
-        <el-form-item>
-
-          <el-button type="primary" @click="handleGenerate" :loading="generateLoading">
-
-            生成用例
-
-          </el-button>
-
-          <el-button @click="handleReset">重置</el-button>
-
-        </el-form-item>
-
-      </el-form>
-
-
-
-      <!-- 生成结果 -->
-
-      <el-card v-if="generationResult" class="result-card" style="margin-top: 20px">
-
-        <template #header>
-
-          <div class="card-header">
-
-            <span>生成结果</span>
-
-            <el-tag :type="getStatusType(generationResult.status)">
-
-              {{ getStatusText(generationResult.status) }}
-
-            </el-tag>
-
-          </div>
-
-        </template>
-
-
-
-        <div v-if="generationResult.status === 'PROCESSING'">
-
-          <el-progress :percentage="generationResult.progress || 0" />
-
-          <p style="margin-top: 10px; color: #909399">
-
-            {{ generationResult.message || '正在生成用例，请稍候..' }}
-
-          </p>
-
-        </div>
-
-
-
-        <div v-else-if="generationResult.status === 'SUCCESS'">
-
-          <el-alert
-
-            type="success"
-
-            :closable="false"
-
-            show-icon
-
-            style="margin-bottom: 20px"
-
-          >
-
-            {{ generationResult.message || '用例生成成功' }}
-
-            <template v-if="generationResult.successCases !== undefined">
-
-              <br />成功生成 {{ generationResult.successCases }} 个用例
-
-              <template v-if="generationResult.failCases && generationResult.failCases > 0">
-
-                ，失败{{ generationResult.failCases }} 个
-
-              </template>
-
-            </template>
-
-          </el-alert>
-
-          <el-button type="primary" @click="handleViewResults">查看生成的用例</el-button>
-
-        </div>
-
-
-
-        <div v-else-if="generationResult.status === 'FAILED'">
-
-          <el-alert
-
-            type="error"
-
-            :closable="false"
-
-            show-icon
-
-          >
-
-            {{ generationResult.message || '用例生成失败' }}
-
-          </el-alert>
-
-        </div>
-
-      </el-card>
-
-    </el-card>
-
-
-    <!-- 用例生成任务列表 -->
-    <el-card class="task-list-card" style="margin-top: 20px">
-      <template #header>
-        <div class="card-header">
-          <span>用例生成任务列表</span>
-          <el-button link type="primary" @click="handleRefreshTaskList">
-            刷新列表
-          </el-button>
-        </div>
-      </template>
-
-      <el-table
-        v-loading="taskListLoading"
-        :data="taskList"
-        stripe
-        style="width: 100%"
-      >
-        <el-table-column prop="taskCode" label="任务编号" width="180" />
-        <el-table-column prop="requirementName" label="需求名称" min-width="200" show-overflow-tooltip />
-        <el-table-column label="生成信息" min-width="200">
-          <template #default="scope">
-            {{ scope.row.layerName }} | {{ scope.row.methodName }} | {{ scope.row.modelCode }}
+  <div class="case-generation-container">
+    <div class="bento-grid">
+      <!-- Config Section (Left/Main) -->
+      <div class="bento-item config-item">
+        <el-card class="bento-card">
+          <template #header>
+            <div class="card-header">
+              <div class="header-title">
+                <el-icon><MagicStick /></el-icon>
+                <h2>智能用例生成</h2>
+              </div>
+              <span class="header-subtitle">AI-Powered Case Generation</span>
+            </div>
           </template>
-        </el-table-column>
-        <el-table-column label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="getTaskStatusType(scope.row.taskStatus)">
-              {{ getTaskStatusText(scope.row.taskStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="用例数" width="120">
-          <template #default="scope">
-            {{ scope.row.successCases }}/{{ scope.row.totalCases }}
-            <span v-if="scope.row.failCases > 0" style="color: #F56C6C; margin-left: 5px;">
-              (失败{{ scope.row.failCases }})
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="250" fixed="right">
-          <template #default="scope">
-            <el-button size="small" link type="primary" @click="viewTaskDetail(scope.row)">
-              查看详情
-            </el-button>
-            <el-button
-              size="small"
-              link
-              type="success"
-              :disabled="scope.row.taskStatus !== 'SUCCESS'"
-              @click="exportTaskToExcel(scope.row)"
-            >
-              导出Excel
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
 
-      <!-- 分页 -->
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="taskPagination.page"
-          v-model:page-size="taskPagination.size"
-          :total="taskPagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handlePageChange"
-        />
+          <el-form :model="form" :rules="formRules" ref="formRef" label-position="top" class="bento-form">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="需求ID (Requirement)" prop="requirementId">
+                  <el-select
+                    v-model="form.requirementId"
+                    placeholder="选择需求"
+                    filterable
+                    clearable
+                    style="width: 100%"
+                    :loading="requirementLoading"
+                  >
+                    <el-option
+                      v-for="req in requirementList"
+                      :key="req.id"
+                      :label="`${req.requirementCode} - ${req.requirementName}`"
+                      :value="req.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="模型配置 (Model)" prop="modelCode">
+                  <el-select
+                    v-model="form.modelCode"
+                    placeholder="默认模型"
+                    filterable
+                    clearable
+                    style="width: 100%"
+                    :loading="modelLoading"
+                  >
+                    <el-option
+                      v-for="model in modelList"
+                      :key="model.modelCode"
+                      :label="model.modelName"
+                      :value="model.modelCode"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="测试分层 (Layer)" prop="layerCode">
+                  <el-select
+                    v-model="form.layerCode"
+                    placeholder="全部"
+                    clearable
+                    style="width: 100%"
+                    :loading="layerLoading"
+                  >
+                    <el-option
+                      v-for="layer in layerList"
+                      :key="layer.layerCode"
+                      :label="layer.layerName"
+                      :value="layer.layerCode"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="测试方法 (Method)" prop="methodCode">
+                  <el-select
+                    v-model="form.methodCode"
+                    placeholder="全部"
+                    clearable
+                    style="width: 100%"
+                    :loading="methodLoading"
+                  >
+                    <el-option
+                      v-for="method in methodList"
+                      :key="method.methodCode"
+                      :label="method.methodName"
+                      :value="method.methodCode"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                 <el-form-item label="提示词模板 (Prompt)">
+                  <el-select
+                    v-model="form.templateId"
+                    placeholder="默认模板"
+                    filterable
+                    clearable
+                    style="width: 100%"
+                    :loading="templateLoading"
+                  >
+                    <el-option
+                      v-for="template in templateList"
+                      :key="template.id"
+                      :label="template.templateName"
+                      :value="template.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-form-item label="工作流 (Workflow)">
+              <el-select
+                v-model="form.workflowId"
+                placeholder="默认流程"
+                filterable
+                clearable
+                style="width: 100%"
+                :loading="workflowLoading"
+              >
+                <el-option
+                  v-for="workflow in workflowList"
+                  :key="workflow.id"
+                  :label="`${workflow.workflowName} (${workflow.workflowCode})`"
+                  :value="workflow.id"
+                />
+              </el-select>
+              <div class="form-helper">
+                <el-link type="primary" :underline="false" @click="handleOpenWorkflowEditor">
+                  <el-icon class="mr-1"><Edit /></el-icon> 创建新工作流
+                </el-link>
+                <el-divider direction="vertical" />
+                <el-link type="info" :underline="false" @click="loadWorkflows">
+                  <el-icon class="mr-1"><Refresh /></el-icon> 刷新
+                </el-link>
+              </div>
+            </el-form-item>
+
+            <div class="form-actions">
+              <el-button class="action-btn" type="primary" @click="handleGenerate" :loading="generateLoading" size="large">
+                <el-icon class="mr-2"><VideoPlay /></el-icon> 开始执行 (Generate)
+              </el-button>
+              <el-button class="action-btn" @click="handleReset" size="large">重置</el-button>
+            </div>
+          </el-form>
+        </el-card>
       </div>
-    </el-card>
 
+      <!-- Result Section (Right/Status) -->
+      <div class="bento-item status-item">
+        <el-card class="bento-card status-card">
+          <template #header>
+            <div class="card-header">
+              <div class="header-title">
+                <el-icon><Odometer /></el-icon>
+                <h2>当前状态</h2>
+              </div>
+            </div>
+          </template>
+          
+          <div class="status-content">
+            <div v-if="!generationResult" class="empty-status">
+              <el-empty description="等待任务开始..." :image-size="80" />
+            </div>
+
+            <div v-else class="active-status">
+              <div class="status-indicator">
+                <el-progress 
+                  type="dashboard" 
+                  :percentage="generationResult.progress || (generationResult.status === 'SUCCESS' ? 100 : 50)" 
+                  :status="generationResult.status === 'SUCCESS' ? 'success' : (generationResult.status === 'FAILED' ? 'exception' : '')"
+                  :width="120"
+                />
+                <div class="status-text">{{ getStatusText(generationResult.status) }}</div>
+              </div>
+              
+              <div class="status-details">
+                <p class="status-message">{{ generationResult.message }}</p>
+                
+                <div v-if="generationResult.status === 'SUCCESS'" class="result-stats">
+                   <div class="stat-item success">
+                    <span class="label">Success</span>
+                    <span class="value">{{ generationResult.successCases || 0 }}</span>
+                   </div>
+                   <div class="stat-item fail" v-if="generationResult.failCases">
+                    <span class="label">Failed</span>
+                    <span class="value">{{ generationResult.failCases }}</span>
+                   </div>
+                </div>
+
+                <div class="status-actions">
+                   <el-button 
+                    v-if="generationResult.status === 'SUCCESS'" 
+                    type="success" 
+                    plain 
+                    block 
+                    @click="handleViewResults"
+                  >
+                    查看结果详情
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-card>
+      </div>
+
+      <!-- History List Section (Bottom/Full) -->
+      <div class="bento-item list-item">
+        <el-card class="bento-card">
+          <template #header>
+            <div class="card-header">
+              <div class="header-title">
+                <el-icon><List /></el-icon>
+                <h2>任务历史</h2>
+              </div>
+              <el-button link type="primary" @click="handleRefreshTaskList">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </div>
+          </template>
+
+          <el-table
+            v-loading="taskListLoading"
+            :data="taskList"
+            style="width: 100%"
+            class="bento-table"
+          >
+            <el-table-column prop="taskCode" label="TASK ID" width="160">
+                <template #default="scope">
+                    <span class="mono-text">{{ scope.row.taskCode }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="requirementName" label="REQUIREMENT" min-width="200" show-overflow-tooltip />
+            <el-table-column label="CONFIG" min-width="200">
+              <template #default="scope">
+                <div class="config-tags">
+                    <el-tag size="small" type="info" v-if="scope.row.layerName">{{ scope.row.layerName }}</el-tag>
+                    <el-tag size="small" type="info" v-if="scope.row.methodName">{{ scope.row.methodName }}</el-tag>
+                    <el-tag size="small" type="info" v-if="scope.row.modelCode">{{ scope.row.modelCode }}</el-tag>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="STATUS" width="100">
+              <template #default="scope">
+                <el-tag :type="getTaskStatusType(scope.row.taskStatus)" effect="plain">
+                  {{ getTaskStatusText(scope.row.taskStatus) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="CASES" width="120">
+              <template #default="scope">
+                 <span :class="{'text-success': true}">{{ scope.row.successCases }}</span> / {{ scope.row.totalCases }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="TIME" width="180">
+                <template #default="scope">
+                    <span class="mono-text text-sm">{{ scope.row.createTime }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="ACTIONS" width="180" fixed="right">
+              <template #default="scope">
+                <el-button size="small" link type="primary" @click="viewTaskDetail(scope.row)">
+                  Details
+                </el-button>
+                <el-button
+                  size="small"
+                  link
+                  type="success"
+                  :disabled="scope.row.taskStatus !== 'SUCCESS'"
+                  @click="exportTaskToExcel(scope.row)"
+                >
+                  Export
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <!-- 分页 -->
+          <div class="pagination">
+            <el-pagination
+              v-model:current-page="taskPagination.page"
+              v-model:page-size="taskPagination.size"
+              :total="taskPagination.total"
+              :page-sizes="[10, 20, 50, 100]"
+              layout="prev, pager, next"
+              @size-change="handleSizeChange"
+              @current-change="handlePageChange"
+              small
+            />
+          </div>
+        </el-card>
+      </div>
+    </div>
 
     <!-- 任务详情对话框 -->
     <el-dialog
       v-model="taskDetailDialogVisible"
-      title="任务详情"
+      title="TASK DETAILS"
       width="1000px"
       @close="currentTaskDetail = null"
+      class="bento-dialog"
     >
-      <el-descriptions v-loading="taskDetailLoading" :column="2" border>
-        <el-descriptions-item label="任务编号">{{ currentTaskDetail?.taskCode }}</el-descriptions-item>
-        <el-descriptions-item label="任务状态">
+      <el-descriptions v-loading="taskDetailLoading" :column="2" border class="bento-descriptions">
+        <el-descriptions-item label="任务编号 (Task Code)">
+             <span class="mono-text">{{ currentTaskDetail?.taskCode }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="任务状态 (Status)">
           <el-tag :type="getTaskStatusType(currentTaskDetail?.taskStatus)">
             {{ getTaskStatusText(currentTaskDetail?.taskStatus) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="需求编号">{{ currentTaskDetail?.requirementCode }}</el-descriptions-item>
-        <el-descriptions-item label="需求名称">{{ currentTaskDetail?.requirementName }}</el-descriptions-item>
-        <el-descriptions-item label="测试分层">{{ currentTaskDetail?.layerName }}</el-descriptions-item>
-        <el-descriptions-item label="测试方法">{{ currentTaskDetail?.methodName }}</el-descriptions-item>
-        <el-descriptions-item label="模型配置">{{ currentTaskDetail?.modelCode }}</el-descriptions-item>
-        <el-descriptions-item label="用例统计">
-          {{ currentTaskDetail?.totalCases }}个
-          (成功: {{ currentTaskDetail?.successCases }}, 失败: {{ currentTaskDetail?.failCases }})
+        <el-descriptions-item label="需求 (Requirement)">
+            {{ currentTaskDetail?.requirementCode }} - {{ currentTaskDetail?.requirementName }}
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentTaskDetail?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="完成时间">{{ currentTaskDetail?.completeTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="配置 (Config)">
+            {{ currentTaskDetail?.layerName }} / {{ currentTaskDetail?.methodName }} / {{ currentTaskDetail?.modelCode }}
+        </el-descriptions-item>
+        <el-descriptions-item label="用例统计 (Stats)">
+          Total: {{ currentTaskDetail?.totalCases }} | Success: {{ currentTaskDetail?.successCases }} | Failed: {{ currentTaskDetail?.failCases }}
+        </el-descriptions-item>
+        <el-descriptions-item label="时间 (Time)">
+            {{ currentTaskDetail?.createTime }}
+        </el-descriptions-item>
       </el-descriptions>
 
-      <el-divider content-position="left">生成的用例列表</el-divider>
+      <el-divider content-position="left">CASES GENERATED</el-divider>
 
       <el-table
         :data="currentTaskDetail?.cases || []"
-        stripe
         style="width: 100%"
         max-height="400"
+        class="bento-table"
       >
-        <el-table-column prop="caseCode" label="用例编码" width="150" />
-        <el-table-column prop="caseName" label="用例名称" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="caseType" label="用例类型" width="100" />
-        <el-table-column prop="casePriority" label="优先级" width="100">
+        <el-table-column prop="caseCode" label="ID" width="150" >
+             <template #default="scope"><span class="mono-text">{{ scope.row.caseCode }}</span></template>
+        </el-table-column>
+        <el-table-column prop="caseName" label="Name" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="casePriority" label="Pri" width="80">
           <template #default="scope">
-            <el-tag v-if="scope.row.casePriority" :type="getPriorityType(scope.row.casePriority)">
+            <el-tag v-if="scope.row.casePriority" :type="getPriorityType(scope.row.casePriority)" size="small">
               {{ scope.row.casePriority }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="preCondition" label="前置条件" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="testStep" label="测试步骤" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="expectedResult" label="预期结果" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="testStep" label="Steps" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="expectedResult" label="Expected" min-width="150" show-overflow-tooltip />
       </el-table>
 
       <template #footer>
-        <el-button @click="taskDetailDialogVisible = false">关闭</el-button>
+        <el-button @click="taskDetailDialogVisible = false">Close</el-button>
         <el-button
           type="primary"
           :disabled="currentTaskDetail?.taskStatus !== 'SUCCESS'"
           @click="currentTaskDetail && exportTaskToExcel(currentTaskDetail)"
         >
-          导出Excel
+          Export Excel
         </el-button>
       </template>
     </el-dialog>
 
   </div>
-
 </template>
 
 
 
 <script setup lang="ts">
-
-import { ref, reactive, onMounted, computed } from 'vue'
-
+import { ref, reactive, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-
+import { MagicStick, VideoPlay, Refresh, Odometer, List, Edit } from '@element-plus/icons-vue'
 import { caseGenerationApi, type CaseGenerationRequest, type GenerationTask, type TaskListItem, type TaskDetail, type TaskListQuery } from '@/api/caseGeneration'
-
 import { workflowApi, type WorkflowDefinition } from '@/api/workflow'
-
 import { useCacheStore } from '@/store/cache'
 
 
@@ -1202,47 +1066,233 @@ onUnmounted(() => {
 
 
 <style scoped lang="scss">
+@use '@/styles/variables.scss' as *;
 
-.case-generation {
-
-  padding: 20px;
-
-
-
-  .card-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-
-
-    h2 {
-
-      margin: 0;
-
-    }
-
-  }
-
-
-
-  .result-card {
-
-    .card-header {
-
-      display: flex;
-
-      justify-content: space-between;
-
-      align-items: center;
-
-    }
-
-  }
-
+.case-generation-container {
+  height: 100%;
+  overflow-y: auto;
+  // Use padding to create space around the bento grid
+  padding: 24px;
 }
 
+.bento-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  
+  // Responsive: Stack on smaller screens
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bento-item {
+  &.config-item {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+  }
+  
+  &.status-item {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    
+    @media (max-width: 1200px) {
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+    }
+  }
+  
+  &.list-item {
+    grid-column: 1 / 3;
+    grid-row: 2 / 3;
+    
+     @media (max-width: 1200px) {
+      grid-column: 1 / 2;
+      grid-row: 3 / 4;
+    }
+  }
+}
+
+.bento-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  :deep(.el-card__body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  &.status-card {
+     :deep(.el-card__body) {
+        justify-content: center;
+        align-items: center;
+     }
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .el-icon {
+      font-size: 18px;
+      color: $tech-white;
+    }
+    
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+  
+  .header-subtitle {
+    font-family: $font-mono;
+    font-size: 12px;
+    color: $text-secondary;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+}
+
+.bento-form {
+  .el-form-item {
+    margin-bottom: 24px;
+  }
+  
+  .form-helper {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    
+    .mr-1 {
+      margin-right: 4px;
+    }
+  }
+  
+  .form-actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 16px;
+    
+    .action-btn {
+      flex: 1;
+    }
+  }
+}
+
+.status-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  
+  .empty-status {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+  }
+  
+  .active-status {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    text-align: center;
+    
+    .status-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      
+      .status-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: $tech-white;
+      }
+    }
+    
+    .status-details {
+      width: 100%;
+      
+      .status-message {
+        color: $text-secondary;
+        margin-bottom: 24px;
+      }
+      
+      .result-stats {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin-bottom: 24px;
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            
+            .label {
+                font-family: $font-mono;
+                font-size: 10px;
+                text-transform: uppercase;
+                color: $text-secondary;
+            }
+            
+            .value {
+                font-family: $font-mono;
+                font-size: 24px;
+                font-weight: bold;
+            }
+            
+            &.success .value { color: $acid-green; }
+            &.fail .value { color: $alert-red; }
+        }
+      }
+    }
+  }
+}
+
+.config-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+// Utility
+.mono-text {
+    font-family: $font-mono;
+}
+
+.text-success {
+    color: $acid-green;
+}
+
+.mr-2 {
+  margin-right: 8px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
 </style>

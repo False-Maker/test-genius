@@ -80,13 +80,14 @@ class EmbeddingService:
         # 根据提供者设置模型名称和维度
         if self.provider == "local":
             self.embedding_model = config.EMBEDDING_MODEL_NAME
-            # 常见模型维度映射
+            # BGE中文模型维度映射 (推荐用于中文场景)
             dimension_map = {
-                "all-MiniLM-L6-v2": 384,
-                "all-MiniLM-L12-v2": 384,
-                "all-mpnet-base-v2": 768,
-                "paraphrase-multilingual-MiniLM-L12-v2": 384,
-                "distiluse-base-multilingual-cased-v2": 512,
+                # BGE 中文模型系列
+                "BAAI/bge-small-zh-v1.5": 512,
+                "BAAI/bge-base-zh-v1.5": 768,
+                "BAAI/bge-large-zh-v1.5": 1024,
+                # BGE 多语言模型
+                "BAAI/bge-m3": 1024,
             }
             self.embedding_dimension = dimension_map.get(
                 self.embedding_model, 

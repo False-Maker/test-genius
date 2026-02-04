@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS knowledge_document_chunk (
     chunk_start INT, -- 分块在原文中的起始位置
     chunk_end INT, -- 分块在原文中的结束位置
     has_overlap CHAR(1) DEFAULT '0', -- 是否有重叠
-    embedding vector(1536), -- 向量列
+    embedding vector(512), -- 向量列 (BAAI/bge-small-zh-v1.5)
     metadata JSONB, -- 分块元数据
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

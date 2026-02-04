@@ -1,8 +1,8 @@
 
 services:
-  # PostgreSQL数据库
+  # PostgreSQL数据库 (with pgvector extension)
   postgres:
-    image: postgres:14
+    image: pgvector/pgvector:pg14
     container_name: test-design-postgres
     environment:
       POSTGRES_DB: test_design_assistant
