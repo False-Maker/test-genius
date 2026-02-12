@@ -22,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -165,7 +166,10 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
 
             File file = new File(resolvedPath);
             if (!file.exists() || !file.isFile()) {
-                log.warn("文档不存在或不是文件: {}（请确认uploads目录已正确挂载，并重新上传文档）", resolvedPath);
+                Path basePath = resolveUploadBasePath();
+                boolean baseDirExists = Files.isDirectory(basePath);
+                log.warn("文档不存在或不是文件: resolvedPath={}, uploadBasePath={}, 上传根目录存在={}（若为Docker部署请确认 volumes 中 uploads 已挂载；若曾重建过卷请重新上传文档）",
+                    resolvedPath, uploadBasePath, baseDirExists);
                 return null;
             }
 
