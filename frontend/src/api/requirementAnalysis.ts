@@ -2,6 +2,7 @@ import request from './request'
 
 // 测试要点类型
 export interface TestPoint {
+  name: string
   point: string
   description?: string
   priority?: string
@@ -9,6 +10,7 @@ export interface TestPoint {
 
 // 业务规则类型
 export interface BusinessRule {
+  name: string
   rule: string
   description?: string
   type?: string
@@ -18,12 +20,14 @@ export interface BusinessRule {
 export interface RequirementAnalysisResult {
   requirementId: number
   requirementName: string
+  requirementText?: string
   keywords: string[]
   contentLength: number
   sentenceCount: number
+  analysisTime: string
   testPoints: TestPoint[]
   businessRules: BusinessRule[]
-  analysisTime: string
+  keyInfo?: Record<string, any>
 }
 
 // 需求分析API
@@ -40,7 +44,3 @@ export const requirementAnalysisApi = {
 
   // 提取业务规则
   getBusinessRules(requirementId: number) {
-    return request.get<BusinessRule[]>(`/v1/requirements/${requirementId}/business-rules`)
-  }
-}
-

@@ -29,10 +29,15 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * 需求分析服务实现
@@ -96,7 +101,6 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         }
         
         // 4. 确定最终用于分析的文本
-        // 优先使用文档内容，文档不可用时回退到需求描述
         String analysisText = null;
         if (documentContent != null && !documentContent.isEmpty()) {
             analysisText = documentContent;
@@ -127,13 +131,25 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         try {
             Map<String, Object> analysisResult = callAnalysisService(analysisText);
             
+            // 提取结构化数据
+            List<TestPointDTO> testPoints = extractTestPoints(analysisResult);
+            List<BusinessRuleDTO> businessRules = extractBusinessRules(analysisResult);
+            Map<String, Object> keyInfo = extractKeyInfo(analysisResult);
+            
+            // 构建统一的返回结果
             RequirementAnalysisResult result = new RequirementAnalysisResult();
             result.setRequirementId(requirementId);
             result.setRequirementName(requirement.getRequirementName());
             result.setRequirementText(analysisText);
-            result.setTestPoints(extractTestPoints(analysisResult));
-            result.setBusinessRules(extractBusinessRules(analysisResult));
-            result.setKeyInfo(extractKeyInfo(analysisResult));
+            result.setTestPoints(testPoints);
+            result.setBusinessRules(businessRules);
+            result.setKeyInfo(keyInfo);
+            
+            // 从 keyInfo 中提取并填充顶层字段，前端无需再手动适配
+            result.setKeywords(extractKeywords(keyInfo));
+            result.setContentLength(extractContentLength(keyInfo, analysisText));
+            result.setSentenceCount(extractSentenceCount(keyInfo, analysisText));
+            result.setAnalysisTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             
             log.info("需求分析完成: requirementId={}, 测试要点数={}, 业务规则数={}", 
                 requirementId, 
@@ -162,9 +178,47 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         return result.getBusinessRules();
     }
     
-    /**
-     * 解析文档
-     */
+    // ========== keyInfo 字段提取辅助方法 ==========
+    
+    @SuppressWarnings("unchecked")
+    private List<String> extractKeywords(Map<String, Object> keyInfo) {
+        try {
+            Object kw = keyInfo.get("keywords");
+            if (kw instanceof List) {
+                return ((List<?>) kw).stream()
+                    .map(Object::toString)
+                    .toList();
+            }
+        } catch (Exception e) {
+            log.warn("提取关键词失败: {}", e.getMessage());
+        }
+        return List.of();
+    }
+    
+    private Integer extractContentLength(Map<String, Object> keyInfo, String analysisText) {
+        Object val = keyInfo.get("content_length");
+        if (val == null) {
+            val = keyInfo.get("contentLength");
+        }
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        }
+        return analysisText != null ? analysisText.length() : 0;
+    }
+    
+    private Integer extractSentenceCount(Map<String, Object> keyInfo, String analysisText) {
+        Object val = keyInfo.get("sentence_count");
+        if (val == null) {
+            val = keyInfo.get("sentenceCount");
+        }
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        }
+        return analysisText != null ? analysisText.split("[。！？\n]").length : 0;
+    }
+    
+    // ========== 文档解析 ==========
+    
     private String parseDocument(String docUrl) {
         try {
             String resolvedPath = resolveDocumentPath(docUrl);
@@ -255,14 +309,8 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         return path.normalize().toAbsolutePath();
     }
     
-    /**
-     * 调用AI分析服务（通过模型配置）
-     * 
-     * 降级策略：
-     * 1. 优先使用模型配置中的模型调用 AI 服务
-     * 2. 模型配置不可用时，直接调用 Python AI 服务（不带模型配置）
-     * 3. AI 服务完全不可用时，使用本地关键词分析
-     */
+    // ========== AI 服务调用（三级降级） ==========
+    
     @SuppressWarnings("unchecked")
     private Map<String, Object> callAnalysisService(String requirementText) {
         try {
@@ -314,9 +362,6 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         }
     }
     
-    /**
-     * 不带模型配置直接调用 AI 服务（降级策略1）
-     */
     @SuppressWarnings("unchecked")
     private Map<String, Object> callAIServiceDirectly(String url, Map<String, Object> request) {
         try {
@@ -343,9 +388,6 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         }
     }
     
-    /**
-     * 本地文本分析（降级策略2）
-     */
     private Map<String, Object> localTextAnalysis(String requirementText) {
         Map<String, Object> result = new HashMap<>();
         result.put("test_points", extractTestPointsFromText(requirementText));
@@ -354,23 +396,21 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         return result;
     }
     
-    /**
-     * 构建分析提示词
-     */
+    // ========== 提示词构建 ==========
+    
     private String buildAnalysisPrompt(String requirementText) {
         return String.format(
             "请分析以下需求文档，提取测试要点和业务规则：\n\n%s\n\n" +
             "请以JSON格式返回分析结果，包含以下字段：\n" +
-            "1. test_points: 测试要点列表，每个测试要点包含：名称、描述、优先级\n" +
-            "2. business_rules: 业务规则列表，每个业务规则包含：规则名称、规则描述、规则类型\n" +
-            "3. key_info: 关键信息，包含：关键词、功能模块、涉及角色等",
+            "1. test_points: 测试要点列表，每个测试要点包含：name(名称)、description(描述)、priority(优先级)\n" +
+            "2. business_rules: 业务规则列表，每个业务规则包含：name(规则名称)、description(规则描述)、type(规则类型)\n" +
+            "3. key_info: 关键信息，包含：keywords(关键词列表)、content_length(内容长度)、sentence_count(句子数量)",
             requirementText
         );
     }
     
-    /**
-     * 从分析结果中提取测试要点
-     */
+    // ========== AI 结果解析 ==========
+    
     @SuppressWarnings("unchecked")
     private List<TestPointDTO> extractTestPoints(Map<String, Object> analysisResult) {
         try {
@@ -384,7 +424,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
                     TestPointDTO point = new TestPointDTO();
                     point.setName((String) data.get("name"));
                     point.setDescription((String) data.get("description"));
-                    point.setPriority((String) data.getOrDefault("priority", "中"));
+                    point.setPriority((String) data.getOrDefault("priority", "MEDIUM"));
                     return point;
                 })
                 .toList();
@@ -394,9 +434,6 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         }
     }
     
-    /**
-     * 从分析结果中提取业务规则
-     */
     @SuppressWarnings("unchecked")
     private List<BusinessRuleDTO> extractBusinessRules(Map<String, Object> analysisResult) {
         try {
@@ -420,9 +457,6 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         }
     }
     
-    /**
-     * 从分析结果中提取关键信息
-     */
     @SuppressWarnings("unchecked")
     private Map<String, Object> extractKeyInfo(Map<String, Object> analysisResult) {
         try {
@@ -434,11 +468,10 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         }
     }
     
-    /**
-     * 从文本中提取测试要点（简单实现）
-     */
+    // ========== 本地文本分析（降级用） ==========
+    
     private List<Map<String, Object>> extractTestPointsFromText(String text) {
-        List<Map<String, Object>> points = new java.util.ArrayList<>();
+        List<Map<String, Object>> points = new ArrayList<>();
         
         String[] sentences = text.split("[。！？\n]");
         for (String sentence : sentences) {
@@ -446,7 +479,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
                 Map<String, Object> point = new HashMap<>();
                 point.put("name", sentence.substring(0, Math.min(50, sentence.length())));
                 point.put("description", sentence);
-                point.put("priority", "中");
+                point.put("priority", "MEDIUM");
                 points.add(point);
             }
         }
@@ -454,11 +487,8 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         return points.isEmpty() ? List.of(createDefaultTestPoint()) : points;
     }
     
-    /**
-     * 从文本中提取业务规则（简单实现）
-     */
     private List<Map<String, Object>> extractBusinessRulesFromText(String text) {
-        List<Map<String, Object>> rules = new java.util.ArrayList<>();
+        List<Map<String, Object>> rules = new ArrayList<>();
         
         String[] sentences = text.split("[。！？\n]");
         for (String sentence : sentences) {
@@ -474,13 +504,10 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         return rules.isEmpty() ? List.of(createDefaultBusinessRule()) : rules;
     }
     
-    /**
-     * 从文本中提取关键信息
-     */
     private Map<String, Object> extractKeyInfoFromText(String text) {
         Map<String, Object> keyInfo = new HashMap<>();
         
-        java.util.Set<String> keywords = new java.util.HashSet<>();
+        Set<String> keywords = new HashSet<>();
         String[] words = text.split("[\\s，。！？、\n]");
         for (String word : words) {
             if (word.length() >= 2 && word.length() <= 6) {
@@ -499,7 +526,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         Map<String, Object> point = new HashMap<>();
         point.put("name", "功能测试");
         point.put("description", "验证功能是否按需求实现");
-        point.put("priority", "高");
+        point.put("priority", "HIGH");
         return point;
     }
     

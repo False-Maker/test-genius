@@ -13,6 +13,10 @@ public class RequirementAnalysisResult {
     private Long requirementId;
     private String requirementName;
     private String requirementText;
+    private List<String> keywords;
+    private Integer contentLength;
+    private Integer sentenceCount;
+    private String analysisTime;
     private List<TestPointDTO> testPoints;
     private List<BusinessRuleDTO> businessRules;
     private Map<String, Object> keyInfo;
@@ -25,6 +29,18 @@ public class RequirementAnalysisResult {
 
     public String getRequirementText() { return requirementText; }
     public void setRequirementText(String requirementText) { this.requirementText = requirementText; }
+
+    public List<String> getKeywords() { return keywords; }
+    public void setKeywords(List<String> keywords) { this.keywords = keywords; }
+
+    public Integer getContentLength() { return contentLength; }
+    public void setContentLength(Integer contentLength) { this.contentLength = contentLength; }
+
+    public Integer getSentenceCount() { return sentenceCount; }
+    public void setSentenceCount(Integer sentenceCount) { this.sentenceCount = sentenceCount; }
+
+    public String getAnalysisTime() { return analysisTime; }
+    public void setAnalysisTime(String analysisTime) { this.analysisTime = analysisTime; }
 
     public List<TestPointDTO> getTestPoints() { return testPoints; }
     public void setTestPoints(List<TestPointDTO> testPoints) { this.testPoints = testPoints; }
