@@ -535,4 +535,43 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         public List<BusinessRule> getBusinessRules() { return businessRules; }
         public void setBusinessRules(List<BusinessRule> businessRules) { this.businessRules = businessRules; }
         
-        public Map<String, Object> getKeyInfo() { return keyInfo;
+        public Map<String, Object> getKeyInfo() { return keyInfo; }
+        public void setKeyInfo(Map<String, Object> keyInfo) { this.keyInfo = keyInfo; }
+    }
+    
+    /**
+     * 测试要点
+     */
+    public static class TestPoint {
+        private String name;
+        private String description;
+        private String priority;
+        
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        
+        public String getPriority() { return priority; }
+        public void setPriority(String priority) { this.priority = priority; }
+    }
+    
+    /**
+     * 业务规则
+     */
+    public static class BusinessRule {
+        private String name;
+        private String description;
+        private String type;
+        
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+        
+        public String getType() { return type; }
+        public void setType(String type) { this.type = type; }
+    }
+}
