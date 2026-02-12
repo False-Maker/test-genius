@@ -37,5 +37,9 @@ public interface ModelConfigRepository extends JpaRepository<ModelConfig, Long>,
      * 根据编码前缀查询模型配置，按ID倒序排列（用于生成编码）
      */
     List<ModelConfig> findByModelCodeStartingWithOrderByIdDesc(String prefix);
-}
 
+    /**
+     * 根据任务类型查询启用的模型配置（模糊匹配 taskTypes JSON 字段），按优先级排序
+     */
+    List<ModelConfig> findByIsActiveAndTaskTypesContainingOrderByPriorityAsc(String isActive, String taskType);
+}
