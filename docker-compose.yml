@@ -50,6 +50,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       APP_AI_SERVICE_URL: http://backend-python:8000
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -81,6 +83,7 @@ services:
     volumes:
       - ./backend-java:/workspace
       - maven_repo:/root/.m2
+      - uploads_data:/workspace/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -262,6 +265,7 @@ volumes:
   alertmanager_data:
   maven_repo:
   frontend_node_modules:
+  uploads_data:
 
 networks:
   test-design-network:

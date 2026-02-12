@@ -71,12 +71,22 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
                 String documentContent = parseDocument(requirement.getRequirementDocUrl());
                 if (documentContent != null && !documentContent.isEmpty()) {
                     requirementText = documentContent;
+                } else if (!hasDescription) {
+                    // 文档解析返回空内容，且没有需求描述
+                    throw new BusinessException(
+                        "需求文档解析失败（文件可能不存在或已被清理），且需求描述为空，无法进行分析。" +
+                        "请重新上传需求文档或填写需求描述后再进行分析。" +
+                        "（文档路径: " + requirement.getRequirementDocUrl() + "）");
                 }
+            } catch (BusinessException e) {
+                throw e;
             } catch (Exception e) {
                 log.warn("文档解析失败，使用需求描述: {}", e.getMessage());
                 // 文档解析失败时，如果没有需求描述，则无法继续分析
                 if (!hasDescription) {
-                    throw new BusinessException("需求文档解析失败，且需求描述为空，无法进行分析。请检查文档路径或填写需求描述。");
+                    throw new BusinessException(
+                        "需求文档解析失败（" + e.getMessage() + "），且需求描述为空，无法进行分析。" +
+                        "请重新上传需求文档或填写需求描述后再进行分析。");
                 }
             }
         }
@@ -104,6 +114,8 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
             
             return result;
             
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             log.error("需求分析失败: requirementId={}, 错误={}", requirementId, e.getMessage(), e);
             throw new BusinessException("需求分析失败: " + e.getMessage());
@@ -129,12 +141,13 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         try {
             String resolvedPath = resolveDocumentPath(docUrl);
             if (resolvedPath == null) {
+                log.warn("无法解析文档路径: docUrl={}", docUrl);
                 return null;
             }
 
             File file = new File(resolvedPath);
             if (!file.exists() || !file.isFile()) {
-                log.warn("文档不存在或不是文件: {}", resolvedPath);
+                log.warn("文档不存在或不是文件: {}（请确认uploads目录已正确挂载）", resolvedPath);
                 return null;
             }
 
@@ -489,14 +502,3 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         private String type;
         
         // Getters and Setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-    }
-}
-
