@@ -1,6 +1,8 @@
 package com.sinosoft.testdesign.service;
 
-import com.sinosoft.testdesign.service.impl.RequirementAnalysisServiceImpl;
+import com.sinosoft.testdesign.dto.BusinessRuleDTO;
+import com.sinosoft.testdesign.dto.RequirementAnalysisResult;
+import com.sinosoft.testdesign.dto.TestPointDTO;
 
 import java.util.List;
 
@@ -17,20 +19,19 @@ public interface RequirementAnalysisService {
      * @param requirementId 需求ID
      * @return 需求分析结果
      */
-    RequirementAnalysisServiceImpl.RequirementAnalysisResult analyzeRequirement(Long requirementId);
+    RequirementAnalysisResult analyzeRequirement(Long requirementId);
     
     /**
      * 提取测试要点
      * @param requirementId 需求ID
      * @return 测试要点列表
      */
-    List<RequirementAnalysisServiceImpl.TestPoint> extractTestPoints(Long requirementId);
+    List<TestPointDTO> extractTestPoints(Long requirementId);
     
     /**
      * 提取业务规则
      * @param requirementId 需求ID
      * @return 业务规则列表
      */
-    List<RequirementAnalysisServiceImpl.BusinessRule> extractBusinessRules(Long requirementId);
+    List<BusinessRuleDTO> extractBusinessRules(Long requirementId);
 }
-

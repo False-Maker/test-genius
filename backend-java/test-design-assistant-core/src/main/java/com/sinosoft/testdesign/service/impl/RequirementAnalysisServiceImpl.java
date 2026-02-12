@@ -2,6 +2,9 @@ package com.sinosoft.testdesign.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.BusinessException;
+import com.sinosoft.testdesign.dto.BusinessRuleDTO;
+import com.sinosoft.testdesign.dto.RequirementAnalysisResult;
+import com.sinosoft.testdesign.dto.TestPointDTO;
 import com.sinosoft.testdesign.entity.ModelConfig;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.repository.RequirementRepository;
@@ -148,13 +151,13 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
     }
     
     @Override
-    public List<TestPoint> extractTestPoints(Long requirementId) {
+    public List<TestPointDTO> extractTestPoints(Long requirementId) {
         RequirementAnalysisResult result = analyzeRequirement(requirementId);
         return result.getTestPoints();
     }
     
     @Override
-    public List<BusinessRule> extractBusinessRules(Long requirementId) {
+    public List<BusinessRuleDTO> extractBusinessRules(Long requirementId) {
         RequirementAnalysisResult result = analyzeRequirement(requirementId);
         return result.getBusinessRules();
     }
@@ -369,7 +372,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      * 从分析结果中提取测试要点
      */
     @SuppressWarnings("unchecked")
-    private List<TestPoint> extractTestPoints(Map<String, Object> analysisResult) {
+    private List<TestPointDTO> extractTestPoints(Map<String, Object> analysisResult) {
         try {
             List<Map<String, Object>> testPointsData = (List<Map<String, Object>>) analysisResult.get("test_points");
             if (testPointsData == null) {
@@ -378,7 +381,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
             
             return testPointsData.stream()
                 .map(data -> {
-                    TestPoint point = new TestPoint();
+                    TestPointDTO point = new TestPointDTO();
                     point.setName((String) data.get("name"));
                     point.setDescription((String) data.get("description"));
                     point.setPriority((String) data.getOrDefault("priority", "中"));
@@ -395,7 +398,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      * 从分析结果中提取业务规则
      */
     @SuppressWarnings("unchecked")
-    private List<BusinessRule> extractBusinessRules(Map<String, Object> analysisResult) {
+    private List<BusinessRuleDTO> extractBusinessRules(Map<String, Object> analysisResult) {
         try {
             List<Map<String, Object>> rulesData = (List<Map<String, Object>>) analysisResult.get("business_rules");
             if (rulesData == null) {
@@ -404,7 +407,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
             
             return rulesData.stream()
                 .map(data -> {
-                    BusinessRule rule = new BusinessRule();
+                    BusinessRuleDTO rule = new BusinessRuleDTO();
                     rule.setName((String) data.get("name"));
                     rule.setDescription((String) data.get("description"));
                     rule.setType((String) data.getOrDefault("type", "业务规则"));
@@ -421,157 +424,4 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      * 从分析结果中提取关键信息
      */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> extractKeyInfo(Map<String, Object> analysisResult) {
-        try {
-            Map<String, Object> keyInfo = (Map<String, Object>) analysisResult.get("key_info");
-            return keyInfo != null ? keyInfo : new HashMap<>();
-        } catch (Exception e) {
-            log.warn("提取关键信息失败: {}", e.getMessage());
-            return new HashMap<>();
-        }
-    }
-    
-    /**
-     * 从文本中提取测试要点（简单实现）
-     */
-    private List<Map<String, Object>> extractTestPointsFromText(String text) {
-        List<Map<String, Object>> points = new java.util.ArrayList<>();
-        
-        String[] sentences = text.split("[。！？\n]");
-        for (String sentence : sentences) {
-            if (sentence.contains("测试") || sentence.contains("验证") || sentence.contains("检查")) {
-                Map<String, Object> point = new HashMap<>();
-                point.put("name", sentence.substring(0, Math.min(50, sentence.length())));
-                point.put("description", sentence);
-                point.put("priority", "中");
-                points.add(point);
-            }
-        }
-        
-        return points.isEmpty() ? List.of(createDefaultTestPoint()) : points;
-    }
-    
-    /**
-     * 从文本中提取业务规则（简单实现）
-     */
-    private List<Map<String, Object>> extractBusinessRulesFromText(String text) {
-        List<Map<String, Object>> rules = new java.util.ArrayList<>();
-        
-        String[] sentences = text.split("[。！？\n]");
-        for (String sentence : sentences) {
-            if (sentence.contains("规则") || sentence.contains("要求") || sentence.contains("必须")) {
-                Map<String, Object> rule = new HashMap<>();
-                rule.put("name", sentence.substring(0, Math.min(50, sentence.length())));
-                rule.put("description", sentence);
-                rule.put("type", "业务规则");
-                rules.add(rule);
-            }
-        }
-        
-        return rules.isEmpty() ? List.of(createDefaultBusinessRule()) : rules;
-    }
-    
-    /**
-     * 从文本中提取关键信息
-     */
-    private Map<String, Object> extractKeyInfoFromText(String text) {
-        Map<String, Object> keyInfo = new HashMap<>();
-        
-        java.util.Set<String> keywords = new java.util.HashSet<>();
-        String[] words = text.split("[\\s，。！？、\n]");
-        for (String word : words) {
-            if (word.length() >= 2 && word.length() <= 6) {
-                keywords.add(word);
-            }
-        }
-        
-        keyInfo.put("keywords", keywords.stream().limit(10).toList());
-        keyInfo.put("content_length", text.length());
-        keyInfo.put("sentence_count", text.split("[。！？\n]").length);
-        
-        return keyInfo;
-    }
-    
-    private Map<String, Object> createDefaultTestPoint() {
-        Map<String, Object> point = new HashMap<>();
-        point.put("name", "功能测试");
-        point.put("description", "验证功能是否按需求实现");
-        point.put("priority", "高");
-        return point;
-    }
-    
-    private Map<String, Object> createDefaultBusinessRule() {
-        Map<String, Object> rule = new HashMap<>();
-        rule.put("name", "业务规则");
-        rule.put("description", "遵循业务规则和规范");
-        rule.put("type", "业务规则");
-        return rule;
-    }
-    
-    /**
-     * 需求分析结果
-     */
-    public static class RequirementAnalysisResult {
-        private Long requirementId;
-        private String requirementName;
-        private String requirementText;
-        private List<TestPoint> testPoints;
-        private List<BusinessRule> businessRules;
-        private Map<String, Object> keyInfo;
-        
-        // Getters and Setters
-        public Long getRequirementId() { return requirementId; }
-        public void setRequirementId(Long requirementId) { this.requirementId = requirementId; }
-        
-        public String getRequirementName() { return requirementName; }
-        public void setRequirementName(String requirementName) { this.requirementName = requirementName; }
-        
-        public String getRequirementText() { return requirementText; }
-        public void setRequirementText(String requirementText) { this.requirementText = requirementText; }
-        
-        public List<TestPoint> getTestPoints() { return testPoints; }
-        public void setTestPoints(List<TestPoint> testPoints) { this.testPoints = testPoints; }
-        
-        public List<BusinessRule> getBusinessRules() { return businessRules; }
-        public void setBusinessRules(List<BusinessRule> businessRules) { this.businessRules = businessRules; }
-        
-        public Map<String, Object> getKeyInfo() { return keyInfo; }
-        public void setKeyInfo(Map<String, Object> keyInfo) { this.keyInfo = keyInfo; }
-    }
-    
-    /**
-     * 测试要点
-     */
-    public static class TestPoint {
-        private String name;
-        private String description;
-        private String priority;
-        
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public String getPriority() { return priority; }
-        public void setPriority(String priority) { this.priority = priority; }
-    }
-    
-    /**
-     * 业务规则
-     */
-    public static class BusinessRule {
-        private String name;
-        private String description;
-        private String type;
-        
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-    }
-}
+    private Map<String, Object> extractKeyInfo(Map<String
