@@ -60,49 +60,67 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         TestRequirement requirement = requirementRepository.findById(requirementId)
             .orElseThrow(() -> new BusinessException("需求不存在: " + requirementId));
         
-        // 2. 如果需求有文档，先解析文档
+        // 2. 准备需求文本
         String requirementText = requirement.getRequirementDescription();
         boolean hasDescription = requirementText != null && !requirementText.trim().isEmpty();
         boolean hasDocUrl = requirement.getRequirementDocUrl() != null && !requirement.getRequirementDocUrl().isEmpty();
         
+        // 3. 如果有文档URL，尝试解析文档内容
+        String documentContent = null;
+        boolean docParseFailed = false;
+        String docParseFailReason = null;
+        
         if (hasDocUrl) {
-            // 如果有文档，调用文档解析服务
             try {
-                String documentContent = parseDocument(requirement.getRequirementDocUrl());
-                if (documentContent != null && !documentContent.isEmpty()) {
-                    requirementText = documentContent;
-                } else if (!hasDescription) {
-                    // 文档解析返回空内容，且没有需求描述
-                    throw new BusinessException(
-                        "需求文档解析失败（文件可能不存在或已被清理），且需求描述为空，无法进行分析。" +
-                        "请重新上传需求文档或填写需求描述后再进行分析。" +
-                        "（文档路径: " + requirement.getRequirementDocUrl() + "）");
+                documentContent = parseDocument(requirement.getRequirementDocUrl());
+                if (documentContent == null || documentContent.isEmpty()) {
+                    docParseFailed = true;
+                    docParseFailReason = "文件可能不存在或已被清理（路径: " + requirement.getRequirementDocUrl() + "）";
+                    log.warn("文档解析返回空内容: docUrl={}", requirement.getRequirementDocUrl());
                 }
-            } catch (BusinessException e) {
-                throw e;
             } catch (Exception e) {
-                log.warn("文档解析失败，使用需求描述: {}", e.getMessage());
-                // 文档解析失败时，如果没有需求描述，则无法继续分析
-                if (!hasDescription) {
-                    throw new BusinessException(
-                        "需求文档解析失败（" + e.getMessage() + "），且需求描述为空，无法进行分析。" +
-                        "请重新上传需求文档或填写需求描述后再进行分析。");
-                }
+                docParseFailed = true;
+                docParseFailReason = e.getMessage();
+                log.warn("文档解析异常: docUrl={}, 错误={}", requirement.getRequirementDocUrl(), e.getMessage());
             }
         }
         
-        if (requirementText == null || requirementText.trim().isEmpty()) {
-            throw new BusinessException("需求描述和文档内容不能同时为空，请至少填写需求描述或上传需求文档后再进行分析。");
+        // 4. 确定最终用于分析的文本
+        // 优先使用文档内容，文档不可用时回退到需求描述
+        String analysisText = null;
+        if (documentContent != null && !documentContent.isEmpty()) {
+            analysisText = documentContent;
+        } else if (hasDescription) {
+            if (docParseFailed) {
+                log.info("文档解析失败，回退使用需求描述进行分析: requirementId={}", requirementId);
+            }
+            analysisText = requirementText;
         }
         
-        // 3. 调用AI服务进行需求分析
+        // 5. 如果既没有文档内容也没有需求描述，无法分析
+        if (analysisText == null || analysisText.trim().isEmpty()) {
+            String errorMsg;
+            if (hasDocUrl && docParseFailed) {
+                errorMsg = "需求文档解析失败（" + docParseFailReason + "），且需求描述为空，无法进行分析。" +
+                    "请重新上传需求文档或填写需求描述后再进行分析。";
+            } else if (hasDocUrl) {
+                errorMsg = "需求文档内容为空，且需求描述为空，无法进行分析。" +
+                    "请重新上传需求文档或填写需求描述后再进行分析。";
+            } else {
+                errorMsg = "需求描述为空且未上传需求文档，无法进行分析。" +
+                    "请至少填写需求描述或上传需求文档后再进行分析。";
+            }
+            throw new BusinessException(errorMsg);
+        }
+        
+        // 6. 调用AI服务进行需求分析
         try {
-            Map<String, Object> analysisResult = callAnalysisService(requirementText);
+            Map<String, Object> analysisResult = callAnalysisService(analysisText);
             
             RequirementAnalysisResult result = new RequirementAnalysisResult();
             result.setRequirementId(requirementId);
             result.setRequirementName(requirement.getRequirementName());
-            result.setRequirementText(requirementText);
+            result.setRequirementText(analysisText);
             result.setTestPoints(extractTestPoints(analysisResult));
             result.setBusinessRules(extractBusinessRules(analysisResult));
             result.setKeyInfo(extractKeyInfo(analysisResult));
@@ -147,7 +165,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
 
             File file = new File(resolvedPath);
             if (!file.exists() || !file.isFile()) {
-                log.warn("文档不存在或不是文件: {}（请确认uploads目录已正确挂载）", resolvedPath);
+                log.warn("文档不存在或不是文件: {}（请确认uploads目录已正确挂载，并重新上传文档）", resolvedPath);
                 return null;
             }
 
