@@ -2,6 +2,7 @@ package com.sinosoft.testdesign.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.BusinessException;
+import com.sinosoft.testdesign.entity.ModelConfig;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.repository.RequirementRepository;
 import com.sinosoft.testdesign.service.ModelCallService;
@@ -28,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 需求分析服务实现
@@ -43,6 +45,10 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
     private final RequirementRepository requirementRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final ModelCallService modelCallService;
+    
+    /** 需求分析任务类型常量 */
+    private static final String TASK_TYPE_REQUIREMENT_ANALYSIS = "REQUIREMENT_ANALYSIS";
     
     @Value("${app.ai-service.url:http://localhost:8000}")
     private String aiServiceUrl;
@@ -114,7 +120,7 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
             throw new BusinessException(errorMsg);
         }
         
-        // 6. 调用AI服务进行需求分析
+        // 6. 调用AI服务进行需求分析（使用模型配置）
         try {
             Map<String, Object> analysisResult = callAnalysisService(analysisText);
             
@@ -247,60 +253,102 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
     }
     
     /**
-     * 调用AI分析服务
+     * 调用AI分析服务（通过模型配置）
+     * 
+     * 降级策略：
+     * 1. 优先使用模型配置中的模型调用 AI 服务
+     * 2. 模型配置不可用时，直接调用 Python AI 服务（不带模型配置）
+     * 3. AI 服务完全不可用时，使用本地关键词分析
      */
+    @SuppressWarnings("unchecked")
     private Map<String, Object> callAnalysisService(String requirementText) {
         try {
-            // 构建分析提示词
             String prompt = buildAnalysisPrompt(requirementText);
-            
-            // 调用Python AI服务进行需求分析
             String url = aiServiceUrl + "/api/v1/requirement/analyze";
             
             Map<String, Object> request = new HashMap<>();
             request.put("requirement_text", requirementText);
             request.put("prompt", prompt);
             
+            // 优先从模型配置中获取最佳模型
+            Optional<ModelConfig> modelConfigOpt = modelCallService.getBestModelForTask(TASK_TYPE_REQUIREMENT_ANALYSIS);
+            
+            if (modelConfigOpt.isPresent()) {
+                ModelConfig modelConfig = modelConfigOpt.get();
+                log.info("需求分析使用模型配置: modelCode={}, modelName={}, modelType={}",
+                        modelConfig.getModelCode(), modelConfig.getModelName(), modelConfig.getModelType());
+                
+                try {
+                    Map<String, Object> response = modelCallService.callWithModel(modelConfig, url, request);
+                    
+                    if (Boolean.TRUE.equals(response.get("success"))) {
+                        Map<String, Object> analysisResult = (Map<String, Object>) response.get("result");
+                        if (analysisResult != null) {
+                            return analysisResult;
+                        }
+                    }
+                    log.warn("模型配置调用返回失败，尝试降级: {}", response.get("message"));
+                } catch (Exception e) {
+                    log.warn("模型配置调用异常，尝试降级: {}", e.getMessage());
+                }
+            } else {
+                log.warn("未找到可用的模型配置，尝试直接调用 AI 服务");
+            }
+            
+            // 降级策略1：不带模型配置直接调用 Python AI 服务
+            Map<String, Object> fallbackResult = callAIServiceDirectly(url, request);
+            if (fallbackResult != null) {
+                return fallbackResult;
+            }
+            
+            // 降级策略2：使用本地简单分析
+            log.warn("AI 服务不可用，使用本地文本分析");
+            return localTextAnalysis(requirementText);
+            
+        } catch (Exception e) {
+            log.error("调用AI分析服务失败，使用本地分析降级: {}", e.getMessage());
+            return localTextAnalysis(requirementText);
+        }
+    }
+    
+    /**
+     * 不带模型配置直接调用 AI 服务（降级策略1）
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> callAIServiceDirectly(String url, Map<String, Object> request) {
+        try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
             
-            ResponseEntity<Map> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, Map.class
-            );
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> body = response.getBody();
-                
-                // 解析Python服务返回的结果
                 if (Boolean.TRUE.equals(body.get("success"))) {
                     Map<String, Object> analysisResult = (Map<String, Object>) body.get("result");
                     if (analysisResult != null) {
                         return analysisResult;
                     }
                 }
-                
-                // 如果Python服务返回失败，使用降级策略
-                log.warn("Python AI服务返回失败，使用本地分析: {}", body.get("message"));
+                log.warn("直接调用 AI 服务返回失败: {}", body.get("message"));
             }
-            
-            // 降级策略：使用本地简单分析
-            Map<String, Object> result = new HashMap<>();
-            result.put("test_points", extractTestPointsFromText(requirementText));
-            result.put("business_rules", extractBusinessRulesFromText(requirementText));
-            result.put("key_info", extractKeyInfoFromText(requirementText));
-            
-            return result;
-            
+            return null;
         } catch (Exception e) {
-            log.error("调用AI分析服务失败，使用降级策略: {}", e.getMessage());
-            // 降级策略：使用本地简单分析
-            Map<String, Object> result = new HashMap<>();
-            result.put("test_points", extractTestPointsFromText(requirementText));
-            result.put("business_rules", extractBusinessRulesFromText(requirementText));
-            result.put("key_info", extractKeyInfoFromText(requirementText));
-            return result;
+            log.warn("直接调用 AI 服务异常: {}", e.getMessage());
+            return null;
         }
+    }
+    
+    /**
+     * 本地文本分析（降级策略2）
+     */
+    private Map<String, Object> localTextAnalysis(String requirementText) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("test_points", extractTestPointsFromText(requirementText));
+        result.put("business_rules", extractBusinessRulesFromText(requirementText));
+        result.put("key_info", extractKeyInfoFromText(requirementText));
+        return result;
     }
     
     /**
@@ -387,10 +435,8 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      * 从文本中提取测试要点（简单实现）
      */
     private List<Map<String, Object>> extractTestPointsFromText(String text) {
-        // 简单的关键词匹配，实际应该使用大模型
         List<Map<String, Object>> points = new java.util.ArrayList<>();
         
-        // 查找包含"测试"、"验证"、"检查"等关键词的句子
         String[] sentences = text.split("[。！？\n]");
         for (String sentence : sentences) {
             if (sentence.contains("测试") || sentence.contains("验证") || sentence.contains("检查")) {
@@ -409,10 +455,8 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      * 从文本中提取业务规则（简单实现）
      */
     private List<Map<String, Object>> extractBusinessRulesFromText(String text) {
-        // 简单的关键词匹配，实际应该使用大模型
         List<Map<String, Object>> rules = new java.util.ArrayList<>();
         
-        // 查找包含"规则"、"要求"、"必须"等关键词的句子
         String[] sentences = text.split("[。！？\n]");
         for (String sentence : sentences) {
             if (sentence.contains("规则") || sentence.contains("要求") || sentence.contains("必须")) {
@@ -433,7 +477,6 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
     private Map<String, Object> extractKeyInfoFromText(String text) {
         Map<String, Object> keyInfo = new HashMap<>();
         
-        // 提取关键词（简单实现）
         java.util.Set<String> keywords = new java.util.HashSet<>();
         String[] words = text.split("[\\s，。！？、\n]");
         for (String word : words) {
@@ -492,45 +535,4 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
         public List<BusinessRule> getBusinessRules() { return businessRules; }
         public void setBusinessRules(List<BusinessRule> businessRules) { this.businessRules = businessRules; }
         
-        public Map<String, Object> getKeyInfo() { return keyInfo; }
-        public void setKeyInfo(Map<String, Object> keyInfo) { this.keyInfo = keyInfo; }
-    }
-    
-    /**
-     * 测试要点
-     */
-    public static class TestPoint {
-        private String name;
-        private String description;
-        private String priority;
-        
-        // Getters and Setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public String getPriority() { return priority; }
-        public void setPriority(String priority) { this.priority = priority; }
-    }
-    
-    /**
-     * 业务规则
-     */
-    public static class BusinessRule {
-        private String name;
-        private String description;
-        private String type;
-        
-        // Getters and Setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-        
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
-    }
-}
+        public Map<String, Object> getKeyInfo() { return keyInfo;
