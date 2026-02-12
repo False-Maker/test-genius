@@ -171,7 +171,8 @@ management:
       probability: 1.0  # 采样率：100%（生产环境建议根据实际情况调整）
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans  # Zipkin服务地址
+      enabled: false  # 禁用Zipkin（未部署Zipkin服务时避免Connection refused报错）
+      endpoint: http://localhost:9411/api/v2/spans  # Zipkin服务地址（启用时取消注释enabled）
 
 # Resilience4j配置（限流和熔断）
 resilience4j:
@@ -204,4 +205,3 @@ resilience4j:
         retryExceptions:
           - org.springframework.web.client.ResourceAccessException
           - java.net.ConnectException
-
