@@ -64,6 +64,33 @@ services:
     networks:
       - test-design-network
 
+  backend-java-dev:
+    image: maven:3.9-eclipse-temurin-17
+    container_name: test-design-backend-java-dev
+    working_dir: /workspace
+    command: mvn -pl test-design-assistant-core -am spring-boot:run
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test_design_assistant
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_AI_SERVICE_URL: http://backend-python:8000
+    volumes:
+      - ./backend-java:/workspace
+      - maven_repo:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - dev
+    networks:
+      - test-design-network
+
   # Python AI服务
   backend-python:
     build:
@@ -74,6 +101,10 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_design_assistant
+      EMBEDDING_PROVIDER: local
+      EMBEDDING_MODEL_NAME: BAAI/bge-m3
+      EMBEDDING_MAX_SEQ_LENGTH: 8192
+      EMBEDDING_DIMENSION: 1024
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,6 +114,30 @@ services:
       timeout: 3s
       retries: 3
       start_period: 20s
+    networks:
+      - test-design-network
+
+  backend-python-dev:
+    image: python:3.10-slim
+    container_name: test-design-backend-python-dev
+    working_dir: /app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_design_assistant
+      PYTHONUNBUFFERED: "1"
+      EMBEDDING_PROVIDER: local
+      EMBEDDING_MODEL_NAME: BAAI/bge-m3
+      EMBEDDING_MAX_SEQ_LENGTH: 8192
+      EMBEDDING_DIMENSION: 1024
+    volumes:
+      - ./backend-python/ai-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - dev
     networks:
       - test-design-network
 
@@ -106,6 +161,23 @@ services:
     networks:
       - test-design-network
 
+  frontend-dev:
+    image: node:18-alpine
+    container_name: test-design-frontend-dev
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "3000:5173"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    profiles:
+      - dev
+    networks:
+      - test-design-network
+
   # Prometheus监控服务
   prometheus:
     image: prom/prometheus:latest
@@ -125,6 +197,8 @@ services:
       - '--web.enable-lifecycle'
     depends_on:
       - backend-java
+    profiles:
+      - monitoring
     networks:
       - test-design-network
 
@@ -144,6 +218,8 @@ services:
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
+    profiles:
+      - monitoring
     networks:
       - test-design-network
 
@@ -161,6 +237,8 @@ services:
       - '--storage.path=/alertmanager'
     depends_on:
       - prometheus
+    profiles:
+      - monitoring
     networks:
       - test-design-network
 
@@ -172,6 +250,8 @@ services:
       - "9411:9411"
     environment:
       - STORAGE_TYPE=mem  # 使用内存存储（生产环境建议使用Elasticsearch）
+    profiles:
+      - monitoring
     networks:
       - test-design-network
 
@@ -180,8 +260,9 @@ volumes:
   prometheus_data:
   grafana_data:
   alertmanager_data:
+  maven_repo:
+  frontend_node_modules:
 
 networks:
   test-design-network:
     driver: bridge
-

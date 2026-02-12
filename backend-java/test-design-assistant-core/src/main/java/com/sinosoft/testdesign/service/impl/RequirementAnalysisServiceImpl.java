@@ -8,6 +8,7 @@ import com.sinosoft.testdesign.service.ModelCallService;
 import com.sinosoft.testdesign.service.RequirementAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +45,12 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
     
     @Value("${app.ai-service.url:http://localhost:8000}")
     private String aiServiceUrl;
+
+    @Value("${app.upload.base-path:./uploads}")
+    private String uploadBasePath;
+
+    @Value("${app.upload.url-prefix:/api/v1/files}")
+    private String uploadUrlPrefix;
     
     @Override
     public RequirementAnalysisResult analyzeRequirement(Long requirementId) {
@@ -114,30 +127,88 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      */
     private String parseDocument(String docUrl) {
         try {
-            // 调用Python服务的文档解析接口
-            String url = aiServiceUrl + "/api/v1/document/parse-by-path";
-            
-            Map<String, String> request = new HashMap<>();
-            request.put("file_path", docUrl);
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, String>> entity = new HttpEntity<>(request, headers);
-            
-            ResponseEntity<Map> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, Map.class
-            );
-            
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> body = response.getBody();
-                return (String) body.get("content");
+            String resolvedPath = resolveDocumentPath(docUrl);
+            if (resolvedPath == null) {
+                return null;
             }
-            
+
+            File file = new File(resolvedPath);
+            if (!file.exists() || !file.isFile()) {
+                log.warn("文档不存在或不是文件: {}", resolvedPath);
+                return null;
+            }
+
+            String url = aiServiceUrl + "/api/v1/document/parse";
+
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", new FileSystemResource(file));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> responseBody = response.getBody();
+                return (String) responseBody.get("content");
+            }
+
             return null;
         } catch (Exception e) {
             log.error("文档解析失败: docUrl={}, 错误={}", docUrl, e.getMessage());
             return null;
         }
+    }
+
+    private String resolveDocumentPath(String docUrl) {
+        if (docUrl == null) {
+            return null;
+        }
+
+        String trimmed = docUrl.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        String pathPart = trimmed;
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            try {
+                URI uri = URI.create(trimmed);
+                if (uri.getPath() != null) {
+                    pathPart = uri.getPath();
+                }
+            } catch (Exception ignored) {
+                pathPart = trimmed;
+            }
+        }
+
+        if (pathPart.startsWith(uploadUrlPrefix)) {
+            pathPart = pathPart.substring(uploadUrlPrefix.length());
+        }
+
+        if (pathPart.startsWith("/")) {
+            pathPart = pathPart.substring(1);
+        }
+
+        Path basePath = resolveUploadBasePath();
+        Path resolved = basePath.resolve(pathPart).normalize();
+
+        if (!resolved.startsWith(basePath)) {
+            log.warn("文档路径不安全: {}", docUrl);
+            return null;
+        }
+
+        return resolved.toString();
+    }
+
+    private Path resolveUploadBasePath() {
+        Path path = Paths.get(uploadBasePath);
+        if (!path.isAbsolute()) {
+            String userDir = System.getProperty("user.dir");
+            path = Paths.get(userDir, uploadBasePath);
+        }
+        return path.normalize().toAbsolutePath();
     }
     
     /**
