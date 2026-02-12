@@ -424,4 +424,90 @@ public class RequirementAnalysisServiceImpl implements RequirementAnalysisServic
      * 从分析结果中提取关键信息
      */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> extractKeyInfo(Map<String
+    private Map<String, Object> extractKeyInfo(Map<String, Object> analysisResult) {
+        try {
+            Map<String, Object> keyInfo = (Map<String, Object>) analysisResult.get("key_info");
+            return keyInfo != null ? keyInfo : new HashMap<>();
+        } catch (Exception e) {
+            log.warn("提取关键信息失败: {}", e.getMessage());
+            return new HashMap<>();
+        }
+    }
+    
+    /**
+     * 从文本中提取测试要点（简单实现）
+     */
+    private List<Map<String, Object>> extractTestPointsFromText(String text) {
+        List<Map<String, Object>> points = new java.util.ArrayList<>();
+        
+        String[] sentences = text.split("[。！？\n]");
+        for (String sentence : sentences) {
+            if (sentence.contains("测试") || sentence.contains("验证") || sentence.contains("检查")) {
+                Map<String, Object> point = new HashMap<>();
+                point.put("name", sentence.substring(0, Math.min(50, sentence.length())));
+                point.put("description", sentence);
+                point.put("priority", "中");
+                points.add(point);
+            }
+        }
+        
+        return points.isEmpty() ? List.of(createDefaultTestPoint()) : points;
+    }
+    
+    /**
+     * 从文本中提取业务规则（简单实现）
+     */
+    private List<Map<String, Object>> extractBusinessRulesFromText(String text) {
+        List<Map<String, Object>> rules = new java.util.ArrayList<>();
+        
+        String[] sentences = text.split("[。！？\n]");
+        for (String sentence : sentences) {
+            if (sentence.contains("规则") || sentence.contains("要求") || sentence.contains("必须")) {
+                Map<String, Object> rule = new HashMap<>();
+                rule.put("name", sentence.substring(0, Math.min(50, sentence.length())));
+                rule.put("description", sentence);
+                rule.put("type", "业务规则");
+                rules.add(rule);
+            }
+        }
+        
+        return rules.isEmpty() ? List.of(createDefaultBusinessRule()) : rules;
+    }
+    
+    /**
+     * 从文本中提取关键信息
+     */
+    private Map<String, Object> extractKeyInfoFromText(String text) {
+        Map<String, Object> keyInfo = new HashMap<>();
+        
+        java.util.Set<String> keywords = new java.util.HashSet<>();
+        String[] words = text.split("[\\s，。！？、\n]");
+        for (String word : words) {
+            if (word.length() >= 2 && word.length() <= 6) {
+                keywords.add(word);
+            }
+        }
+        
+        keyInfo.put("keywords", keywords.stream().limit(10).toList());
+        keyInfo.put("content_length", text.length());
+        keyInfo.put("sentence_count", text.split("[。！？\n]").length);
+        
+        return keyInfo;
+    }
+    
+    private Map<String, Object> createDefaultTestPoint() {
+        Map<String, Object> point = new HashMap<>();
+        point.put("name", "功能测试");
+        point.put("description", "验证功能是否按需求实现");
+        point.put("priority", "高");
+        return point;
+    }
+    
+    private Map<String, Object> createDefaultBusinessRule() {
+        Map<String, Object> rule = new HashMap<>();
+        rule.put("name", "业务规则");
+        rule.put("description", "遵循业务规则和规范");
+        rule.put("type", "业务规则");
+        return rule;
+    }
+}
