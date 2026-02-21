@@ -1,6 +1,7 @@
 """
 pytest配置文件和fixtures
 """
+
 import pytest
 from unittest.mock import Mock, MagicMock
 from sqlalchemy import create_engine
@@ -30,7 +31,7 @@ def test_db() -> Generator[Session, None, None]:
     """
     # 创建表
     Base.metadata.create_all(bind=test_engine)
-    
+
     db = TestingSessionLocal()
     try:
         yield db
@@ -41,21 +42,22 @@ def test_db() -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def client(test_db: Session) -> TestClient:
+def client(test_db: Session) -> Generator[TestClient, None, None]:
     """
     创建测试客户端
     """
+
     def override_get_db():
         try:
             yield test_db
         finally:
             pass
-    
+
     app.dependency_overrides[get_db] = override_get_db
     test_client = TestClient(app)
-    
+
     yield test_client
-    
+
     app.dependency_overrides.clear()
 
 
@@ -100,4 +102,3 @@ def mock_llm_instance(mock_llm_response):
     llm.invoke = Mock(return_value=mock_llm_response)
     llm.get_num_tokens = Mock(return_value=100)
     return llm
-

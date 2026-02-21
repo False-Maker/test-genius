@@ -157,7 +157,7 @@ Max Concurrent: 4
 
 ### Wave 1: 测试基础设施 (4个任务)
 
-- [ ] 1. **修复Python测试依赖**
+ - [x] 1. **修复Python测试依赖**
 
   **What to do**:
   
@@ -215,7 +215,7 @@ Max Concurrent: 4
 
 ---
 
-- [ ] 2. **完善前端Mock和Fixture**
+ - [x] 2. **完善前端Mock和Fixture**
 
   **What to do**:
   
@@ -276,7 +276,7 @@ Max Concurrent: 4
 
 ---
 
-- [ ] 3. **配置测试覆盖率报告**
+ - [x] 3. **配置测试覆盖率报告**
 
   **What to do**:
   
@@ -332,7 +332,7 @@ Max Concurrent: 4
 
 ---
 
-- [ ] 4. **添加测试工具脚本**
+ - [x] 4. **添加测试工具脚本**
 
   **What to do**:
   
