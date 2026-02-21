@@ -10,145 +10,314 @@ const router = createRouter({
     {
       path: '/requirement',
       name: 'Requirement',
-      component: () => import('../views/requirement/RequirementList.vue')
+      component: () => import('../views/requirement/RequirementList.vue'),
+      meta: {
+        title: '需求ID管理',
+        icon: 'Document',
+        permission: ['requirement:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/test-case',
       name: 'TestCase',
-      component: () => import('../views/test-case/TestCaseList.vue')
+      component: () => import('../views/test-case/TestCaseList.vue'),
+      meta: {
+        title: '用例管理',
+        icon: 'Tickets',
+        permission: ['testcase:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/case-generation',
       name: 'CaseGeneration',
-      component: () => import('../views/case-generation/CaseGeneration.vue')
+      component: () => import('../views/case-generation/CaseGeneration.vue'),
+      meta: {
+        title: '智能用例生成',
+        icon: 'MagicStick',
+        permission: ['case:generate'],
+        keepAlive: false
+      }
     },
     {
       path: '/prompt-template',
       name: 'PromptTemplate',
-      component: () => import('../views/prompt-template/PromptTemplateList.vue')
+      component: () => import('../views/prompt-template/PromptTemplateList.vue'),
+      meta: {
+        title: 'Prompt模板',
+        icon: 'EditPen',
+        permission: ['prompt:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/model-config',
       name: 'ModelConfig',
-      component: () => import('../views/model-config/ModelConfigList.vue')
+      component: () => import('../views/model-config/ModelConfigList.vue'),
+      meta: {
+        title: '模型配置',
+        icon: 'Setting',
+        permission: ['model:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/knowledge-base',
       name: 'KnowledgeBase',
-      component: () => import('../views/knowledge-base/KnowledgeBaseList.vue')
+      component: () => import('../views/knowledge-base/KnowledgeBaseList.vue'),
+      meta: {
+        title: '知识库',
+        icon: 'Collection',
+        permission: ['knowledge:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/case-reuse',
       name: 'CaseReuse',
-      component: () => import('../views/case-reuse/CaseReuse.vue')
+      component: () => import('../views/case-reuse/CaseReuse.vue'),
+      meta: {
+        title: '智能复用',
+        icon: 'Refresh',
+        permission: ['case:reuse'],
+        keepAlive: false
+      }
     },
     {
       path: '/ui-script-generation',
       name: 'UIScriptGeneration',
-      component: () => import('../views/test-execution/UIScriptGeneration.vue')
+      component: () => import('../views/test-execution/UIScriptGeneration.vue'),
+      meta: {
+        title: 'UI脚本生成',
+        icon: 'VideoPlay',
+        permission: ['script:generate'],
+        keepAlive: false
+      }
     },
     {
       path: '/ui-script-repair',
       name: 'UIScriptRepair',
-      component: () => import('../views/test-execution/UIScriptRepair.vue')
+      component: () => import('../views/test-execution/UIScriptRepair.vue'),
+      meta: {
+        title: 'UI脚本修复',
+        icon: 'Tools',
+        permission: ['script:repair'],
+        keepAlive: false
+      }
     },
     {
       path: '/test-execution',
       name: 'TestExecutionManagement',
-      component: () => import('../views/test-execution/TestExecutionManagement.vue')
+      component: () => import('../views/test-execution/TestExecutionManagement.vue'),
+      meta: {
+        title: '执行管理',
+        icon: 'VideoCamera',
+        permission: ['execution:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/test-report',
       name: 'TestReport',
-      component: () => import('../views/test-report/TestReportList.vue')
+      component: () => import('../views/test-report/TestReportList.vue'),
+      meta: {
+        title: '测试报告',
+        icon: 'DocumentCopy',
+        permission: ['report:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/test-report-template',
       name: 'TestReportTemplate',
-      component: () => import('../views/test-report-template/TestReportTemplateList.vue')
+      component: () => import('../views/test-report-template/TestReportTemplateList.vue'),
+      meta: {
+        title: '报告模板',
+        icon: 'Notebook',
+        permission: ['template:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/test-coverage',
       name: 'TestCoverageAnalysis',
-      component: () => import('../views/test-coverage/TestCoverageAnalysis.vue')
+      component: () => import('../views/test-coverage/TestCoverageAnalysis.vue'),
+      meta: {
+        title: '覆盖率分析',
+        icon: 'PieChart',
+        permission: ['coverage:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/test-risk-assessment',
       name: 'TestRiskAssessment',
-      component: () => import('../views/test-risk-assessment/TestRiskAssessment.vue')
+      component: () => import('../views/test-risk-assessment/TestRiskAssessment.vue'),
+      meta: {
+        title: '风险评估',
+        icon: 'Warning',
+        permission: ['risk:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/page-element',
       name: 'PageElementList',
-      component: () => import('../views/page-element/PageElementList.vue')
+      component: () => import('../views/page-element/PageElementList.vue'),
+      meta: {
+        title: '页面元素',
+        icon: 'Grid',
+        permission: ['element:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/ui-script-template',
       name: 'UIScriptTemplateList',
-      component: () => import('../views/ui-script-template/UIScriptTemplateList.vue')
+      component: () => import('../views/ui-script-template/UIScriptTemplateList.vue'),
+      meta: {
+        title: '脚本模板',
+        icon: 'Memo',
+        permission: ['script:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/test-specification',
       name: 'TestSpecificationList',
-      component: () => import('../views/test-specification/TestSpecificationList.vue')
+      component: () => import('../views/test-specification/TestSpecificationList.vue'),
+      meta: {
+        title: '测试规约',
+        icon: 'DocumentChecked',
+        permission: ['specification:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/specification-check',
       name: 'SpecificationCheck',
-      component: () => import('../views/specification-check/SpecificationCheck.vue')
+      component: () => import('../views/specification-check/SpecificationCheck.vue'),
+      meta: {
+        title: '规约检查',
+        icon: 'CircleCheck',
+        permission: ['specification:check'],
+        keepAlive: false
+      }
     },
     {
       path: '/test-case-quality',
       name: 'TestCaseQuality',
-      component: () => import('../views/test-case-quality/TestCaseQuality.vue')
+      component: () => import('../views/test-case-quality/TestCaseQuality.vue'),
+      meta: {
+        title: '质量评估',
+        icon: 'Star',
+        permission: ['quality:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/flow-document',
       name: 'FlowDocumentGeneration',
-      component: () => import('../views/flow-document/FlowDocumentGeneration.vue')
+      component: () => import('../views/flow-document/FlowDocumentGeneration.vue'),
+      meta: {
+        title: '流程文档生成',
+        icon: 'Share',
+        permission: ['document:generate'],
+        keepAlive: false
+      }
     },
     {
       path: '/data-document',
       name: 'DataDocumentGeneration',
-      component: () => import('../views/data-document/DataDocumentGeneration.vue')
+      component: () => import('../views/data-document/DataDocumentGeneration.vue'),
+      meta: {
+        title: '数据文档生成',
+        icon: 'DataBoard',
+        permission: ['document:generate'],
+        keepAlive: false
+      }
     },
     {
       path: '/workflow',
       name: 'WorkflowEditor',
-      component: () => import('../views/workflow/WorkflowEditor.vue')
+      component: () => import('../views/workflow/WorkflowEditor.vue'),
+      meta: {
+        title: '工作流编辑器',
+        icon: 'Connection',
+        permission: ['workflow:edit'],
+        keepAlive: false
+      }
     },
     {
       path: '/monitoring',
       name: 'MonitoringDashboard',
-      component: () => import('../views/monitoring/MonitoringDashboard.vue')
+      component: () => import('../views/monitoring/MonitoringDashboard.vue'),
+      meta: {
+        title: '监控Dashboard',
+        icon: 'Monitor',
+        permission: ['monitoring:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/agent',
       name: 'AgentManagement',
-      component: () => import('../views/agent/AgentManagement.vue')
+      component: () => import('../views/agent/AgentManagement.vue'),
+      meta: {
+        title: 'Agent管理',
+        icon: 'Robot',
+        permission: ['agent:read'],
+        keepAlive: true
+      }
     },
     {
       path: '/agent/chat/:agentId',
       name: 'AgentChat',
-      component: () => import('../views/agent/AgentChat.vue')
+      component: () => import('../views/agent/AgentChat.vue'),
+      meta: {
+        title: 'Agent对话',
+        icon: 'ChatDotRound',
+        permission: ['agent:chat'],
+        keepAlive: false
+      }
     },
     {
       path: '/agent/sessions',
       name: 'AgentSessionHistory',
-      component: () => import('../views/agent/AgentSessionHistory.vue')
+      component: () => import('../views/agent/AgentSessionHistory.vue'),
+      meta: {
+        title: 'Agent会话历史',
+        icon: 'Clock',
+        permission: ['agent:history'],
+        keepAlive: true
+      }
     },
     {
       path: '/model-comparison',
       name: 'ModelPerformanceComparison',
-      component: () => import('../views/model-comparison/ModelPerformanceComparison.vue')
+      component: () => import('../views/model-comparison/ModelPerformanceComparison.vue'),
+      meta: {
+        title: '模型性能对比',
+        icon: 'TrendCharts',
+        permission: ['model:compare'],
+        keepAlive: true
+      }
     },
     {
       path: '/intelligent-model',
       name: 'IntelligentModelSelection',
-      component: () => import('../views/intelligent-model/IntelligentModelSelection.vue')
+      component: () => import('../views/intelligent-model/IntelligentModelSelection.vue'),
+      meta: {
+        title: '智能模型选择',
+        icon: 'MagicStick',
+        permission: ['model:select'],
+        keepAlive: true
+      }
     }
   ]
 })
 
 export default router
+
 
