@@ -490,7 +490,7 @@ Max Concurrent: 4
 
 ---
 
-- [ ] 6. **添加API测试**
+ - [x] 6. **添加API测试**
 
   **What to do**:
   为所有API模块添加测试：
