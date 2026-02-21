@@ -861,7 +861,7 @@ const loadRequirements = async () => {
     const res = await requirementApi.getRequirementList({ page: 0, size: 1000 })
 
 
-    requirementList.value = res.data.content || []
+    requirementList.value = res.data?.content || []
 
 
   } catch (error) {
@@ -900,7 +900,7 @@ const loadTestCases = async () => {
     const res = await testCaseApi.getTestCaseList({ page: 0, size: 1000 })
 
 
-    testCaseList.value = res.data.content || []
+    testCaseList.value = res.data?.content || []
 
 
   } catch (error) {
@@ -1190,7 +1190,8 @@ const exportEquivalenceExcel = async () => {
   try {
 
 
-const blob = await dataDocumentApi.exportEquivalenceTableToExcel(equivalenceResult.value)
+const response = await dataDocumentApi.exportEquivalenceTableToExcel(equivalenceResult.value)
+    const blob = response.data
     downloadFile(blob, `${equivalenceResult.value.title || '等价类表'}.xlsx`)
 
 
@@ -1224,7 +1225,8 @@ const exportEquivalenceWord = async () => {
   try {
 
 
-const blob = await dataDocumentApi.exportEquivalenceTableToWord(equivalenceResult.value)
+const response = await dataDocumentApi.exportEquivalenceTableToWord(equivalenceResult.value)
+    const blob = response.data
     downloadFile(blob, `${equivalenceResult.value.title || '等价类表'}.docx`)
 
 
@@ -1258,7 +1260,8 @@ const exportOrthogonalExcel = async () => {
   try {
 
 
-const blob = await dataDocumentApi.exportOrthogonalTableToExcel(orthogonalResult.value)
+const response = await dataDocumentApi.exportOrthogonalTableToExcel(orthogonalResult.value)
+    const blob = response.data
     downloadFile(blob, `${orthogonalResult.value.title || '正交表'}.xlsx`)
 
 
@@ -1292,7 +1295,8 @@ const exportOrthogonalWord = async () => {
   try {
 
 
-const blob = await dataDocumentApi.exportOrthogonalTableToWord(orthogonalResult.value)
+const response = await dataDocumentApi.exportOrthogonalTableToWord(orthogonalResult.value)
+    const blob = response.data
     downloadFile(blob, `${orthogonalResult.value.title || '正交表'}.docx`)
 
 

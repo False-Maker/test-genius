@@ -607,11 +607,12 @@ const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 
 const reportList = ref<TestReportResponseDTO[]>([])
-const formData = reactive<TestReportRequestDTO>({
+const formData = reactive<TestReportRequestDTO & { id?: number }>({
   reportName: '',
   reportType: 'EXECUTION',
   requirementId: undefined,
-  executionTaskId: undefined
+  executionTaskId: undefined,
+  id: undefined
 })
 const viewData = ref<TestReportResponseDTO>({} as TestReportResponseDTO)
 
@@ -897,14 +898,13 @@ const handleCreate = () => {
 
 const handleEdit = (row: TestReportResponseDTO) => {
 
-
   isEdit.value = true
 
 
   formData.reportName = row.reportName
 
 
-  formData.reportType = row.reportType as any
+  formData.reportType = row.reportType
 
 
   formData.requirementId = row.requirementId
@@ -915,7 +915,8 @@ const handleEdit = (row: TestReportResponseDTO) => {
 
   // Store ID for update
 
-  ;(formData as any).id = row.id
+  formData.id = row.id
+
 
   dialogVisible.value = true
 
@@ -1078,7 +1079,7 @@ const handleSubmit = async () => {
                 if (isEdit.value) {
 
 
-                     await testReportApi.updateReport((formData as any).id, formData)
+                     await testReportApi.updateReport(formData.id!, formData)
 
 
                      ElMessage.success('更新成功')
@@ -1156,7 +1157,7 @@ const resetForm = () => {
     formData.executionTaskId = undefined
 
 
-    delete (formData as any).id
+    formData.id = undefined
 
 
 }

@@ -185,8 +185,8 @@ const handleAssessQuality = async () => {
     }
     qualityLoading.value = true
     try {
-        const res = await testCaseQualityApi.assessQuality(caseId.value)
-        qualityScore.value = res.data
+const res = await testCaseQualityApi.assessQuality(caseId.value)
+        qualityScore.value = res.data?.data
         // Also fetch details'Maybe not needed if generic quality level is enough for this button
     } catch (e) {
         console.error(e)
@@ -202,8 +202,8 @@ const handleCheckCompleteness = async () => {
     }
     completenessLoading.value = true
     try {
-        const res = await testCaseQualityApi.checkCompleteness(caseId.value)
-        completenessScore.value = res.data
+const res = await testCaseQualityApi.checkCompleteness(caseId.value)
+        completenessScore.value = res.data?.data
     } catch (e) {
         console.error(e)
     } finally {
@@ -218,8 +218,8 @@ const handleCheckStandardization = async () => {
     }
     standardizationLoading.value = true
     try {
-        const res = await testCaseQualityApi.checkStandardization(caseId.value)
-        standardizationScore.value = res.data
+const res = await testCaseQualityApi.checkStandardization(caseId.value)
+        standardizationScore.value = res.data?.data
     } catch (e) {
         console.error(e)
     } finally {

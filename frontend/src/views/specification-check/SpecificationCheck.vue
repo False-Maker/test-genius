@@ -342,16 +342,12 @@ const handleMatch = async () => {
 
     matchedSpecs.value = [] 
 
-    try {
-
+try {
     const res = await specificationCheckApi.matchSpecifications(caseId.value)
-      matchedSpecs.value = res.data || []
-
-        if (data.length === 0) {
-
-            ElMessage.info('未匹配到适用规约')
-
-        }
+    matchedSpecs.value = res.data?.data || []
+    if (matchedSpecs.value.length === 0) {
+      ElMessage.info('未匹配到适用规约')
+    }
 
     } catch (e) {
 
@@ -384,7 +380,7 @@ const handleCheck = async () => {
     try {
 
   const res = await specificationCheckApi.checkCompliance({ caseId: caseId.value })
-      checkResult.value = res.data
+      checkResult.value = res.data?.data
 
     } catch (e) {
 
@@ -417,7 +413,7 @@ const handleInject = async () => {
     try {
 
 const res = await specificationCheckApi.injectSpecification({ caseId: caseId.value })
-      injectionResult.value = res.data
+      injectionResult.value = res.data?.data
        ElMessage.success('规约注入成功')
 
     } catch (e) {
@@ -451,7 +447,7 @@ const handleReport = async () => {
     try {
 
 const res = await specificationCheckApi.generateComplianceReport({ caseId: caseId.value })
-      reportResult.value = res.data
+      reportResult.value = res.data?.data
         ElMessage.success('报告生成成功')
 
     } catch (e) {

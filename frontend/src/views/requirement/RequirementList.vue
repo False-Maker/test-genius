@@ -6835,31 +6835,8 @@ const loadRequirementList = async () => {
 
 
 
-      requirementList.value = response.data.content || []
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      pagination.total = response.data.totalElements || 0
+requirementList.value = response.data?.content || []
+      pagination.total = response.data?.totalElements || 0
 
 
 

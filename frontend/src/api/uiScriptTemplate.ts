@@ -34,46 +34,46 @@ export interface UIScriptTemplateResponseDTO {
 export const uiScriptTemplateApi = {
     // Create template
     createTemplate(data: UIScriptTemplateRequestDTO) {
-        return request.post<any, UIScriptTemplateResponseDTO>('/v1/ui-script-templates', data)
+        return request.post<UIScriptTemplateResponseDTO>('/v1/ui-script-templates', data)
     },
 
     // Get template list
     getTemplateList(page: number = 0, size: number = 10, templateName?: string, templateType?: string, scriptLanguage?: string, isActive?: string) {
-        return request.get<any, ApiResult<PageResult<UIScriptTemplateResponseDTO>>>('/v1/ui-script-templates', {
+        return request.get<ApiResult<PageResult<UIScriptTemplateResponseDTO>>>('/v1/ui-script-templates', {
             params: { page, size, templateName, templateType, scriptLanguage, isActive }
         })
     },
 
     // Get template by ID
     getTemplateById(id: number) {
-        return request.get<any, UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/${id}`)
+        return request.get<UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/${id}`)
     },
 
     // Get template by code
     getTemplateByCode(templateCode: string) {
-        return request.get<any, UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/code/${templateCode}`)
+        return request.get<UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/code/${templateCode}`)
     },
 
     // Update template
     updateTemplate(id: number, data: UIScriptTemplateRequestDTO) {
-        return request.put<any, UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/${id}`, data)
+        return request.put<UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/${id}`, data)
     },
 
     // Delete template
     deleteTemplate(id: number) {
-        return request.delete<any, void>(`/v1/ui-script-templates/${id}`)
+        return request.delete<void>(`/v1/ui-script-templates/${id}`)
     },
 
     // Get active templates by type and language
     getActiveTemplates(templateType?: string, scriptLanguage?: string) {
-        return request.get<any, UIScriptTemplateResponseDTO[]>('/v1/ui-script-templates/active', {
+        return request.get<UIScriptTemplateResponseDTO[]>('/v1/ui-script-templates/active', {
             params: { templateType, scriptLanguage }
         })
     },
 
     // Update template status
     updateTemplateStatus(id: number, isActive: string) {
-        return request.put<any, UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/${id}/status`, null, {
+        return request.put<UIScriptTemplateResponseDTO>(`/v1/ui-script-templates/${id}/status`, null, {
             params: { isActive }
         })
     }

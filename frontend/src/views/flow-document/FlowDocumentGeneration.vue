@@ -515,7 +515,7 @@ const loadRequirements = async () => {
   requirementLoading.value = true
   try {
     const res = await requirementApi.getRequirementList({ page: 0, size: 1000 })
-    requirementList.value = res.data.content || []
+    requirementList.value = res.data?.content || []
   } catch (error) {
     console.error('加载需求ID列表失败', error)
   } finally {
@@ -528,7 +528,7 @@ const loadTestCases = async () => {
   caseLoading.value = true
   try {
     const res = await testCaseApi.getTestCaseList({ page: 0, size: 1000 })
-    testCaseList.value = res.data.content || []
+    testCaseList.value = res.data?.content || []
   } catch (error) {
     console.error('加载用例列表失败:', error)
   } finally {

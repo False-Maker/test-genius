@@ -61,44 +61,44 @@ export const testReportApi = {
 
     // Get report by code
     getReportByCode(reportCode: string) {
-        return request.get<any, TestReportResponseDTO>(`/v1/test-reports/code/${reportCode}`)
+        return request.get<TestReportResponseDTO>(`/v1/test-reports/code/${reportCode}`)
     },
 
     // Get reports by requirement ID
     getReportsByRequirementId(requirementId: number) {
-        return request.get<any, TestReportResponseDTO[]>(`/v1/test-reports/requirement/${requirementId}`)
+        return request.get<TestReportResponseDTO[]>(`/v1/test-reports/requirement/${requirementId}`)
     },
 
     // Get reports by execution task ID
     getReportsByExecutionTaskId(executionTaskId: number) {
-        return request.get<any, TestReportResponseDTO[]>(`/v1/test-reports/execution-task/${executionTaskId}`)
+        return request.get<TestReportResponseDTO[]>(`/v1/test-reports/execution-task/${executionTaskId}`)
     },
 
     // Update report
     updateReport(id: number, data: TestReportRequestDTO) {
-        return request.put<any, TestReportResponseDTO>(`/v1/test-reports/${id}`, data)
+        return request.put<TestReportResponseDTO>(`/v1/test-reports/${id}`, data)
     },
 
     // Publish report
     publishReport(id: number) {
-        return request.put<any, TestReportResponseDTO>(`/v1/test-reports/${id}/publish`)
+        return request.put<TestReportResponseDTO>(`/v1/test-reports/${id}/publish`)
     },
 
     // Delete report
     deleteReport(id: number) {
-        return request.delete<any, void>(`/v1/test-reports/${id}`)
+        return request.delete<void>(`/v1/test-reports/${id}`)
     },
 
     // Export report
     exportReport(reportCode: string, format: 'WORD' | 'PDF' | 'EXCEL') {
-        return request.get<any, string>(`/v1/test-reports/${reportCode}/export`, {
+        return request.get<string>(`/v1/test-reports/${reportCode}/export`, {
             params: { format }
         })
     },
 
     // Summarize execution results
     summarizeExecutionResults(requirementId?: number, executionTaskId?: number) {
-        return request.get<any, string>('/v1/test-reports/summarize', {
+        return request.get<string>('/v1/test-reports/summarize', {
             params: { requirementId, executionTaskId }
         })
     }

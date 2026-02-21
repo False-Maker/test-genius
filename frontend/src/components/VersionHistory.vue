@@ -327,6 +327,7 @@ import {
   type PromptTemplateVersionRequest,
   type VersionCompareResult
 } from '@/api/promptTemplate'
+import { logger } from '@/utils/logger'
 
 import AbTestManagement from './AbTestManagement.vue'
 
@@ -372,7 +373,7 @@ const loadVersions = async () => {
       versions.value = response.data
     }
   } catch (error) {
-    console.error('加载版本列表失败:', error)
+    logger.error('加载版本列表失败', error)
     ElMessage.error('加载版本列表失败')
   } finally {
     loading.value = false
@@ -387,7 +388,7 @@ const handleViewVersion = async (version: PromptTemplateVersion) => {
       viewDialogVisible.value = true
     }
   } catch (error) {
-    console.error('获取版本详情失败:', error)
+    logger.error('获取版本详情失败', error)
     ElMessage.error('获取版本详情失败')
   }
 }
@@ -411,7 +412,7 @@ const handleCompareVersion = async (version: PromptTemplateVersion) => {
       }
     }
   } catch (error) {
-    console.error('版本对比失败:', error)
+    logger.error('版本对比失败', error)
     ElMessage.error('版本对比失败')
   }
 }
@@ -438,7 +439,7 @@ const handleRollback = async (version: PromptTemplateVersion) => {
     }
   } catch (error: any) {
     if (error !== 'cancel') {
-      console.error('回滚失败:', error)
+      logger.error('回滚失败', error)
       ElMessage.error(error.response?.data?.message || '回滚失败')
     }
   }
@@ -465,7 +466,7 @@ const handleDeleteVersion = async (version: PromptTemplateVersion) => {
     loadVersions()
   } catch (error: any) {
     if (error !== 'cancel') {
-      console.error('删除失败:', error)
+      logger.error('删除失败', error)
       ElMessage.error(error.response?.data?.message || '删除失败')
     }
   }
@@ -494,7 +495,7 @@ const handleSubmitCreate = async () => {
         createDialogVisible.value = false
         loadVersions()
       } catch (error: any) {
-        console.error('创建版本失败:', error)
+        logger.error('创建版本失败', error)
         ElMessage.error(error.response?.data?.message || '创建版本失败')
       } finally {
         createLoading.value = false

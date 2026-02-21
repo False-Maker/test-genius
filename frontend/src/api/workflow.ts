@@ -60,7 +60,7 @@ export interface WorkflowNode {
   id: string
   type: string
   name: string
-  config: Record<string, any>
+  config: Record<string, unknown>
 }
 
 // 工作流边配置类型
@@ -161,7 +161,7 @@ export const workflowApi = {
   // 执行工作流
   executeWorkflow(
     workflowConfig: string,
-    inputData: Record<string, any>,
+    inputData: Record<string, unknown>,
     workflowId?: number,
     workflowCode?: string,
     workflowVersion?: number
@@ -169,7 +169,7 @@ export const workflowApi = {
     return request.post<{
       execution_id: string
       status: string
-      output?: any
+      output?: unknown
       error?: string
       error_node?: string
     }>('/api/v1/workflow/execute', {

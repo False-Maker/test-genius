@@ -1,50 +1,5 @@
 import request from './request'
-import { ApiResult } from './types'
-
-// 测试要点类型
-export interface TestPoint {
-  name: string
-  point: string
-  description?: string
-  priority?: string
-}
-
-// 业务规则类型
-export interface BusinessRule {
-  name: string
-  rule: string
-  description?: string
-  type?: string
-}
-
-// 关键信息类型
-export interface KeyInfo {
-  [key: string]: unknown
-}
-
-// 需求分析结果类型
-export interface RequirementAnalysisResult {
-  requirementId: number
-  requirementName: string
-  requirementText?: string
-  keywords: string[]
-  contentLength: number
-  sentenceCount: number
-  analysisTime: string
-  testPoints: TestPoint[]
-  businessRules: BusinessRule[]
-  keyInfo?: KeyInfo
-}
-
-// 需求分析请求类型
-export interface RequirementAnalysisRequest {
-  requirementId: number
-  keywords?: string[]
-  analyzeDepth?: 'basic' | 'detailed' | 'comprehensive'
-  includeTestPoints?: boolean
-  includeBusinessRules?: boolean
-  includeKeywords?: boolean
-}
+import type { ApiResult, TestPoint, BusinessRule, KeyInfo, RequirementAnalysisResult, RequirementAnalysisRequest } from './types'
 
 // 需求分析API
 export const requirementAnalysisApi = {

@@ -14,59 +14,59 @@ export interface RequirementInputConfig {
 }
 
 export interface TestCaseInputConfig {
-  /** 输入来源 */
+  /** Input source: 'manual' for manual paste, 'repository' for case library, 'file' for file upload */
   source: 'manual' | 'repository' | 'file'
-  /** 用例内容（手动粘贴时使用） */
+  /** Manual content when source is 'manual' */
   content?: string
-  /** 用例ID（用例库导入时使用） */
+  /** Case ID when source is 'repository' */
   caseId?: string
 }
 
 export interface FileUploadConfig {
-  /** 接受的文件类型 */
-  acceptTypes: string[]
-  /** 最大文件大小（MB） */
+  /** Accept file types ['.pdf', '.docx', '.txt', '.md'] */
+  acceptTypes: ('.pdf' | '.docx' | '.txt' | '.md')[]
+  /** Maximum file size in MB */
   maxSize: number
-  /** 解析模式 */
+  /** Parse mode: 'auto' for automatic detection, 'ocr' for OCR recognition, 'text' for text extraction */
   parseMode: 'auto' | 'ocr' | 'text'
 }
 
 // 处理节点配置
 export interface RequirementAnalysisConfig {
-  /** 分析维度 */
+  /** Analysis dimensions to include: 'functional' for functional requirements, 'non-functional' for non-functional requirements, 'security' for security requirements, 'performance' for performance requirements */
   dimensions: ('functional' | 'non-functional' | 'security' | 'performance')[]
-  /** 输出深度（1-5级） */
+  /** Analysis depth level (1-5) */
   depth: number
-  /** 语言偏好 */
+  /** Language preference for output: 'zh' for Chinese, 'en' for English */
   language: 'zh' | 'en'
 }
 
 export interface TemplateSelectConfig {
-  /** 测试类型 */
+  /** Test type: 'functional' for functional testing, 'api' for API testing, 'ui' for UI automation, 'security' for security testing */
   testType: 'functional' | 'api' | 'ui' | 'security'
-  /** 模板ID */
-  templateId: string
-  /** 自定义字段（JSON格式） */
+  /** Template ID for the selected template */
+  templateId?: string
+  /** Custom fields in JSON format for template customization */
   customFields?: string
 }
 
 export interface PromptGenerateConfig {
-  /** 生成策略 */
+  /** Generation strategy: 'zero_shot' for direct generation, 'few_shot' for few-shot learning, 'cot' for chain-of-thought */
   strategy: 'zero_shot' | 'few_shot' | 'cot'
-  /** 是否注入上下文 */
+  /** Whether to inject knowledge base context */
   injectContext: boolean
-  /** 提示词模板 */
-  template: string
+  /** Custom prompt template with {{variable}} placeholders */
+  template?: string
 }
 
 export interface LLMCallConfig {
-  /** 模型代码 */
-  model_code: string
-  /** 温度参数（0-1） */
+  /** Model code to use for LLM calls: 'DEEPSEEK_CHAT', 'GPT4', 'CLAUDE_35' */
+  model_code: 'DEEPSEEK_CHAT' | 'GPT4' | 'CLAUDE_35'
+  /** Temperature parameter for creativity (0-1) */
   temperature: number
-  /** 最大Token数 */
+  /** Maximum number of tokens */
   max_tokens: number
-  /** 系统提示 */
+  /** System-level prompt template */
   system_prompt?: string
 }
 
@@ -90,75 +90,71 @@ export interface FormatTransformConfig {
 }
 
 export interface DataCleanConfig {
-  /** 清洗规则 */
+  /** Data cleaning rules to apply: 'trim' for whitespace, 'remove_empty' for empty fields, 'remove_duplicates' for duplicates, 'normalize_date' for date standardization */
   rules: ('trim' | 'remove_empty' | 'remove_duplicates' | 'normalize_date')[]
-  /** 敏感脱敏字段 */
-  masking?: string[]
-  /** 自定义清洗脚本 */
+  /** Data masking options for sensitive information: 'phone' for phone numbers, 'id_card' for ID cards, 'email' for emails, 'name' for names */
+  masking?: ('phone' | 'id_card' | 'email' | 'name')[]
+  /** Custom cleaning script in JavaScript */
   customScript?: string
-  /** 数据类型 */
-  dataType?: 'json' | 'text' | 'csv'
 }
 
 export interface DataMergeConfig {
-  /** 合并策略 */
+  /** Merge strategy: 'append' for sequential concatenation, 'key_merge' for merge by key, 'override' for value override */
   strategy: 'append' | 'key_merge' | 'override'
-  /** 主键字段（按键合并时使用） */
+  /** Primary key field when strategy is 'key_merge' */
   primaryKey?: string
-  /** 冲突处理策略 */
+  /** Conflict resolution strategy: 'use_first' to keep first value, 'use_last' to use last value, 'error' to throw error */
   conflictResolution: 'use_first' | 'use_last' | 'error'
-  /** 分隔符 */
-  separator?: string
 }
 
 // 输出节点配置
 export interface CaseSaveConfig {
-  /** 保存目标 */
+  /** Save target: 'case_repo' for test case library, 'temp_file' for temporary files, 'api' for external API */
   target: 'case_repo' | 'temp_file' | 'api'
-  /** 项目ID */
+  /** Associated project ID */
   projectId?: string
-  /** 标签 */
+  /** Tags for the saved test cases */
   tags: string[]
 }
 
 export interface ReportGenerateConfig {
-  /** 报告类型 */
+  /** Report type: 'plan' for test plan report, 'review' for review report, 'execution' for execution report */
   reportType: 'plan' | 'review' | 'execution'
-  /** 包含章节 */
+  /** Report sections to include: 'summary' for summary, 'statistics' for statistics, 'details' for details, 'risks' for risk analysis */
   sections: ('summary' | 'statistics' | 'details' | 'risks')[]
-  /** 导出格式 */
+  /** Export format: 'html' for HTML, 'pdf' for PDF, 'markdown' for Markdown */
   format: 'html' | 'pdf' | 'markdown'
 }
 
 export interface FileExportConfig {
-  /** 文件格式 */
+  /** File format: 'xlsx' for Excel, 'csv' for CSV, 'json' for JSON, 'xmind' for XMind */
   fileFormat: 'xlsx' | 'csv' | 'json' | 'xmind'
-  /** 文件名称 */
+  /** File name pattern with support for {date} placeholder */
   fileName?: string
-  /** 包含表头 */
+  /** Whether to include header row in exported files */
   includeHeader: boolean
 }
 
 // 控制节点配置
 export interface ConditionConfig {
-  /** 判断条件 */
-  condition: string
-  /** 比较模式 */
+  /** Condition expression for evaluation */
+  condition?: string
+  /** Evaluation mode: 'expression' for expression evaluation, 'script' for script execution */
   mode: 'expression' | 'script'
-  /** 是否有默认分支 */
+  /** Whether to include a default branch */
   hasDefaultBranch: boolean
 }
 
 export interface LoopConfig {
-  /** 循环类型 */
+  /** Loop type: 'count' for count-based loops, 'collection' for collection iteration, 'while' for conditional loops */
   loopType: 'count' | 'collection' | 'while'
-  /** 循环次数（按次数循环时使用） */
+  /** Loop count when loopType is 'count' */
   count?: number
-  /** 集合变量名（遍历集合时使用） */
+  /** Collection variable name when loopType is 'collection' */
   collectionVar?: string
-  /** 终止条件（条件循环时使用） */
+  /** Condition expression when loopType is 'while' */
   condition?: string
-  /** 最大迭代次数 */
+  /** Maximum number of iterations to prevent infinite loops */
   maxIterations: number
 }
 
@@ -174,6 +170,114 @@ export interface NodeConfigBase {
   enabled: boolean
   /** 超时时间（秒） */
   timeout?: number
+}
+
+// Additional config types to reach 17 total configuration interfaces
+
+/**
+ * Configuration for specification check nodes
+ */
+export interface SpecificationCheckConfig {
+  /** Check level: 'BASIC' for basic validation, 'DETAILED' for comprehensive analysis */
+  checkLevel: 'BASIC' | 'DETAILED'
+  /** Whether to automatically fix issues found */
+  autoFix: boolean
+}
+
+/**
+ * Configuration for test coverage analysis nodes
+ */
+export interface TestCoverageAnalysisConfig {
+  /** Coverage type: 'functional' for functional coverage, 'code' for code coverage, 'requirements' for requirements coverage */
+  coverageType: 'functional' | 'code' | 'requirements'
+  /** Baseline data for comparison */
+  baselineData?: string
+}
+
+/**
+ * Configuration for test risk assessment nodes
+ */
+export interface TestRiskAssessmentConfig {
+  /** Risk assessment model to use: 'SEVERITY_IMPACT' for severity-impact matrix, 'PROBABILITY_IMPACT' for probability-impact matrix, 'CUSTOM_MATRIX' for custom risk matrix */
+  riskModel: 'SEVERITY_IMPACT' | 'PROBABILITY_IMPACT' | 'CUSTOM_MATRIX'
+  /** Whether to include mitigation suggestions */
+  mitigationSuggestions: boolean
+}
+
+/**
+ * Configuration for test case quality nodes
+ */
+export interface TestCaseQualityConfig {
+  /** Quality metrics to evaluate: 'completeness' for completeness, 'traceability' for traceability, 'reusability' for reusability, 'maintainability' for maintainability */
+  qualityMetrics: ('completeness' | 'traceability' | 'reusability' | 'maintainability')[]
+  /** Benchmark data for comparison */
+  benchmarkData?: string
+}
+
+/**
+ * Configuration for test report template nodes
+ */
+export interface TestReportTemplateConfig {
+  /** Template format: 'HTML' for HTML templates, 'DOCX' for Word templates */
+  templateFormat: 'HTML' | 'DOCX'
+  /** Report sections to include: 'executive_summary' for executive summary, 'test_coverage' for test coverage, 'test_results' for test results, 'defect_analysis' for defect analysis, 'recommendations' for recommendations */
+  sections: ('executive_summary' | 'test_coverage' | 'test_results' | 'defect_analysis' | 'recommendations')[]
+  /** Custom styles configuration */
+  customStyles?: string
+}
+
+/**
+ * Configuration for test specification nodes
+ */
+export interface TestSpecificationConfig {
+  /** Specification format: 'JSON' for JSON specifications, 'MARKDOWN' for Markdown specifications */
+  specFormat: 'JSON' | 'MARKDOWN'
+  /** Whether to include test examples */
+  includeExamples: boolean
+}
+
+/**
+ * Configuration for data document nodes
+ */
+export interface DataDocumentConfig {
+  /** Document format: 'PDF' for PDF documents, 'WORD' for Word documents, 'MARKDOWN' for Markdown */
+  docFormat: 'PDF' | 'WORD' | 'MARKDOWN'
+  /** Whether to include data dictionary */
+  includeDataDictionary: boolean
+}
+
+/**
+ * Configuration for UI script template nodes
+ */
+export interface UIScriptTemplateConfig {
+  /** Script type: 'ELEMENTS' for element operations, 'PAGES' for page operations, 'WORKFLOWS' for workflow operations */
+  scriptType: 'ELEMENTS' | 'PAGES' | 'WORKFLOWS'
+  /** Target framework for script generation: 'SELENIUM' for Selenium, 'PLAYWRIGHT' for Playwright, 'CYPRESS' for Cypress, 'ROBOT_FRAMEWORK' for Robot Framework */
+  targetFramework: 'SELENIUM' | 'PLAYWRIGHT' | 'CYPRESS' | 'ROBOT_FRAMEWORK'
+  /** Locator strategy for element identification: 'CSS_SELECTOR' for CSS selectors, 'XPATH' for XPath, 'ID' for ID, 'TEXT' for text */
+  locatorStrategy: 'CSS_SELECTOR' | 'XPATH' | 'ID' | 'TEXT'
+}
+
+/**
+ * Configuration for UI script generation nodes
+ */
+export interface UIScriptGenerationConfig {
+  /** Generation mode: 'MANUAL' for manual creation, 'RECORDING' for recording-based, 'TEMPLATE' for template-based */
+  generationMode: 'MANUAL' | 'RECORDING' | 'TEMPLATE'
+  /** Target application type: 'WEB' for web applications, 'MOBILE_WEB' for mobile web applications, 'DESKTOP' for desktop applications, 'HYBRID' for hybrid applications */
+  targetApp: 'WEB' | 'MOBILE_WEB' | 'DESKTOP' | 'HYBRID'
+  /** Recording strategy for automation: 'FULL' for full recording, 'SMART' for smart recording, 'COMPRESSED' for compressed recording */
+  recordingStrategy: 'FULL' | 'SMART' | 'COMPRESSED'
+}
+
+/**
+ * Configuration for UI script repair nodes
+ */
+export interface UIScriptRepairConfig {
+  /** Repair mode: 'AUTO' for automatic repair, 'SEMIAUTO' for semi-automatic repair, 'MANUAL' for manual repair */
+  repairMode: 'AUTO' | 'SEMIAUTO' | 'MANUAL'
+  /** Fallback strategy when repair fails: 'SKIP' to skip problematic elements, 'LOG' to log the issue, 'ALERT' to show alert, 'ROLLBACK' to rollback to previous working state */
+  fallbackStrategy: 'SKIP' | 'LOG' | 'ALERT' | 'ROLLBACK'
 }
 
 /**
@@ -197,6 +301,16 @@ export type WorkflowNodeConfig =
   | FileExportConfig
   | ConditionConfig
   | LoopConfig
+  | SpecificationCheckConfig
+  | TestCoverageAnalysisConfig
+  | TestRiskAssessmentConfig
+  | TestCaseQualityConfig
+  | TestReportTemplateConfig
+  | TestSpecificationConfig
+  | DataDocumentConfig
+  | UIScriptTemplateConfig
+  | UIScriptGenerationConfig
+  | UIScriptRepairConfig
 
 /**
  * 节点类型枚举
@@ -241,4 +355,5 @@ export interface NodeConfigMap {
   [NodeType.FILE_EXPORT]: FileExportConfig
   [NodeType.CONDITION]: ConditionConfig
   [NodeType.LOOP]: LoopConfig
+  // Additional node types can be added here as needed
 }

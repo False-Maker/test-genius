@@ -1,5 +1,5 @@
 import request from './request'
-import type { ApiResult, PageResult } from './types'
+import type { ApiResult, PageResult, TestCaseImportResult } from './types'
 
 // 用例相关类型定义
 export interface TestCase {
@@ -90,15 +90,11 @@ export const testCaseApi = {
     })
   },
 
-  // 导入用例
+// 导入用例
   importTestCases(file: File) {
     const formData = new FormData()
     formData.append('file', file)
-    return request.post<{
-      successCount: number
-      failCount: number
-      errors: Array<{ row: number; message: string }>
-    }>('/v1/test-cases/import', formData, {
+    return request.post<TestCaseImportResult>('/v1/test-cases/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

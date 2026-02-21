@@ -2483,15 +2483,8 @@ const loadTaskList = async () => {
 
 
 
-      taskList.value = response.data.content || []
-
-
-
-
-
-
-
-      pagination.total = response.data.totalElements || 0
+taskList.value = response.data?.content || []
+      pagination.total = response.data?.totalElements || 0
 
 
 
@@ -2643,15 +2636,8 @@ const loadRecordList = async () => {
 
 
 
-      recordList.value = response.data.content || []
-
-
-
-
-
-
-
-      recordPagination.total = response.data.totalElements || 0
+recordList.value = response.data?.content || []
+      recordPagination.total = response.data?.totalElements || 0
 
 
 

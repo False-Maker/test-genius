@@ -104,92 +104,92 @@ export const testSpecificationApi = {
     // --- Specification Management ---
 
     createSpecification(data: TestSpecificationRequestDTO) {
-        return request.post<any, TestSpecificationResponseDTO>('/v1/specifications', data)
+        return request.post<TestSpecificationResponseDTO>('/v1/specifications', data)
     },
 
     getSpecificationList(page: number = 0, size: number = 10, specName?: string, specType?: string, isActive?: string) {
-        return request.get<any, ApiResult<PageResult<TestSpecificationResponseDTO>>>('/v1/specifications', {
+        return request.get<ApiResult<PageResult<TestSpecificationResponseDTO>>>('/v1/specifications', {
             params: { page, size, specName, specType, isActive }
         })
     },
 
     getSpecificationById(id: number) {
-        return request.get<any, TestSpecificationResponseDTO>(`/v1/specifications/${id}`)
+        return request.get<TestSpecificationResponseDTO>(`/v1/specifications/${id}`)
     },
 
     getSpecificationByCode(specCode: string) {
-        return request.get<any, TestSpecificationResponseDTO>(`/v1/specifications/code/${specCode}`)
+        return request.get<TestSpecificationResponseDTO>(`/v1/specifications/code/${specCode}`)
     },
 
     updateSpecification(id: number, data: TestSpecificationRequestDTO) {
-        return request.put<any, TestSpecificationResponseDTO>(`/v1/specifications/${id}`, data)
+        return request.put<TestSpecificationResponseDTO>(`/v1/specifications/${id}`, data)
     },
 
     deleteSpecification(id: number) {
-        return request.delete<any, void>(`/v1/specifications/${id}`)
+        return request.delete<void>(`/v1/specifications/${id}`)
     },
 
     updateSpecificationStatus(id: number, isActive: string) {
-        return request.put<any, TestSpecificationResponseDTO>(`/v1/specifications/${id}/status`, null, {
+        return request.put<TestSpecificationResponseDTO>(`/v1/specifications/${id}/status`, null, {
             params: { isActive }
         })
     },
 
     getApplicationSpecifications() {
-        return request.get<any, TestSpecificationResponseDTO[]>('/v1/specifications/application')
+        return request.get<TestSpecificationResponseDTO[]>('/v1/specifications/application')
     },
 
     getPublicSpecifications() {
-        return request.get<any, TestSpecificationResponseDTO[]>('/v1/specifications/public')
+        return request.get<TestSpecificationResponseDTO[]>('/v1/specifications/public')
     },
 
     // --- Version Management ---
 
     createVersion(specId: number, versionNumber: string, versionName?: string, versionDescription?: string, changeLog?: string) {
-        return request.post<any, TestSpecificationResponseDTO>(`/v1/specifications/${specId}/versions`, null, {
+        return request.post<TestSpecificationResponseDTO>(`/v1/specifications/${specId}/versions`, null, {
             params: { versionNumber, versionName, versionDescription, changeLog }
         })
     },
 
     switchVersion(specId: number, versionNumber: string) {
-        return request.put<any, TestSpecificationResponseDTO>(`/v1/specifications/${specId}/versions/${versionNumber}/switch`)
+        return request.put<TestSpecificationResponseDTO>(`/v1/specifications/${specId}/versions/${versionNumber}/switch`)
     },
 
     getVersionList(specId: number) {
-        return request.get<any, SpecVersionResponseDTO[]>(`/v1/specifications/${specId}/versions`)
+        return request.get<SpecVersionResponseDTO[]>(`/v1/specifications/${specId}/versions`)
     },
 
 
     // --- Field Test Point Management ---
 
     createFieldTestPoint(data: FieldTestPointRequestDTO) {
-        return request.post<any, FieldTestPointResponseDTO>('/v1/specifications/field-points', data)
+        return request.post<FieldTestPointResponseDTO>('/v1/specifications/field-points', data)
     },
 
     getFieldTestPointList(page: number = 0, size: number = 10, fieldName?: string, specId?: number, isActive?: string) {
-        return request.get<any, PageResult<FieldTestPointResponseDTO>>('/v1/specifications/field-points', {
+        return request.get<PageResult<FieldTestPointResponseDTO>>('/v1/specifications/field-points', {
             params: { page, size, fieldName, specId, isActive }
         })
     },
 
     getFieldTestPointById(id: number) {
-        return request.get<any, FieldTestPointResponseDTO>(`/v1/specifications/field-points/${id}`)
+        return request.get<FieldTestPointResponseDTO>(`/v1/specifications/field-points/${id}`)
     },
 
     getFieldTestPointsBySpecId(specId: number) {
-        return request.get<any, FieldTestPointResponseDTO[]>(`/v1/specifications/${specId}/field-points`)
+        return request.get<FieldTestPointResponseDTO[]>(`/v1/specifications/${specId}/field-points`)
     },
 
     updateFieldTestPoint(id: number, data: FieldTestPointRequestDTO) {
-        return request.put<any, FieldTestPointResponseDTO>(`/v1/specifications/field-points/${id}`, data)
+        return request.put<FieldTestPointResponseDTO>(`/v1/specifications/field-points/${id}`, data)
     },
 
     deleteFieldTestPoint(id: number) {
-        return request.delete<any, void>(`/v1/specifications/field-points/${id}`)
+        return request.delete<void>(`/v1/specifications/field-points/${id}`)
     },
 
     updateFieldTestPointStatus(id: number, isActive: string) {
-        return request.put<any, FieldTestPointResponseDTO>(`/v1/specifications/field-points/${id}/status`, null, {
+        return request.put<FieldTestPointResponseDTO>(`/v1/specifications/field-points/${id}/status`, null, {
             params: { isActive }
         })
     },
@@ -197,33 +197,33 @@ export const testSpecificationApi = {
     // --- Logic Test Point Management ---
 
     createLogicTestPoint(data: LogicTestPointRequestDTO) {
-        return request.post<any, LogicTestPointResponseDTO>('/v1/specifications/logic-points', data)
+        return request.post<LogicTestPointResponseDTO>('/v1/specifications/logic-points', data)
     },
 
     getLogicTestPointList(page: number = 0, size: number = 10, logicName?: string, specId?: number, isActive?: string) {
-        return request.get<any, PageResult<LogicTestPointResponseDTO>>('/v1/specifications/logic-points', {
+        return request.get<PageResult<LogicTestPointResponseDTO>>('/v1/specifications/logic-points', {
             params: { page, size, logicName, specId, isActive }
         })
     },
 
     getLogicTestPointById(id: number) {
-        return request.get<any, LogicTestPointResponseDTO>(`/v1/specifications/logic-points/${id}`)
+        return request.get<LogicTestPointResponseDTO>(`/v1/specifications/logic-points/${id}`)
     },
 
     getLogicTestPointsBySpecId(specId: number) {
-        return request.get<any, LogicTestPointResponseDTO[]>(`/v1/specifications/${specId}/logic-points`)
+        return request.get<LogicTestPointResponseDTO[]>(`/v1/specifications/${specId}/logic-points`)
     },
 
     updateLogicTestPoint(id: number, data: LogicTestPointRequestDTO) {
-        return request.put<any, LogicTestPointResponseDTO>(`/v1/specifications/logic-points/${id}`, data)
+        return request.put<LogicTestPointResponseDTO>(`/v1/specifications/logic-points/${id}`, data)
     },
 
     deleteLogicTestPoint(id: number) {
-        return request.delete<any, void>(`/v1/specifications/logic-points/${id}`)
+        return request.delete<void>(`/v1/specifications/logic-points/${id}`)
     },
 
     updateLogicTestPointStatus(id: number, isActive: string) {
-        return request.put<any, LogicTestPointResponseDTO>(`/v1/specifications/logic-points/${id}/status`, null, {
+        return request.put<LogicTestPointResponseDTO>(`/v1/specifications/logic-points/${id}/status`, null, {
             params: { isActive }
         })
     }

@@ -983,7 +983,7 @@ const handleGenerate = async () => {
           if (uploadResponse.data) {
 
 
-            form.pageCodeUrl = uploadResponse.data.fileUrl
+            form.pageCodeUrl = uploadResponse.data?.data?.fileUrl
 
 
           }

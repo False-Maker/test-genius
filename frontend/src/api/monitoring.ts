@@ -81,7 +81,7 @@ export const monitoringApi = {
     appType?: string,
     userId?: number
   ) {
-    const params: any = { startTime, endTime }
+    const params: Record<string, string | number> = { startTime, endTime }
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     if (userId) params.userId = userId
@@ -95,7 +95,7 @@ export const monitoringApi = {
     modelCode?: string,
     appType?: string
   ) {
-    const params: any = { startTime, endTime }
+    const params: Record<string, string> = { startTime, endTime }
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     return request.get<ResponseTimeStats>('/v1/monitoring/response-time', { params })
@@ -108,7 +108,7 @@ export const monitoringApi = {
     modelCode?: string,
     appType?: string
   ) {
-    const params: any = { startTime, endTime }
+    const params: Record<string, string> = { startTime, endTime }
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     return request.get<SuccessRateStats>('/v1/monitoring/success-rate', { params })
@@ -121,7 +121,7 @@ export const monitoringApi = {
     modelCode?: string,
     appType?: string
   ) {
-    const params: any = { startTime, endTime }
+    const params: Record<string, string> = { startTime, endTime }
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     return request.get<TokenUsageStats>('/v1/monitoring/token-usage', { params })
@@ -135,7 +135,7 @@ export const monitoringApi = {
     appType?: string,
     userId?: number
   ) {
-    const params: any = { startTime, endTime }
+    const params: Record<string, string | number> = { startTime, endTime }
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     if (userId) params.userId = userId
@@ -165,7 +165,7 @@ export const monitoringApi = {
     modelCode?: string,
     appType?: string
   ) {
-    const params: any = { startTime, endTime, interval, metric }
+    const params: Record<string, string> = { startTime, endTime, interval, metric }
     if (modelCode) params.modelCode = modelCode
     if (appType) params.appType = appType
     return request.get<TimeSeriesData>('/v1/monitoring/time-series', { params })
@@ -173,7 +173,7 @@ export const monitoringApi = {
 
   // 获取模型性能对比统计
   getModelPerformanceStats(startTime: string, endTime: string) {
-    return request.get<any[]>('/v1/monitoring/model-performance', {
+    return request.get<Record<string, unknown>[]>('/v1/monitoring/model-performance', {
       params: { startTime, endTime }
     })
   }

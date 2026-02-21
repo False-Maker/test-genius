@@ -423,6 +423,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Upload, Search, Reading, Document, DocumentCopy, Notebook, Link } from '@element-plus/icons-vue'
 import { knowledgeBaseApi, type KnowledgeDocument } from '@/api/knowledgeBase'
+import { logger } from '@/utils/logger'
 
 // 响应式数据据�?
 const loading = ref(false)
@@ -462,9 +463,9 @@ const loadDocuments = async () => {
   loading.value = true
   try {
     const response = await knowledgeBaseApi.listDocuments(currentKBId.value, 20)
-      documentList.value = response.data || []
+      documentList.value = response.data?.data || []
   } catch (error) {
-    console.error('加载文档失败', error)
+    logger.error('加载文档失败', error)
   } finally {
     loading.value = false
   }
@@ -500,10 +501,10 @@ const handleInit = async () => {
       ElMessage.success('知识库初始化成功')
     }
   } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('初始化知识库失败', error)
-      ElMessage.error('初始化知识库失败')
-    }
+      if (error !== 'cancel') {
+        logger.error('初始化知识库失败', error)
+        ElMessage.error('初始化知识库失败')
+      }
   }
 }
 
@@ -549,9 +550,9 @@ const handleUploadSubmit = async () => {
     } else {
       ElMessage.error(response.message || '上传失败')
     }
-  } catch (error: any) {
-    console.error('上传失败:', error)
-    ElMessage.error(error.message || '上传失败')
+} catch (error: any) {
+      logger.error('上传失败:', error)
+      ElMessage.error(error.message || '上传失败')
   } finally {
     uploadLoading.value = false
   }
@@ -599,8 +600,8 @@ const handleSearch = async () => {
         ElMessage.info('未找到相关文档')
       }
     }
-  } catch (error) {
-      console.error('检索失败', error)
+} catch (error) {
+      logger.error('检索失败', error)
       ElMessage.error('检索失败')
   } finally {
     loading.value = false
@@ -633,8 +634,8 @@ const handleSubmit = async () => {
         ElMessage.success('添加成功')
         addDialogVisible.value = false
         handleReset()
-      } catch (error) {
-        console.error('添加失败:', error)
+} catch (error) {
+        logger.error('添加失败:', error)
       } finally {
         submitLoading.value = false
       }

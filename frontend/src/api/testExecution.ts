@@ -92,7 +92,7 @@ export interface TestExecutionStatistics {
   skippedRecords?: number
   successRate?: number
   avgExecutionDuration?: number
-  trendData?: Array<Record<string, any>>
+  trendData?: Array<Record<string, unknown>>
 }
 
 // 测试执行任务列表查询参数
@@ -122,9 +122,9 @@ export const testExecutionApi = {
     return request.post<TestExecutionTaskResponse>('/v1/test-execution/tasks', data)
   },
 
-  // 查询执行任务列表
+// 查询执行任务列表
   getExecutionTaskList(params?: TestExecutionTaskListParams) {
-    return request.get<any, ApiResult<PageResult<TestExecutionTaskResponse>>>('/v1/test-execution/tasks', { params })
+    return request.get<ApiResult<PageResult<TestExecutionTaskResponse>>>('/v1/test-execution/tasks', { params })
   },
 
   // 获取执行任务详情（根据ID）
@@ -168,9 +168,9 @@ export const testExecutionApi = {
     return request.post<TestExecutionRecordResponse>('/v1/test-execution/records', data)
   },
 
-  // 查询执行记录列表
+// 查询执行记录列表
   getExecutionRecordList(params?: TestExecutionRecordListParams) {
-    return request.get<any, ApiResult<PageResult<TestExecutionRecordResponse>>>('/v1/test-execution/records', { params })
+    return request.get<ApiResult<PageResult<TestExecutionRecordResponse>>>('/v1/test-execution/records', { params })
   },
 
   // 获取执行记录详情（根据ID）

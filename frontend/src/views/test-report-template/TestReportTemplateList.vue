@@ -516,15 +516,10 @@
 
 
 import { ref, reactive, computed, onMounted } from 'vue'
-
-
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-
-
 import { Plus, Edit, Delete, Star } from '@element-plus/icons-vue'
-
-
 import { testReportTemplateApi, type TestReportTemplateRequestDTO, type TestReportTemplateResponseDTO } from '@/api/testReportTemplate'
+import { logger } from '@/utils/logger'
 
 
 
@@ -558,14 +553,15 @@ const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 
 
-const formData = reactive<TestReportTemplateRequestDTO>({
+const formData = reactive<TestReportTemplateRequestDTO & { id?: number }>({
   templateName: '',
   templateType: 'EXECUTION',
   templateContent: '{}',
   fileFormat: 'WORD',
   templateDescription: '',
   isActive: '1',
-  isDefault: '0'
+  isDefault: '0',
+  id: undefined
 })
 
 
@@ -686,7 +682,7 @@ const loadTemplateList = async () => {
   } catch (error) {
 
 
-    console.error('Failed to load templates', error)
+    logger.error('Failed to load templates', error)
 
 
     ElMessage.error('加载模板列表失败')
@@ -769,7 +765,8 @@ const handleEdit = (row: TestReportTemplateResponseDTO) => {
 
   // Store ID for update
 
-  ;(formData as any).id = row.id
+  formData.id = row.id
+
 
   dialogVisible.value = true
 
@@ -795,12 +792,8 @@ const handleView = async (row: TestReportTemplateResponseDTO) => {
         viewDialogVisible.value = true
 
 
-    } catch(e) {
-
-
-        console.error(e)
-
-
+  } catch(e) {
+        logger.error(e)
     }
 
 
@@ -858,13 +851,9 @@ const handleStatusChange = async (row: TestReportTemplateResponseDTO) => {
     } catch (e) {
 
 
-        // revert
-
-
+      // revert
         row.isActive = row.isActive === '1' ? '0' : '1'
-
-
-        console.error(e)
+        logger.error(e)
 
 
     }
@@ -927,7 +916,7 @@ const handleSubmit = async () => {
                 if (isEdit.value) {
 
 
-                     await testReportTemplateApi.updateTemplate((formData as any).id, formData)
+                     await testReportTemplateApi.updateTemplate(formData.id!, formData)
 
 
                      ElMessage.success('更新成功')
@@ -954,7 +943,7 @@ const handleSubmit = async () => {
             } catch (e) {
 
 
-                console.error(e)
+      logger.error(e)
 
 
             } finally {
@@ -1020,7 +1009,7 @@ const resetForm = () => {
     })
 
 
-    delete (formData as any).id
+    formData.id = undefined
 
 
 }

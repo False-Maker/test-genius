@@ -1241,7 +1241,7 @@ const handleQualityAssess = async (row: TestCase) => {
   
 try {
     const response = await testCaseQualityApi.assessQuality(row.id!)
-    qualityResult.value = normalizeQualityResult(response.data)
+    qualityResult.value = normalizeQualityResult(response.data?.data)
     activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']
   } catch (error) {
     console.error('质量评估失败:', error)

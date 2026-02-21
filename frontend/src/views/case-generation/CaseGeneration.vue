@@ -735,9 +735,7 @@ const handleRefreshTaskList = () => {
 const exportTaskToExcel = async (task: TaskListItem) => {
   try {
     const response = await caseGenerationApi.exportTaskToExcel(task.id)
-
-    const blob = response
-
+    const blob = response.data
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url

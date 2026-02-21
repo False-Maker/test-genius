@@ -415,6 +415,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import { pageElementApi, type PageElementInfoRequestDTO, type PageElementInfoResponseDTO } from '@/api/pageElement'
+import { logger } from '@/utils/logger'
 
 // 响应式数据
 const loading = ref(false)
@@ -471,11 +472,11 @@ const loadElementList = async () => {
       searchForm.elementType || undefined
     )
     if (response.data) {
-      elementList.value = response.data.content || []
-      pagination.total = response.data.totalElements || 0
+      elementList.value = response.data?.content || []
+      pagination.total = response.data?.totalElements || 0
     }
   } catch (error) {
-    console.error('Failed to load element list', error)
+    logger.error('Failed to load element list', error)
     ElMessage.error('加载元素列表失败')
   } finally {
     loading.value = false
@@ -535,7 +536,7 @@ const handleDelete = async (row: PageElementInfoResponseDTO) => {
         }
         loadElementList()
     } catch(e) {
-        console.error(e)
+        logger.error(e)
     }
 }
 
@@ -555,7 +556,7 @@ const handleSubmit = async () => {
                 dialogVisible.value = false
                 loadElementList()
             } catch (e) {
-                console.error(e)
+                logger.error(e)
             } finally {
                 submitLoading.value = false
             }

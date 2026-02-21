@@ -1427,13 +1427,8 @@ const loadTemplateList = async () => {
 
 
 
-      templateList.value = response.data.content || []
-
-
-
-
-
-      pagination.total = response.data.totalElements || 0
+templateList.value = response.data?.content || []
+      pagination.total = response.data?.totalElements || 0
 
 
 

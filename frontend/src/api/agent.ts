@@ -8,7 +8,7 @@ export interface Agent {
   agentName: string
   agentType: string // TEST_DESIGN_ASSISTANT, CASE_OPTIMIZATION, CUSTOM
   agentDescription?: string
-  agentConfig?: any
+  agentConfig?: Record<string, unknown>
   systemPrompt?: string
   maxIterations?: number
   maxTokens?: number
@@ -27,7 +27,7 @@ export interface AgentSession {
   userId?: number
   userName?: string
   sessionTitle?: string
-  contextData?: any
+  contextData?: Record<string, unknown>
   status?: string // ACTIVE, CLOSED, EXPIRED
   totalTokens?: number
   totalIterations?: number
@@ -42,8 +42,8 @@ export interface AgentMessage {
   messageType: string // USER, ASSISTANT, TOOL, SYSTEM
   role: string // user, assistant, tool, system
   content: string
-  toolCalls?: any
-  toolResults?: any
+  toolCalls?: unknown[]
+  toolResults?: unknown[]
   tokensUsed?: number
   responseTime?: number
   modelCode?: string
@@ -57,9 +57,9 @@ export interface AgentTool {
   toolName: string
   toolType: string // TEST_RELATED, GENERAL, CUSTOM
   toolDescription: string
-  toolSchema?: any
+  toolSchema?: Record<string, unknown>
   toolImplementation?: string
-  toolConfig?: any
+  toolConfig?: Record<string, unknown>
   isBuiltin?: string
   isActive?: string
   permissionLevel?: string
@@ -73,42 +73,42 @@ export interface AgentTool {
 export const agentApi = {
   // 创建Agent
   createAgent(data: Agent) {
-    return request.post<any, ApiResult<Agent>>('/v1/agents', data)
+    return request.post<ApiResult<Agent>>('/v1/agents', data)
   },
 
   // 更新Agent
   updateAgent(id: number, data: Agent) {
-    return request.put<any, ApiResult<Agent>>(`/v1/agents/${id}`, data)
+    return request.put<ApiResult<Agent>>(`/v1/agents/${id}`, data)
   },
 
   // 根据ID查询Agent
   getAgentById(id: number) {
-    return request.get<any, ApiResult<Agent>>(`/v1/agents/${id}`)
+    return request.get<ApiResult<Agent>>(`/v1/agents/${id}`)
   },
 
   // 根据编码查询Agent
   getAgentByCode(code: string) {
-    return request.get<any, ApiResult<Agent>>(`/v1/agents/code/${code}`)
+    return request.get<ApiResult<Agent>>(`/v1/agents/code/${code}`)
   },
 
   // 查询所有启用的Agent
   getAllActiveAgents() {
-    return request.get<any, ApiResult<Agent[]>>('/v1/agents/active')
+    return request.get<ApiResult<Agent[]>>('/v1/agents/active')
   },
 
   // 查询指定类型的Agent
   getAgentsByType(type: string) {
-    return request.get<any, ApiResult<Agent[]>>(`/v1/agents/type/${type}`)
+    return request.get<ApiResult<Agent[]>>(`/v1/agents/type/${type}`)
   },
 
   // 删除Agent
   deleteAgent(id: number) {
-    return request.delete<any, ApiResult<void>>(`/v1/agents/${id}`)
+    return request.delete<ApiResult<void>>(`/v1/agents/${id}`)
   },
 
   // 启用/禁用Agent
   toggleAgentActive(id: number, active: boolean) {
-    return request.put<any, ApiResult<Agent>>(`/v1/agents/${id}/active`, null, {
+    return request.put<ApiResult<Agent>>(`/v1/agents/${id}/active`, null, {
       params: { active }
     })
   },
@@ -116,50 +116,50 @@ export const agentApi = {
   // Agent Session API
   // 创建会话
   createSession(data: AgentSession) {
-    return request.post<any, ApiResult<AgentSession>>('/v1/agent-sessions', data)
+    return request.post<ApiResult<AgentSession>>('/v1/agent-sessions', data)
   },
 
   // 根据ID查询会话
   getSessionById(id: number) {
-    return request.get<any, ApiResult<AgentSession>>(`/v1/agent-sessions/${id}`)
+    return request.get<ApiResult<AgentSession>>(`/v1/agent-sessions/${id}`)
   },
 
   // 根据编码查询会话
   getSessionByCode(code: string) {
-    return request.get<any, ApiResult<AgentSession>>(`/v1/agent-sessions/code/${code}`)
+    return request.get<ApiResult<AgentSession>>(`/v1/agent-sessions/code/${code}`)
   },
 
   // 查询Agent的所有会话
   getSessionsByAgentId(agentId: number) {
-    return request.get<any, ApiResult<AgentSession[]>>(`/v1/agent-sessions/agent/${agentId}`)
+    return request.get<ApiResult<AgentSession[]>>(`/v1/agent-sessions/agent/${agentId}`)
   },
 
   // 查询用户的所有会话
   getSessionsByUserId(userId: number) {
-    return request.get<any, ApiResult<AgentSession[]>>(`/v1/agent-sessions/user/${userId}`)
+    return request.get<ApiResult<AgentSession[]>>(`/v1/agent-sessions/user/${userId}`)
   },
 
   // 查询Agent和用户的所有会话
   getSessionsByAgentIdAndUserId(agentId: number, userId: number) {
-    return request.get<any, ApiResult<AgentSession[]>>(
+    return request.get<ApiResult<AgentSession[]>>(
       `/v1/agent-sessions/agent/${agentId}/user/${userId}`
     )
   },
 
   // 关闭会话
   closeSession(id: number) {
-    return request.put<any, ApiResult<AgentSession>>(`/v1/agent-sessions/${id}/close`)
+    return request.put<ApiResult<AgentSession>>(`/v1/agent-sessions/${id}/close`)
   },
 
   // 删除会话
   deleteSession(id: number) {
-    return request.delete<any, ApiResult<void>>(`/v1/agent-sessions/${id}`)
+    return request.delete<ApiResult<void>>(`/v1/agent-sessions/${id}`)
   },
 
   // Agent Message API (从Python服务)
   // Agent对话
   chatWithAgent(sessionId: number, message: string) {
-    return request.post<any, ApiResult<any>>('/api/v1/agent/chat', {
+    return request.post<ApiResult<unknown>>('/api/v1/agent/chat', {
       session_id: sessionId,
       message: message
     })
@@ -167,28 +167,28 @@ export const agentApi = {
 
   // 获取会话历史
   getSessionHistory(sessionId: number) {
-    return request.get<any, ApiResult<AgentMessage[]>>(`/api/v1/agent/sessions/${sessionId}/history`)
+    return request.get<ApiResult<AgentMessage[]>>(`/api/v1/agent/sessions/${sessionId}/history`)
   },
 
   // Agent Tool API
   // 获取所有可用工具
   getAllTools() {
-    return request.get<any, ApiResult<AgentTool[]>>('/api/v1/agent/tools')
+    return request.get<ApiResult<AgentTool[]>>('/api/v1/agent/tools')
   },
 
   // 获取Agent可用的工具
   getAgentTools(agentId: number) {
-    return request.get<any, ApiResult<AgentTool[]>>(`/v1/agent-tools/${agentId}`)
+    return request.get<ApiResult<AgentTool[]>>(`/v1/agent-tools/${agentId}`)
   },
 
   // 为Agent添加工具
   addAgentTool(agentId: number, toolId: number) {
-    return request.post<any, ApiResult<void>>(`/v1/agent-tools/${agentId}/${toolId}`)
+    return request.post<ApiResult<void>>(`/v1/agent-tools/${agentId}/${toolId}`)
   },
 
   // 移除Agent工具
   removeAgentTool(agentId: number, toolId: number) {
-    return request.delete<any, ApiResult<void>>(`/v1/agent-tools/${agentId}/${toolId}`)
+    return request.delete<ApiResult<void>>(`/v1/agent-tools/${agentId}/${toolId}`)
   }
 }
 

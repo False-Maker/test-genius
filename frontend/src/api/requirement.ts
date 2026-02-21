@@ -1,29 +1,5 @@
 import request from './request'
-import type { ApiResult, PageResult } from './types'
-
-// 需求相关类型定义
-export interface TestRequirement {
-  id?: number
-  requirementCode?: string
-  requirementName: string
-  requirementType?: string
-  requirementDescription?: string
-  requirementDocUrl?: string
-  requirementStatus?: string
-  businessModule?: string
-  creatorId?: number
-  creatorName?: string
-  createTime?: string
-  updateTime?: string
-  version?: number
-}
-
-export interface RequirementListParams {
-  page?: number
-  size?: number
-  requirementName?: string
-  requirementStatus?: string
-}
+import type { ApiResult, PageResult, TestRequirement, RequirementListParams } from './types'
 
 // 需求管理API
 export const requirementApi = {

@@ -26,75 +26,75 @@ export interface TestCoverageAnalysisResponseDTO {
 export const testCoverageApi = {
     // Analyze coverage (general)
     analyzeCoverage(data: TestCoverageAnalysisRequestDTO) {
-        return request.post<any, TestCoverageAnalysisResponseDTO>('/v1/test-coverage/analyze', data)
+        return request.post<TestCoverageAnalysisResponseDTO>('/v1/test-coverage/analyze', data)
     },
 
     // Analyze requirement coverage
     analyzeRequirementCoverage(requirementId: number) {
-        return request.post<any, TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/analyze/requirement/${requirementId}`)
+        return request.post<TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/analyze/requirement/${requirementId}`)
     },
 
     // Analyze function coverage
     analyzeFunctionCoverage(requirementId: number) {
-        return request.post<any, TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/analyze/function/${requirementId}`)
+        return request.post<TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/analyze/function/${requirementId}`)
     },
 
     // Analyze scenario coverage
     analyzeScenarioCoverage(requirementId: number) {
-        return request.post<any, TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/analyze/scenario/${requirementId}`)
+        return request.post<TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/analyze/scenario/${requirementId}`)
     },
 
     // Analyze code coverage
     analyzeCodeCoverage(requirementId: number | undefined, coverageData: string) {
-        return request.post<any, TestCoverageAnalysisResponseDTO>('/v1/test-coverage/analyze/code', coverageData, {
+        return request.post<TestCoverageAnalysisResponseDTO>('/v1/test-coverage/analyze/code', coverageData, {
             params: { requirementId }
         })
     },
 
     // Get analysis list
     getAnalysisList(page: number = 0, size: number = 10) {
-        return request.get<any, ApiResult<PageResult<TestCoverageAnalysisResponseDTO>>>('/v1/test-coverage', {
+        return request.get<ApiResult<PageResult<TestCoverageAnalysisResponseDTO>>>('/v1/test-coverage', {
             params: { page, size }
         })
     },
 
     // Get analysis by ID
     getAnalysisById(id: number) {
-        return request.get<any, TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/${id}`)
+        return request.get<TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/${id}`)
     },
 
     // Get analysis by requirement ID
     getAnalysisByRequirementId(requirementId: number) {
-        return request.get<any, TestCoverageAnalysisResponseDTO[]>(`/v1/test-coverage/requirement/${requirementId}`)
+        return request.get<TestCoverageAnalysisResponseDTO[]>(`/v1/test-coverage/requirement/${requirementId}`)
     },
 
     // Get analysis by code
     getAnalysisByCode(analysisCode: string) {
-        return request.get<any, TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/code/${analysisCode}`)
+        return request.get<TestCoverageAnalysisResponseDTO>(`/v1/test-coverage/code/${analysisCode}`)
     },
 
     // Get analysis by coverage type
     getAnalysisByCoverageType(coverageType: string) {
-        return request.get<any, TestCoverageAnalysisResponseDTO[]>(`/v1/test-coverage/type/${coverageType}`)
+        return request.get<TestCoverageAnalysisResponseDTO[]>(`/v1/test-coverage/type/${coverageType}`)
     },
 
     // Get coverage trend
     getCoverageTrend(requirementId?: number, coverageType?: string, days: number = 7) {
-        return request.get<any, string>('/v1/test-coverage/trend', {
+        return request.get<string>('/v1/test-coverage/trend', {
             params: { requirementId, coverageType, days }
         })
     },
 
     // Check coverage insufficiency
     checkCoverageInsufficiency(requirementId?: number, threshold: number = 80.0) {
-        return request.get<any, string>('/v1/test-coverage/insufficiency', {
+        return request.get<string>('/v1/test-coverage/insufficiency', {
             params: { requirementId, threshold }
         })
     },
 
     // Generate coverage report
     generateCoverageReport(requirementId?: number, coverageType?: string) {
-        return request.get<any, string>('/v1/test-coverage/report', {
+        return request.get<string>('/v1/test-coverage/report', {
             params: { requirementId, coverageType }
         })
     }

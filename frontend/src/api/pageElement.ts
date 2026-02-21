@@ -29,26 +29,26 @@ export interface PageElementInfoResponseDTO {
 }
 
 export const pageElementApi = {
-    // Create page element
+  // Create page element
     createPageElement(data: PageElementInfoRequestDTO) {
-        return request.post<any, PageElementInfoResponseDTO>('/v1/page-elements', data)
+        return request.post<PageElementInfoResponseDTO>('/v1/page-elements', data)
     },
 
     // Get page element list
     getPageElementList(page: number = 0, size: number = 10, pageUrl?: string, elementType?: string) {
-        return request.get<any, ApiResult<PageResult<PageElementInfoResponseDTO>>>('/v1/page-elements', {
+        return request.get<ApiResult<PageResult<PageElementInfoResponseDTO>>>('/v1/page-elements', {
             params: { page, size, pageUrl, elementType }
         })
     },
 
     // Get page element by ID
     getPageElementById(id: number) {
-        return request.get<any, PageElementInfoResponseDTO>(`/v1/page-elements/${id}`)
+        return request.get<PageElementInfoResponseDTO>(`/v1/page-elements/${id}`)
     },
 
     // Get page element by code
     getPageElementByCode(elementCode: string) {
-        return request.get<any, PageElementInfoResponseDTO>(`/v1/page-elements/code/${elementCode}`)
+        return request.get<PageElementInfoResponseDTO>(`/v1/page-elements/code/${elementCode}`)
     },
 
     // Get page elements by URL

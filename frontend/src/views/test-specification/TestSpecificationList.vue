@@ -692,15 +692,10 @@
 
 
 import { ref, reactive, onMounted } from 'vue'
-
-
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-
-
 import { Plus, Search, Refresh, Edit, Delete, View } from '@element-plus/icons-vue'
-
-
 import { testSpecificationApi, type TestSpecificationRequestDTO, type TestSpecificationResponseDTO } from '@/api/testSpecification'
+import { logger } from '@/utils/logger'
 
 
 
@@ -818,14 +813,9 @@ const loadSpecList = async () => {
     }
 
 
-  } catch (error) {
+} catch (error) {
 
-
-    console.error('Failed to load specification list', error)
-
-
-    ElMessage.error('加载规约列表失败')
-
+    logger.error('Failed to load specification list', error)
 
   } finally {
 
@@ -1112,10 +1102,9 @@ const handleSubmit = async () => {
                 loadSpecList()
 
 
-            } catch (e) {
+          } catch (e) {
 
-
-                console.error(e)
+                logger.error(e)
 
 
             } finally {
