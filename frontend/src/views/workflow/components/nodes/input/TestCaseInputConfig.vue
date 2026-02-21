@@ -47,12 +47,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { TestCaseInputConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: TestCaseInputConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: TestCaseInputConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { source: 'manual' },

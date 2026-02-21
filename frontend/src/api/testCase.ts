@@ -37,9 +37,9 @@ export const testCaseApi = {
     return request.post<TestCase>('/v1/test-cases', data)
   },
 
-  // 查询用例列表
+// 查询用例列表
   getTestCaseList(params: TestCaseListParams = {}) {
-    return request.get<any, ApiResult<PageResult<TestCase>>>('/v1/test-cases', { params })
+    return request.get<ApiResult<PageResult<TestCase>>>('/v1/test-cases', { params })
   },
 
   // 获取用例详情

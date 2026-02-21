@@ -32,7 +32,7 @@ export interface GenerationTask {
   totalCases?: number
   successCases?: number
   failCases?: number
-  result?: any
+  result?: Record<string, unknown>
   createTime?: string
   updateTime?: string
 }
@@ -142,7 +142,7 @@ export const caseGenerationApi = {
 
   // 导出任务用例到Excel
   exportTaskToExcel(taskId: number) {
-    return request.get<any, Blob>(`/v1/case-generation/tasks/${taskId}/export-excel`, {
+    return request.get<Blob>(`/v1/case-generation/tasks/${taskId}/export-excel`, {
       responseType: 'blob'
     })
   }

@@ -44,12 +44,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { RequirementAnalysisConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: RequirementAnalysisConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: RequirementAnalysisConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { dimensions: ['functional'], depth: 2, language: 'zh' },

@@ -40,18 +40,18 @@ export interface QualityScoreDetails {
 }
 
 export const testCaseQualityApi = {
-  // Assess Quality
+// Assess Quality
   assessQuality(caseId: number) {
-    return request.get<any, ApiResult<QualityScore>>(`/v1/test-case-quality/assess/${caseId}`)
+    return request.get<ApiResult<QualityScore>>(`/v1/test-case-quality/assess/${caseId}`)
   },
 
   // Check Completeness
   checkCompleteness(caseId: number) {
-    return request.get<any, ApiResult<CompletenessScore>>(`/v1/test-case-quality/completeness/${caseId}`)
+    return request.get<ApiResult<CompletenessScore>>(`/v1/test-case-quality/completeness/${caseId}`)
   },
 
   // Check Standardization
   checkStandardization(caseId: number) {
-    return request.get<any, ApiResult<StandardizationScore>>(`/v1/test-case-quality/standardization/${caseId}`)
+    return request.get<ApiResult<StandardizationScore>>(`/v1/test-case-quality/standardization/${caseId}`)
   }
 }

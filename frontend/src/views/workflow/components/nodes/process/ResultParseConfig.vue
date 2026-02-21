@@ -50,12 +50,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ResultParseConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: ResultParseConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: ResultParseConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { format: 'json', onFailure: 'error' },

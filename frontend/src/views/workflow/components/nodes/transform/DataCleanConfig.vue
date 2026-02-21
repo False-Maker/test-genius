@@ -56,12 +56,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { DataCleanConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: DataCleanConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: DataCleanConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { rules: ['trim', 'remove_empty'] },

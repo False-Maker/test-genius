@@ -46,12 +46,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { DataMergeConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: DataMergeConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: DataMergeConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { strategy: 'append', conflictResolution: 'use_last' },

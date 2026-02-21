@@ -32,9 +32,9 @@ export const requirementApi = {
     return request.post<TestRequirement>('/v1/requirements', data)
   },
 
-  // 查询需求列表
+// 查询需求列表
   getRequirementList(params: RequirementListParams = {}) {
-    return request.get<any, ApiResult<PageResult<TestRequirement>>>('/v1/requirements', { params })
+    return request.get<ApiResult<PageResult<TestRequirement>>>('/v1/requirements', { params })
   },
 
   // 获取需求详情

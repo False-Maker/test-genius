@@ -53,12 +53,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ReportGenerateConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: ReportGenerateConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: ReportGenerateConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { reportType: 'review', sections: ['summary', 'statistics'], format: 'html' },

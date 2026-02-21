@@ -56,12 +56,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { FormatTransformConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: FormatTransformConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: FormatTransformConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { sourceFormat: 'json', targetFormat: 'json' },

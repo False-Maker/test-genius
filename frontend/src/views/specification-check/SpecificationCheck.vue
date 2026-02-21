@@ -344,11 +344,8 @@ const handleMatch = async () => {
 
     try {
 
-        const res = await specificationCheckApi.matchSpecifications(caseId.value)
-
-        const data = res.data || []
-
-        matchedSpecs.value = data
+    const res = await specificationCheckApi.matchSpecifications(caseId.value)
+      matchedSpecs.value = res.data || []
 
         if (data.length === 0) {
 
@@ -386,19 +383,8 @@ const handleCheck = async () => {
 
     try {
 
-        const res = await specificationCheckApi.checkCompliance({ caseId: caseId.value })
-
-        const data = res.data
-
-        checkResult.value = data
-
-        // Also update matched specs if available in response
-
-        if (data && data.matchedSpecifications) {
-
-            matchedSpecs.value = data.matchedSpecifications
-
-        }
+  const res = await specificationCheckApi.checkCompliance({ caseId: caseId.value })
+      checkResult.value = res.data
 
     } catch (e) {
 
@@ -430,11 +416,9 @@ const handleInject = async () => {
 
     try {
 
-        const res = await specificationCheckApi.injectSpecification({ caseId: caseId.value })
-
-        injectionResult.value = res.data
-
-         ElMessage.success('规约注入成功')
+const res = await specificationCheckApi.injectSpecification({ caseId: caseId.value })
+      injectionResult.value = res.data
+       ElMessage.success('规约注入成功')
 
     } catch (e) {
 
@@ -466,10 +450,8 @@ const handleReport = async () => {
 
     try {
 
-        const res = await specificationCheckApi.generateComplianceReport({ caseId: caseId.value })
-
-        reportResult.value = res.data
-
+const res = await specificationCheckApi.generateComplianceReport({ caseId: caseId.value })
+      reportResult.value = res.data
         ElMessage.success('报告生成成功')
 
     } catch (e) {

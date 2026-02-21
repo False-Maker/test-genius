@@ -48,12 +48,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { FileUploadConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: FileUploadConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: FileUploadConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { acceptTypes: ['.docx', '.md'], maxSize: 10, parseMode: 'auto' },

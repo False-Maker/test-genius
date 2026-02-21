@@ -938,17 +938,15 @@ const canDelete = (status?: string) => {
 const loadTestCaseList = async () => {
   loading.value = true
   try {
-    const response = await testCaseApi.getTestCaseList({
+  const response = await testCaseApi.getTestCaseList({
       page: pagination.page - 1,
       size: pagination.size,
       caseName: searchForm.caseName || undefined,
       caseStatus: searchForm.caseStatus || undefined
     })
     
-    if (response.data) {
-      testCaseList.value = response.data.content || []
-      pagination.total = response.data.totalElements || 0
-    }
+    testCaseList.value = response.data?.content || []
+    pagination.total = response.data?.totalElements || 0
   } catch (error) {
     console.error('加载用例列表失败:', error)
   } finally {
@@ -1241,12 +1239,10 @@ const handleQualityAssess = async (row: TestCase) => {
   qualityResult.value = null
   activeCollapse.value = []
   
-  try {
+try {
     const response = await testCaseQualityApi.assessQuality(row.id!)
-    if (response.data) {
-      qualityResult.value = normalizeQualityResult(response.data)
-      activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']
-    }
+    qualityResult.value = normalizeQualityResult(response.data)
+    activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']
   } catch (error) {
     console.error('质量评估失败:', error)
     ElMessage.error('质量评估失败')

@@ -42,21 +42,21 @@ export interface PageResult<T> {
 }
 
 export const testReportApi = {
-    // Generate report
+// Generate report
     generateReport(data: TestReportRequestDTO) {
-        return request.post<any, TestReportResponseDTO>('/v1/test-reports', data)
+        return request.post<TestReportResponseDTO>('/v1/test-reports', data)
     },
 
     // Get report list
     getReportList(page: number = 0, size: number = 10) {
-        return request.get<any, ApiResult<PageResult<TestReportResponseDTO>>>('/v1/test-reports', {
+        return request.get<ApiResult<PageResult<TestReportResponseDTO>>>('/v1/test-reports', {
             params: { page, size }
         })
     },
 
     // Get report detail
     getReportById(id: number) {
-        return request.get<any, TestReportResponseDTO>(`/v1/test-reports/${id}`)
+        return request.get<TestReportResponseDTO>(`/v1/test-reports/${id}`)
     },
 
     // Get report by code

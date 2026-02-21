@@ -33,12 +33,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ConditionConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: ConditionConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: ConditionConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { mode: 'expression', hasDefaultBranch: true },

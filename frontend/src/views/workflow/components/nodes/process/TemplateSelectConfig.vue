@@ -58,12 +58,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { TemplateSelectConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: TemplateSelectConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: TemplateSelectConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { testType: 'functional' },

@@ -1,9 +1,9 @@
 {
-  "active_plan": "D:\\Demo\\test-genius\\.sisyphus\\plans\\phase-1-p0-critical-fixes.md",
-  "started_at": "2026-02-21T03:54:21.966Z",
+  "active_plan": "D:\\Demo\\test-genius\\.sisyphus\\plans\\phase-2-frontend-fixes.md",
+  "started_at": "2026-02-21T04:30:00.000Z",
   "session_ids": [
     "ses_383cc73ddffe964525jcwgpfnp"
   ],
-  "plan_name": "phase-1-p0-critical-fixes",
+  "plan_name": "phase-2-frontend-fixes",
   "agent": "atlas"
 }

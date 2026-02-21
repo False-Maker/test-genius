@@ -11,11 +11,11 @@ export interface FileUploadResponse {
 
 // 文件上传API
 export const fileUploadApi = {
-  // 上传文件
+// 上传文件
   uploadFile(file: File) {
     const formData = new FormData()
     formData.append('file', file)
-    return request.post<any, ApiResult<FileUploadResponse>>('/v1/files/upload', formData, {
+    return request.post<ApiResult<FileUploadResponse>>('/v1/files/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

@@ -755,19 +755,9 @@ const loadReportList = async () => {
   try {
 
 
-    const response = await testReportApi.getReportList(pagination.page - 1, pagination.size)
-
-
-    if (response.data) {
-
-
-      reportList.value = response.data.content || []
-
-
-      pagination.total = response.data.totalElements || 0
-
-
-    }
+const response = await testReportApi.getReportList(pagination.page - 1, pagination.size)
+      reportList.value = response.data?.content || []
+      pagination.total = response.data?.totalElements || 0
 
 
   } catch (error) {
@@ -943,12 +933,8 @@ const handleView = async (row: TestReportResponseDTO) => {
 
 
         const res = await testReportApi.getReportById(row.id)
-
-
-        viewData.value = res
-
-
-        viewDialogVisible.value = true
+      viewData.value = res.data
+      viewDialogVisible.value = true
 
 
     } catch(e) {

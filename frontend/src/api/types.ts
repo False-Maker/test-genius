@@ -1,5 +1,5 @@
 // 统一响应结果类型
-export interface ApiResult<T = any> {
+export interface ApiResult<T = unknown> {
   code: number
   message: string
   data: T
@@ -15,5 +15,20 @@ export interface PageResult<T> {
   number: number
   first: boolean
   last: boolean
+}
+
+// 常用响应类型
+export interface EmptyResponse {}
+
+export interface IdResponse {
+  id: number
+}
+
+export interface MessageResponse {
+  message: string
+}
+
+export interface SuccessResponse {
+  success: boolean
 }
 

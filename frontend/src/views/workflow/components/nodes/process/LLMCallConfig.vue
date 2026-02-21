@@ -52,12 +52,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { LLMCallConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: LLMCallConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: LLMCallConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { temperature: 0.7, max_tokens: 2000 },

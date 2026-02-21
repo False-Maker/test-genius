@@ -27,7 +27,7 @@ export interface PromptTemplateListParams {
 }
 
 export interface GeneratePromptRequest {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // 提示词模板管理API
@@ -39,7 +39,7 @@ export const promptTemplateApi = {
 
   // 查询模板列表
   getTemplateList(params: PromptTemplateListParams = {}) {
-    return request.get<any, ApiResult<PageResult<PromptTemplate>>>('/v1/prompt-templates', { params })
+    return request.get<ApiResult<PageResult<PromptTemplate>>>('/v1/prompt-templates', { params })
   },
 
   // 获取模板详情

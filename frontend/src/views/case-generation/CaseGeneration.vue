@@ -736,10 +736,7 @@ const exportTaskToExcel = async (task: TaskListItem) => {
   try {
     const response = await caseGenerationApi.exportTaskToExcel(task.id)
 
-    // 创建Blob对象并下载
-    const blob = new Blob([response], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    })
+    const blob = response
 
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')

@@ -172,16 +172,12 @@ const customUpload = async (options: any) => {
 
   try {
 
-    const response = await fileUploadApi.uploadFile(file)
+  const response = await fileUploadApi.uploadFile(file)
 
     if (response.data) {
-
-      handleSuccess(response, file as UploadFile)
-
+      handleSuccess(response.data, file as UploadFile)
     } else {
-
       handleError(new Error(response.message || '上传失败'), file as UploadFile)
-
     }
 
   } catch (error: any) {

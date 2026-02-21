@@ -43,15 +43,18 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { RequirementInputConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: RequirementInputConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: RequirementInputConfig]
+}>()
 
 const config = computed({
-  get: () => props.modelValue || {},
+  get: () => props.modelValue || { inputType: 'text' },
   set: (val) => emit('update:modelValue', val)
 })
 </script>

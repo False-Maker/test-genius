@@ -49,12 +49,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { CaseSaveConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: CaseSaveConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: CaseSaveConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { target: 'case_repo', tags: ['auto-generated'] },

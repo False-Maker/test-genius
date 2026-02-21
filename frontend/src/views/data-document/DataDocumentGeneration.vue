@@ -1190,9 +1190,7 @@ const exportEquivalenceExcel = async () => {
   try {
 
 
-    const blob = await dataDocumentApi.exportEquivalenceTableToExcel(equivalenceResult.value)
-
-
+const blob = await dataDocumentApi.exportEquivalenceTableToExcel(equivalenceResult.value)
     downloadFile(blob, `${equivalenceResult.value.title || '等价类表'}.xlsx`)
 
 
@@ -1226,9 +1224,7 @@ const exportEquivalenceWord = async () => {
   try {
 
 
-    const blob = await dataDocumentApi.exportEquivalenceTableToWord(equivalenceResult.value)
-
-
+const blob = await dataDocumentApi.exportEquivalenceTableToWord(equivalenceResult.value)
     downloadFile(blob, `${equivalenceResult.value.title || '等价类表'}.docx`)
 
 
@@ -1262,9 +1258,7 @@ const exportOrthogonalExcel = async () => {
   try {
 
 
-    const blob = await dataDocumentApi.exportOrthogonalTableToExcel(orthogonalResult.value)
-
-
+const blob = await dataDocumentApi.exportOrthogonalTableToExcel(orthogonalResult.value)
     downloadFile(blob, `${orthogonalResult.value.title || '正交表'}.xlsx`)
 
 
@@ -1298,9 +1292,7 @@ const exportOrthogonalWord = async () => {
   try {
 
 
-    const blob = await dataDocumentApi.exportOrthogonalTableToWord(orthogonalResult.value)
-
-
+const blob = await dataDocumentApi.exportOrthogonalTableToWord(orthogonalResult.value)
     downloadFile(blob, `${orthogonalResult.value.title || '正交表'}.docx`)
 
 

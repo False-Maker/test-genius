@@ -41,12 +41,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { FileExportConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: FileExportConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: FileExportConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { fileFormat: 'xlsx', includeHeader: true },

@@ -38,12 +38,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { PromptGenerateConfig } from '@/types/workflow-nodes'
 
 const props = defineProps<{
-  modelValue: any
+  modelValue: PromptGenerateConfig
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  'update:modelValue': [value: PromptGenerateConfig]
+}>()
 
 const config = computed({
   get: () => props.modelValue || { strategy: 'cot', injectContext: true },

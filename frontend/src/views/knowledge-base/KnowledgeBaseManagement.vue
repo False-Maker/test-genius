@@ -567,12 +567,12 @@ const handleSyncSubmit = async () => {
   }
   
   syncLoading.value = true
-  try {
+try {
     const response = await knowledgeBaseApi.syncKnowledgeBase(syncFormData)
     
     const result = response.data
-    const success = typeof result === 'boolean' ? result : result?.success
-    const errorMessage = typeof result === 'boolean' ? undefined : result?.error
+    const success = response.code === 200 || result?.success
+    const errorMessage = result?.error
     if (success) {
       ElMessage.success('同步任务已启动')
       syncDialogVisible.value = false

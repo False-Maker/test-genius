@@ -462,11 +462,7 @@ const loadDocuments = async () => {
   loading.value = true
   try {
     const response = await knowledgeBaseApi.listDocuments(currentKBId.value, 20)
-    if (response.data) {
-      documentList.value = response.data
-    } else {
-      documentList.value = []
-    }
+      documentList.value = response.data || []
   } catch (error) {
     console.error('加载文档失败', error)
   } finally {

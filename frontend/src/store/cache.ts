@@ -52,11 +52,8 @@ export const useCacheStore = defineStore('cache', () => {
 
     loading.value.requirementList = true
     try {
-      const response = await requirementApi.getRequirementList({ page: 0, size: 1000 })
-      if (response.data) {
-        requirementList.value = response.data.content || []
-        requirementListTime.value = Date.now()
-      }
+    const response = await requirementApi.getRequirementList({ page: 0, size: 1000 })
+      requirementList.value = response.data?.content || []
       return requirementList.value
     } catch (error) {
       console.error('加载需求列表失败:', error)
@@ -118,14 +115,11 @@ export const useCacheStore = defineStore('cache', () => {
 
     loading.value.templateList = true
     try {
-      const response = await promptTemplateApi.getTemplateList({ page: 0, size: 1000 })
-      if (response.data) {
-        // 只缓存启用的模板
-        templateList.value = (response.data.content || []).filter(
-          (t: PromptTemplate) => t.isActive === '1'
-        )
-        templateListTime.value = Date.now()
-      }
+  const response = await promptTemplateApi.getTemplateList({ page: 0, size: 1000 })
+      // 只缓存启用的模板
+      templateList.value = (response.data?.content || []).filter(
+        (t: PromptTemplate) => t.isActive === '1'
+      )
       return templateList.value
     } catch (error) {
       console.error('加载提示词模板列表失败:', error)

@@ -107,15 +107,15 @@ export const knowledgeBaseApi = {
     )
   },
 
-  listDocuments(kbId: number, limit = 20) {
-    return request.get<any, ApiResult<KnowledgeDocument[]>>(`/v1/knowledge-base/${kbId}/documents`, {
+listDocuments(kbId: number, limit = 20) {
+    return request.get<ApiResult<KnowledgeDocument[]>>(`/v1/knowledge-base/${kbId}/documents`, {
       params: { limit }
     })
   },
 
-  // 获取知识库统计信息（通过详情接口，已包含 documentCount/chunkCount/lastSyncTime）
+// 获取知识库统计信息（通过详情接口，已包含 documentCount/chunkCount/lastSyncTime）
   getStatistics(kbId: number) {
-    return request.get<any, ApiResult<KnowledgeBase>>(`/v1/knowledge-base/${kbId}`).then((res) => {
+    return request.get<ApiResult<KnowledgeBase>>(`/v1/knowledge-base/${kbId}`).then((res) => {
       const dto = res.data
       return {
         ...res,
@@ -130,7 +130,7 @@ export const knowledgeBaseApi = {
 
   // 同步知识库
   syncKnowledgeBase(params: KBSyncParams) {
-    return request.post<any, ApiResult<Record<string, unknown>>>(
+    return request.post<ApiResult<Record<string, unknown>>>(
       `/v1/knowledge-base/${params.kbId}/sync`,
       null,
       { params: { syncType: params.syncType, sourcePath: params.sourcePath } }
