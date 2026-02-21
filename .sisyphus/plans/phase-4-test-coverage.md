@@ -370,7 +370,7 @@ Max Concurrent: 4
 
 ### Wave 2: 前端测试 (4个任务)
 
-- [ ] 5. **完善Store测试**
+ - [x] 5. **完善Store测试**
 
   **What to do**:
   为所有Store添加测试：

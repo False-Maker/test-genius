@@ -157,5 +157,93 @@ describe('useUserStore', () => {
       expect(store.isLoggedIn).toBe(true)
     })
   })
+
+  describe('权限检查', () => {
+    it('应该正确检查单个权限', () => {
+      const store = useUserStore()
+      store.setUserInfo({
+        id: 1,
+        username: 'admin',
+        permissions: ['user:create', 'user:update', 'user:delete']
+      })
+
+      expect(store.hasPermission('user:create')).toBe(true)
+      expect(store.hasPermission('user:update')).toBe(true)
+      expect(store.hasPermission('user:read')).toBe(false)
+    })
+
+    it('当用户没有权限时应该返回false', () => {
+      const store = useUserStore()
+      store.setUserInfo({ id: 1, username: 'user' })
+
+      expect(store.hasPermission('any:permission')).toBe(false)
+    })
+
+    it('应该正确检查任意权限（满足一个即可）', () => {
+      const store = useUserStore()
+      store.setUserInfo({
+        id: 1,
+        username: 'admin',
+        permissions: ['user:create', 'user:update']
+      })
+
+      expect(store.hasAnyPermission(['user:create', 'user:delete'])).toBe(true)
+      expect(store.hasAnyPermission(['user:read', 'user:delete'])).toBe(false)
+    })
+
+    it('当用户没有权限时hasAnyPermission应该返回false', () => {
+      const store = useUserStore()
+      store.setUserInfo({ id: 1, username: 'user' })
+
+      expect(store.hasAnyPermission(['any:permission'])).toBe(false)
+    })
+
+    it('应该正确检查所有权限（必须全部满足）', () => {
+      const store = useUserStore()
+      store.setUserInfo({
+        id: 1,
+        username: 'admin',
+        permissions: ['user:create', 'user:update', 'user:delete']
+      })
+
+      expect(store.hasAllPermissions(['user:create', 'user:update'])).toBe(true)
+      expect(store.hasAllPermissions(['user:create', 'user:read'])).toBe(false)
+    })
+
+    it('当用户没有权限时hasAllPermissions应该返回false', () => {
+      const store = useUserStore()
+      store.setUserInfo({ id: 1, username: 'user' })
+
+      expect(store.hasAllPermissions(['any:permission'])).toBe(false)
+    })
+
+    it('应该处理空权限数组', () => {
+      const store = useUserStore()
+      store.setUserInfo({ id: 1, username: 'user' })
+
+      expect(store.hasAnyPermission([])).toBe(false)
+      expect(store.hasAllPermissions([])).toBe(false)
+    })
+  })
+
+  describe('角色检查', () => {
+    it('应该正确存储和检查用户角色', () => {
+      const store = useUserStore()
+      store.setUserInfo({
+        id: 1,
+        username: 'admin',
+        roles: ['admin', 'tester']
+      })
+
+      expect(store.userInfo?.roles).toEqual(['admin', 'tester'])
+    })
+
+    it('应该支持没有角色的用户', () => {
+      const store = useUserStore()
+      store.setUserInfo({ id: 1, username: 'user' })
+
+      expect(store.userInfo?.roles).toBeUndefined()
+    })
+  })
 })
 
