@@ -60,6 +60,16 @@
           <span>智能复用</span>
         </el-menu-item>
 
+        <el-menu-item index="/intelligent-model">
+          <el-icon><MagicStick /></el-icon>
+          <span>智能模型选择</span>
+        </el-menu-item>
+
+        <el-menu-item index="/model-comparison">
+          <el-icon><TrendCharts /></el-icon>
+          <span>模型性能对比</span>
+        </el-menu-item>
+
         <div
           v-show="!isCollapse"
           class="menu-group-title"
@@ -179,6 +189,28 @@
           <el-icon><Setting /></el-icon>
           <span>模型配置</span>
         </el-menu-item>
+
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
+          运维管理
+        </div>
+
+        <el-menu-item index="/workflow">
+          <el-icon><Connection /></el-icon>
+          <span>工作流编辑器</span>
+        </el-menu-item>
+
+        <el-menu-item index="/monitoring">
+          <el-icon><Monitor /></el-icon>
+          <span>监控Dashboard</span>
+        </el-menu-item>
+
+        <el-menu-item index="/agent">
+          <el-icon><Robot /></el-icon>
+          <span>Agent管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -246,7 +278,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Document, List, MagicStick, CopyDocument, Reading, ChatDotRound, Setting, ArrowDown, Edit, Tools, VideoPlay, Share, Grid, Expand, Fold, DataAnalysis, Files, Odometer, Warning, Notebook, Check, Medal, Pointer, DocumentCopy } from '@element-plus/icons-vue'
+import { Document, List, MagicStick, CopyDocument, Reading, ChatDotRound, Setting, ArrowDown, Edit, Tools, VideoPlay, Share, Grid, Expand, Fold, DataAnalysis, Files, Odometer, Warning, Notebook, Check, Medal, Pointer, DocumentCopy, TrendCharts, Connection, Monitor, Robot } from '@element-plus/icons-vue'
 
 const isCollapse = ref(false)
 
