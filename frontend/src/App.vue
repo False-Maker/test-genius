@@ -208,7 +208,7 @@
         </el-menu-item>
 
         <el-menu-item index="/agent">
-          <el-icon><Robot /></el-icon>
+          <el-icon><Avatar /></el-icon>
           <span>Agent管理</span>
         </el-menu-item>
       </el-menu>
@@ -278,7 +278,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Document, List, MagicStick, CopyDocument, Reading, ChatDotRound, Setting, ArrowDown, Edit, Tools, VideoPlay, Share, Grid, Expand, Fold, DataAnalysis, Files, Odometer, Warning, Notebook, Check, Medal, Pointer, DocumentCopy, TrendCharts, Connection, Monitor, Robot } from '@element-plus/icons-vue'
+import { Document, List, MagicStick, CopyDocument, Reading, ChatDotRound, Setting, ArrowDown, Edit, Tools, VideoPlay, Share, Grid, Expand, Fold, DataAnalysis, Files, Odometer, Warning, Notebook, Check, Medal, Pointer, DocumentCopy, TrendCharts, Connection, Monitor, Avatar } from '@element-plus/icons-vue'
 
 const isCollapse = ref(false)
 
