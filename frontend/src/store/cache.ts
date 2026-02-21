@@ -6,14 +6,15 @@ import type { PromptTemplate } from '@/api/promptTemplate'
 import { requirementApi } from '@/api/requirement'
 import { commonApi } from '@/api/common'
 import { promptTemplateApi } from '@/api/promptTemplate'
+import { cacheConfig } from '@/config/cache'
 
 /**
  * 缓存数据Store
  * 管理需求列表、测试分层、测试方法、模板列表、模型配置等缓存数据
  */
 export const useCacheStore = defineStore('cache', () => {
-  // 缓存过期时间（毫秒）- 默认5分钟
-  const CACHE_EXPIRE_TIME = 5 * 60 * 1000
+  // 使用配置文件中的缓存过期时间
+  const CACHE_EXPIRE_TIME = cacheConfig.expireTime
 
   // 状态
   const requirementList = ref<TestRequirement[]>([])
