@@ -5,13 +5,32 @@
         <div class="card-header">
           <span>模型性能对比</span>
           <div class="header-actions">
-            <el-select v-model="selectedTimeRange" @change="handleTimeRangeChange" style="width: 150px; margin-right: 10px;">
-              <el-option label="最近1小时" value="1h" />
-              <el-option label="最近24小时" value="24h" />
-              <el-option label="最近7天" value="7d" />
-              <el-option label="最近30天" value="30d" />
+            <el-select
+              v-model="selectedTimeRange"
+              style="width: 150px; margin-right: 10px;"
+              @change="handleTimeRangeChange"
+            >
+              <el-option
+                label="最近1小时"
+                value="1h"
+              />
+              <el-option
+                label="最近24小时"
+                value="24h"
+              />
+              <el-option
+                label="最近7天"
+                value="7d"
+              />
+              <el-option
+                label="最近30天"
+                value="30d"
+              />
             </el-select>
-            <el-button type="primary" @click="handleRefresh">
+            <el-button
+              type="primary"
+              @click="handleRefresh"
+            >
               <el-icon><Refresh /></el-icon>
               刷新
             </el-button>
@@ -20,62 +39,152 @@
       </template>
 
       <!-- 模型性能对比表格 -->
-      <el-table :data="modelPerformanceData" v-loading="loading" stripe>
-        <el-table-column prop="modelCode" label="模型" width="180" fixed="left" />
-        <el-table-column prop="totalRequests" label="总请求数" width="120" sortable />
-        <el-table-column prop="successCount" label="成功数" width="120" sortable />
-        <el-table-column prop="failureCount" label="失败数" width="120" sortable />
-        <el-table-column prop="successRate" label="成功率" width="100" sortable>
+      <el-table
+        v-loading="loading"
+        :data="modelPerformanceData"
+        stripe
+      >
+        <el-table-column
+          prop="modelCode"
+          label="模型"
+          width="180"
+          fixed="left"
+        />
+        <el-table-column
+          prop="totalRequests"
+          label="总请求数"
+          width="120"
+          sortable
+        />
+        <el-table-column
+          prop="successCount"
+          label="成功数"
+          width="120"
+          sortable
+        />
+        <el-table-column
+          prop="failureCount"
+          label="失败数"
+          width="120"
+          sortable
+        />
+        <el-table-column
+          prop="successRate"
+          label="成功率"
+          width="100"
+          sortable
+        >
           <template #default="{ row }">
             <span :style="{ color: getSuccessRateColor(row.successRate) }">
               {{ (row.successRate * 100).toFixed(2) }}%
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="avgResponseTime" label="平均响应时间(ms)" width="150" sortable>
+        <el-table-column
+          prop="avgResponseTime"
+          label="平均响应时间(ms)"
+          width="150"
+          sortable
+        >
           <template #default="{ row }">
             <span :style="{ color: getResponseTimeColor(row.avgResponseTime) }">
               {{ row.avgResponseTime.toFixed(0) }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="p50ResponseTime" label="P50响应时间(ms)" width="150" sortable />
-        <el-table-column prop="p95ResponseTime" label="P95响应时间(ms)" width="150" sortable />
-        <el-table-column prop="p99ResponseTime" label="P99响应时间(ms)" width="150" sortable />
-        <el-table-column prop="totalTokens" label="总Token数" width="120" sortable />
-        <el-table-column prop="avgTokens" label="平均Token数" width="130" sortable />
-        <el-table-column prop="totalCost" label="总成本(¥)" width="120" sortable>
+        <el-table-column
+          prop="p50ResponseTime"
+          label="P50响应时间(ms)"
+          width="150"
+          sortable
+        />
+        <el-table-column
+          prop="p95ResponseTime"
+          label="P95响应时间(ms)"
+          width="150"
+          sortable
+        />
+        <el-table-column
+          prop="p99ResponseTime"
+          label="P99响应时间(ms)"
+          width="150"
+          sortable
+        />
+        <el-table-column
+          prop="totalTokens"
+          label="总Token数"
+          width="120"
+          sortable
+        />
+        <el-table-column
+          prop="avgTokens"
+          label="平均Token数"
+          width="130"
+          sortable
+        />
+        <el-table-column
+          prop="totalCost"
+          label="总成本(¥)"
+          width="120"
+          sortable
+        >
           <template #default="{ row }">
             <span>¥{{ row.totalCost.toFixed(4) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="costPerRequest" label="平均成本(¥/请求)" width="150" sortable>
+        <el-table-column
+          prop="costPerRequest"
+          label="平均成本(¥/请求)"
+          width="150"
+          sortable
+        >
           <template #default="{ row }">
             <span>¥{{ row.costPerRequest.toFixed(6) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="performanceScore" label="综合评分" width="100" sortable>
+        <el-table-column
+          prop="performanceScore"
+          label="综合评分"
+          width="100"
+          sortable
+        >
           <template #default="{ row }">
             <el-tag :type="getScoreTagType(row.performanceScore)">
               {{ row.performanceScore.toFixed(2) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="推荐" width="100" fixed="right">
+        <el-table-column
+          label="推荐"
+          width="100"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.isRecommended" type="success">推荐</el-tag>
+            <el-tag
+              v-if="row.isRecommended"
+              type="success"
+            >
+              推荐
+            </el-tag>
           </template>
         </el-table-column>
       </el-table>
 
       <!-- 性能对比图表 -->
-      <el-row :gutter="20" class="charts-row" style="margin-top: 20px;">
+      <el-row
+        :gutter="20"
+        class="charts-row"
+        style="margin-top: 20px;"
+      >
         <el-col :span="12">
           <el-card class="chart-card">
             <template #header>
               <span>响应时间对比</span>
             </template>
-            <div ref="responseTimeChartRef" class="chart-container"></div>
+            <div
+              ref="responseTimeChartRef"
+              class="chart-container"
+            />
           </el-card>
         </el-col>
 
@@ -84,18 +193,27 @@
             <template #header>
               <span>成功率对比</span>
             </template>
-            <div ref="successRateChartRef" class="chart-container"></div>
+            <div
+              ref="successRateChartRef"
+              class="chart-container"
+            />
           </el-card>
         </el-col>
       </el-row>
 
-      <el-row :gutter="20" class="charts-row">
+      <el-row
+        :gutter="20"
+        class="charts-row"
+      >
         <el-col :span="12">
           <el-card class="chart-card">
             <template #header>
               <span>成本对比</span>
             </template>
-            <div ref="costChartRef" class="chart-container"></div>
+            <div
+              ref="costChartRef"
+              class="chart-container"
+            />
           </el-card>
         </el-col>
 
@@ -104,40 +222,67 @@
             <template #header>
               <span>综合评分对比</span>
             </template>
-            <div ref="scoreChartRef" class="chart-container"></div>
+            <div
+              ref="scoreChartRef"
+              class="chart-container"
+            />
           </el-card>
         </el-col>
       </el-row>
 
       <!-- 模型选择建议 -->
-      <el-card class="recommendation-card" style="margin-top: 20px;">
+      <el-card
+        class="recommendation-card"
+        style="margin-top: 20px;"
+      >
         <template #header>
           <span>智能模型选择建议</span>
         </template>
         <el-row :gutter="20">
           <el-col :span="8">
             <div class="recommendation-item">
-              <div class="recommendation-label">速度优先</div>
-              <div class="recommendation-value">{{ fastestModel?.modelCode || '-' }}</div>
-              <div class="recommendation-desc">响应时间: {{ fastestModel?.avgResponseTime?.toFixed(0) }}ms</div>
+              <div class="recommendation-label">
+                速度优先
+              </div>
+              <div class="recommendation-value">
+                {{ fastestModel?.modelCode || '-' }}
+              </div>
+              <div class="recommendation-desc">
+                响应时间: {{ fastestModel?.avgResponseTime?.toFixed(0) }}ms
+              </div>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="recommendation-item">
-              <div class="recommendation-label">成功率优先</div>
-              <div class="recommendation-value">{{ mostReliableModel?.modelCode || '-' }}</div>
-              <div class="recommendation-desc">成功率: {{ ((mostReliableModel?.successRate || 0) * 100).toFixed(2) }}%</div>
+              <div class="recommendation-label">
+                成功率优先
+              </div>
+              <div class="recommendation-value">
+                {{ mostReliableModel?.modelCode || '-' }}
+              </div>
+              <div class="recommendation-desc">
+                成功率: {{ ((mostReliableModel?.successRate || 0) * 100).toFixed(2) }}%
+              </div>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="recommendation-item">
-              <div class="recommendation-label">成本优先</div>
-              <div class="recommendation-value">{{ cheapestModel?.modelCode || '-' }}</div>
-              <div class="recommendation-desc">平均成本: ¥{{ cheapestModel?.costPerRequest?.toFixed(6) }}</div>
+              <div class="recommendation-label">
+                成本优先
+              </div>
+              <div class="recommendation-value">
+                {{ cheapestModel?.modelCode || '-' }}
+              </div>
+              <div class="recommendation-desc">
+                平均成本: ¥{{ cheapestModel?.costPerRequest?.toFixed(6) }}
+              </div>
             </div>
           </el-col>
         </el-row>
-        <el-row :gutter="20" style="margin-top: 20px;">
+        <el-row
+          :gutter="20"
+          style="margin-top: 20px;"
+        >
           <el-col :span="24">
             <el-alert
               title="综合推荐"

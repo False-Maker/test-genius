@@ -4,14 +4,28 @@
       <template #header>
         <div class="card-header">
           <span>Agent 会话历史</span>
-          <el-button type="primary" @click="handleRefresh">刷新</el-button>
+          <el-button
+            type="primary"
+            @click="handleRefresh"
+          >
+            刷新
+          </el-button>
         </div>
       </template>
 
       <!-- 搜索栏 -->
-      <el-form :inline="true" :model="searchForm" class="search-form">
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="Agent">
-          <el-select v-model="searchForm.agentId" placeholder="请选择Agent" clearable @change="handleAgentChange">
+          <el-select
+            v-model="searchForm.agentId"
+            placeholder="请选择Agent"
+            clearable
+            @change="handleAgentChange"
+          >
             <el-option
               v-for="agent in agentList"
               :key="agent.id"
@@ -21,51 +35,138 @@
           </el-select>
         </el-form-item>
         <el-form-item label="会话标题">
-          <el-input v-model="searchForm.sessionTitle" placeholder="请输入会话标题" clearable />
+          <el-input
+            v-model="searchForm.sessionTitle"
+            placeholder="请输入会话标题"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option label="活跃" value="ACTIVE" />
-            <el-option label="已关闭" value="CLOSED" />
-            <el-option label="已过期" value="EXPIRED" />
+          <el-select
+            v-model="searchForm.status"
+            placeholder="请选择状态"
+            clearable
+          >
+            <el-option
+              label="活跃"
+              value="ACTIVE"
+            />
+            <el-option
+              label="已关闭"
+              value="CLOSED"
+            />
+            <el-option
+              label="已过期"
+              value="EXPIRED"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 会话列表 -->
-      <el-table :data="sessionList" v-loading="loading" stripe>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="sessionCode" label="会话编码" width="180" />
-        <el-table-column prop="sessionTitle" label="会话标题" min-width="200" />
-        <el-table-column prop="status" label="状态" width="100">
+      <el-table
+        v-loading="loading"
+        :data="sessionList"
+        stripe
+      >
+        <el-table-column
+          prop="id"
+          label="ID"
+          width="80"
+        />
+        <el-table-column
+          prop="sessionCode"
+          label="会话编码"
+          width="180"
+        />
+        <el-table-column
+          prop="sessionTitle"
+          label="会话标题"
+          min-width="200"
+        />
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="100"
+        >
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status!)">
               {{ getStatusText(row.status!) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="userName" label="用户" width="120" />
-        <el-table-column prop="totalTokens" label="Token使用" width="120">
+        <el-table-column
+          prop="userName"
+          label="用户"
+          width="120"
+        />
+        <el-table-column
+          prop="totalTokens"
+          label="Token使用"
+          width="120"
+        >
           <template #default="{ row }">
             {{ row.totalTokens || 0 }}
           </template>
         </el-table-column>
-        <el-table-column prop="totalIterations" label="迭代次数" width="120">
+        <el-table-column
+          prop="totalIterations"
+          label="迭代次数"
+          width="120"
+        >
           <template #default="{ row }">
             {{ row.totalIterations || 0 }}
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column prop="lastActiveTime" label="最后活跃时间" width="180" />
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          prop="lastActiveTime"
+          label="最后活跃时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="240"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleViewMessages(row)">查看消息</el-button>
-            <el-button link type="primary" @click="handleViewDetails(row)">详情</el-button>
-            <el-button link type="danger" @click="handleDelete(row)" v-if="row.status === 'CLOSED'">删除</el-button>
+            <el-button
+              link
+              type="primary"
+              @click="handleViewMessages(row)"
+            >
+              查看消息
+            </el-button>
+            <el-button
+              link
+              type="primary"
+              @click="handleViewDetails(row)"
+            >
+              详情
+            </el-button>
+            <el-button
+              v-if="row.status === 'CLOSED'"
+              link
+              type="danger"
+              @click="handleDelete(row)"
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -101,7 +202,10 @@
         >
           <div class="message-item">
             <div class="message-header">
-              <el-tag :type="message.role === 'user' ? 'primary' : 'success'" size="small">
+              <el-tag
+                :type="message.role === 'user' ? 'primary' : 'success'"
+                size="small"
+              >
                 {{ message.role === 'user' ? '用户' : message.role === 'assistant' ? 'Agent' : '工具' }}
               </el-tag>
               <span class="message-meta">
@@ -110,11 +214,22 @@
                 <span v-if="message.iterationNumber">迭代: {{ message.iterationNumber }}</span>
               </span>
             </div>
-            <div class="message-content">{{ message.content }}</div>
+            <div class="message-content">
+              {{ message.content }}
+            </div>
             <!-- 工具调用信息 -->
-            <div v-if="message.toolCalls && message.toolCalls.length > 0" class="tool-calls">
-              <el-divider content-position="left">工具调用</el-divider>
-              <div v-for="(call, index) in message.toolCalls" :key="index" class="tool-call">
+            <div
+              v-if="message.toolCalls && message.toolCalls.length > 0"
+              class="tool-calls"
+            >
+              <el-divider content-position="left">
+                工具调用
+              </el-divider>
+              <div
+                v-for="(call, index) in message.toolCalls"
+                :key="index"
+                class="tool-call"
+              >
                 <div class="tool-name">
                   <el-icon><Tools /></el-icon>
                   <span>{{ call.function?.name }}</span>
@@ -135,21 +250,43 @@
       title="会话详情"
       width="600px"
     >
-      <el-descriptions :column="1" border v-if="currentSession">
-        <el-descriptions-item label="会话ID">{{ currentSession.id }}</el-descriptions-item>
-        <el-descriptions-item label="会话编码">{{ currentSession.sessionCode }}</el-descriptions-item>
-        <el-descriptions-item label="会话标题">{{ currentSession.sessionTitle }}</el-descriptions-item>
+      <el-descriptions
+        v-if="currentSession"
+        :column="1"
+        border
+      >
+        <el-descriptions-item label="会话ID">
+          {{ currentSession.id }}
+        </el-descriptions-item>
+        <el-descriptions-item label="会话编码">
+          {{ currentSession.sessionCode }}
+        </el-descriptions-item>
+        <el-descriptions-item label="会话标题">
+          {{ currentSession.sessionTitle }}
+        </el-descriptions-item>
         <el-descriptions-item label="状态">
           <el-tag :type="getStatusType(currentSession.status!)">
             {{ getStatusText(currentSession.status!) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="用户">{{ currentSession.userName }}</el-descriptions-item>
-        <el-descriptions-item label="Token使用">{{ currentSession.totalTokens || 0 }}</el-descriptions-item>
-        <el-descriptions-item label="迭代次数">{{ currentSession.totalIterations || 0 }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ formatTime(currentSession.createTime!) }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ formatTime(currentSession.updateTime!) }}</el-descriptions-item>
-        <el-descriptions-item label="最后活跃时间">{{ formatTime(currentSession.lastActiveTime!) }}</el-descriptions-item>
+        <el-descriptions-item label="用户">
+          {{ currentSession.userName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Token使用">
+          {{ currentSession.totalTokens || 0 }}
+        </el-descriptions-item>
+        <el-descriptions-item label="迭代次数">
+          {{ currentSession.totalIterations || 0 }}
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ formatTime(currentSession.createTime!) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="更新时间">
+          {{ formatTime(currentSession.updateTime!) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="最后活跃时间">
+          {{ formatTime(currentSession.lastActiveTime!) }}
+        </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>

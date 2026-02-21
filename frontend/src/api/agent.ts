@@ -1,5 +1,5 @@
 import request from './request'
-import type { ApiResult, PageResult } from './types'
+import type { ApiResult } from './types'
 
 // Agent相关类型定义
 export interface Agent {

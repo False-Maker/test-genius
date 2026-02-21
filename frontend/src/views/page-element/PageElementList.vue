@@ -2,11 +2,20 @@
   <div class="page-element-list">
     <div class="page-header">
       <div class="header-left">
-        <h2 class="page-title">页面元素管理</h2>
-        <p class="page-subtitle">管理测试对象的页面元素信息，包括定位方式、属性等</p>
+        <h2 class="page-title">
+          页面元素管理
+        </h2>
+        <p class="page-subtitle">
+          管理测试对象的页面元素信息，包括定位方式、属性等
+        </p>
       </div>
       <div class="header-right">
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
           新建元素
         </el-button>
@@ -14,25 +23,69 @@
     </div>
 
     <!-- 搜索�?-->
-    <el-card class="search-card" shadow="never">
-      <el-form :inline="true" :model="searchForm" class="search-form">
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="页面URL">
-          <el-input v-model="searchForm.pageUrl" placeholder="请输入页面URL" clearable @keyup.enter="handleSearch" />
+          <el-input
+            v-model="searchForm.pageUrl"
+            placeholder="请输入页面URL"
+            clearable
+            @keyup.enter="handleSearch"
+          />
         </el-form-item>
         <el-form-item label="元素类型">
-          <el-select v-model="searchForm.elementType" placeholder="请选择元素类型" clearable style="width: 180px">
-            <el-option label="按钮 (Button)" value="BUTTON" />
-            <el-option label="输入框(Input)" value="INPUT" />
-            <el-option label="链接 (Link)" value="LINK" />
-            <el-option label="文本 (Text)" value="TEXT" />
-            <el-option label="下拉框(Select)" value="SELECT" />
-            <el-option label="复选框 (Checkbox)" value="CHECKBOX" />
-            <el-option label="单选框 (Radio)" value="RADIO" />
-            <el-option label="其他 (Other)" value="OTHER" />
+          <el-select
+            v-model="searchForm.elementType"
+            placeholder="请选择元素类型"
+            clearable
+            style="width: 180px"
+          >
+            <el-option
+              label="按钮 (Button)"
+              value="BUTTON"
+            />
+            <el-option
+              label="输入框(Input)"
+              value="INPUT"
+            />
+            <el-option
+              label="链接 (Link)"
+              value="LINK"
+            />
+            <el-option
+              label="文本 (Text)"
+              value="TEXT"
+            />
+            <el-option
+              label="下拉框(Select)"
+              value="SELECT"
+            />
+            <el-option
+              label="复选框 (Checkbox)"
+              value="CHECKBOX"
+            />
+            <el-option
+              label="单选框 (Radio)"
+              value="RADIO"
+            />
+            <el-option
+              label="其他 (Other)"
+              value="OTHER"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
             <el-icon><Search /></el-icon> 查询
           </el-button>
           <el-button @click="resetSearch">
@@ -43,9 +96,19 @@
     </el-card>
 
     <!-- 列表 -->
-    <el-card class="table-card" shadow="never">
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-        <el-skeleton :rows="10" animated />
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
       <el-table
         v-else
@@ -53,25 +116,65 @@
         
         style="width: 100%"
       >
-        <el-table-column prop="elementCode" label="元素编码" width="160">
-           <template #default="scope">
+        <el-table-column
+          prop="elementCode"
+          label="元素编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.elementCode }}</span>
-           </template>
+          </template>
         </el-table-column>
-        <el-table-column prop="pageUrl" label="页面URL" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="elementType" label="元素类型" width="120">
+        <el-table-column
+          prop="pageUrl"
+          label="页面URL"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="elementType"
+          label="元素类型"
+          width="120"
+        >
           <template #default="scope">
             <el-tag>{{ scope.row.elementType }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="elementText" label="元素文本" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="elementLocatorType" label="定位方式" width="120" />
-        <el-table-column prop="elementLocatorValue" label="定位�" min-width="200" show-overflow-tooltip />
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column
+          prop="elementText"
+          label="元素文本"
+          min-width="150"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="elementLocatorType"
+          label="定位方式"
+          width="120"
+        />
+        <el-table-column
+          prop="elementLocatorValue"
+          label="定位�"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          label="操作"
+          width="150"
+          fixed="right"
+        >
           <template #default="scope">
             <div class="action-buttons">
-              <el-tooltip content="编辑" placement="top">
-                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
+              <el-tooltip
+                content="编辑"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleEdit(scope.row)"
+                >
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
@@ -84,8 +187,16 @@
               >
                 <template #reference>
                   <div class="delete-btn-wrapper">
-                    <el-tooltip content="删除" placement="top">
-                      <el-button circle size="small" type="danger" plain>
+                    <el-tooltip
+                      content="删除"
+                      placement="top"
+                    >
+                      <el-button
+                        circle
+                        size="small"
+                        type="danger"
+                        plain
+                      >
                         <el-icon><Delete /></el-icon>
                       </el-button>
                     </el-tooltip>
@@ -125,75 +236,173 @@
         :rules="formRules"
         label-width="100px"
       >
-        <el-form-item label="页面URL" prop="pageUrl">
-          <el-input v-model="formData.pageUrl" placeholder="请输入页面URL" />
+        <el-form-item
+          label="页面URL"
+          prop="pageUrl"
+        >
+          <el-input
+            v-model="formData.pageUrl"
+            placeholder="请输入页面URL"
+          />
         </el-form-item>
         <el-row :gutter="20">
-            <el-col :span="12">
-                <el-form-item label="元素类型" prop="elementType">
-                  <el-select v-model="formData.elementType" placeholder="请选择" style="width: 100%">
-                    <el-option label="按钮 (Button)" value="BUTTON" />
-                    <el-option label="输入框(Input)" value="INPUT" />
-                    <el-option label="链接 (Link)" value="LINK" />
-                    <el-option label="文本 (Text)" value="TEXT" />
-                    <el-option label="下拉框(Select)" value="SELECT" />
-                    <el-option label="复选框 (Checkbox)" value="CHECKBOX" />
-                    <el-option label="单选框 (Radio)" value="RADIO" />
-                    <el-option label="其他 (Other)" value="OTHER" />
-                  </el-select>
-                </el-form-item>
-            </el-col>
-            <el-col :span="12">
-                 <el-form-item label="元素文本" prop="elementText">
-                  <el-input v-model="formData.elementText" placeholder="请输入元素文本" />
-                </el-form-item>
-            </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="元素类型"
+              prop="elementType"
+            >
+              <el-select
+                v-model="formData.elementType"
+                placeholder="请选择"
+                style="width: 100%"
+              >
+                <el-option
+                  label="按钮 (Button)"
+                  value="BUTTON"
+                />
+                <el-option
+                  label="输入框(Input)"
+                  value="INPUT"
+                />
+                <el-option
+                  label="链接 (Link)"
+                  value="LINK"
+                />
+                <el-option
+                  label="文本 (Text)"
+                  value="TEXT"
+                />
+                <el-option
+                  label="下拉框(Select)"
+                  value="SELECT"
+                />
+                <el-option
+                  label="复选框 (Checkbox)"
+                  value="CHECKBOX"
+                />
+                <el-option
+                  label="单选框 (Radio)"
+                  value="RADIO"
+                />
+                <el-option
+                  label="其他 (Other)"
+                  value="OTHER"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="元素文本"
+              prop="elementText"
+            >
+              <el-input
+                v-model="formData.elementText"
+                placeholder="请输入元素文本"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="20">
-             <el-col :span="12">
-                <el-form-item label="定位方式" prop="elementLocatorType">
-                  <el-select v-model="formData.elementLocatorType" placeholder="请选择" style="width: 100%">
-                    <el-option label="ID" value="ID" />
-                    <el-option label="Name" value="NAME" />
-                    <el-option label="Class Name" value="CLASS_NAME" />
-                    <el-option label="Tag Name" value="TAG_NAME" />
-                    <el-option label="Link Text" value="LINK_TEXT" />
-                    <el-option label="Partial Link Text" value="PARTIAL_LINK_TEXT" />
-                    <el-option label="CSS Selector" value="CSS_SELECTOR" />
-                    <el-option label="XPath" value="XPATH" />
-                  </el-select>
-                </el-form-item>
-             </el-col>
-             <el-col :span="12">
-                  <el-form-item label="定位值" prop="elementLocatorValue">
-                    <el-input v-model="formData.elementLocatorValue" placeholder="请输入定位值" />
-                  </el-form-item>
-             </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="定位方式"
+              prop="elementLocatorType"
+            >
+              <el-select
+                v-model="formData.elementLocatorType"
+                placeholder="请选择"
+                style="width: 100%"
+              >
+                <el-option
+                  label="ID"
+                  value="ID"
+                />
+                <el-option
+                  label="Name"
+                  value="NAME"
+                />
+                <el-option
+                  label="Class Name"
+                  value="CLASS_NAME"
+                />
+                <el-option
+                  label="Tag Name"
+                  value="TAG_NAME"
+                />
+                <el-option
+                  label="Link Text"
+                  value="LINK_TEXT"
+                />
+                <el-option
+                  label="Partial Link Text"
+                  value="PARTIAL_LINK_TEXT"
+                />
+                <el-option
+                  label="CSS Selector"
+                  value="CSS_SELECTOR"
+                />
+                <el-option
+                  label="XPath"
+                  value="XPATH"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="定位值"
+              prop="elementLocatorValue"
+            >
+              <el-input
+                v-model="formData.elementLocatorValue"
+                placeholder="请输入定位值"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
         
-        <el-form-item label="元素属性" prop="elementAttributes">
-           <el-input 
-             v-model="formData.elementAttributes" 
-             type="textarea" 
-             :rows="4" 
-             placeholder="请输入元素属性(JSON格式)" 
-            />
+        <el-form-item
+          label="元素属性"
+          prop="elementAttributes"
+        >
+          <el-input 
+            v-model="formData.elementAttributes" 
+            type="textarea" 
+            :rows="4" 
+            placeholder="请输入元素属性(JSON格式)" 
+          />
         </el-form-item>
-         <el-form-item label="页面结构" prop="pageStructure">
-           <el-input 
-             v-model="formData.pageStructure" 
-             type="textarea" 
-             :rows="4" 
-             placeholder="请输入页面结构(JSON格式)" 
-            />
+        <el-form-item
+          label="页面结构"
+          prop="pageStructure"
+        >
+          <el-input 
+            v-model="formData.pageStructure" 
+            type="textarea" 
+            :rows="4" 
+            placeholder="请输入页面结构(JSON格式)" 
+          />
         </el-form-item>
-        <el-form-item label="截图URL" prop="screenshotUrl">
-           <el-input v-model="formData.screenshotUrl" placeholder="请输入截图URL" />
+        <el-form-item
+          label="截图URL"
+          prop="screenshotUrl"
+        >
+          <el-input
+            v-model="formData.screenshotUrl"
+            placeholder="请输入截图URL"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
           确定
         </el-button>
       </template>
@@ -206,7 +415,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
 import { pageElementApi, type PageElementInfoRequestDTO, type PageElementInfoResponseDTO } from '@/api/pageElement'
-import type { PageResult } from '@/api/types'
 
 // 响应式数据
 const loading = ref(false)

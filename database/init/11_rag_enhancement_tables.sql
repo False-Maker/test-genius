@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
     chunking_strategy VARCHAR(50),
     chunk_size INT,
     chunk_overlap INT,
-    is_active CHAR(1) DEFAULT '1',
+    is_active VARCHAR(1) DEFAULT '1',
     creator_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -39,11 +39,24 @@ CREATE TABLE IF NOT EXISTS knowledge_document (
     column_count INT, -- 列数（CSV）
     table_count INT, -- 表格数（HTML）
     metadata JSONB, -- 额外元数据
-    is_active CHAR(1) DEFAULT '1',
+    is_active VARCHAR(1) DEFAULT '1',
     creator_id BIGINT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE knowledge_document
+    ADD COLUMN IF NOT EXISTS kb_id BIGINT,
+    ADD COLUMN IF NOT EXISTS file_size BIGINT,
+    ADD COLUMN IF NOT EXISTS file_path VARCHAR(1000),
+    ADD COLUMN IF NOT EXISTS language VARCHAR(20),
+    ADD COLUMN IF NOT EXISTS encoding VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS page_count INT,
+    ADD COLUMN IF NOT EXISTS slide_count INT,
+    ADD COLUMN IF NOT EXISTS row_count INT,
+    ADD COLUMN IF NOT EXISTS column_count INT,
+    ADD COLUMN IF NOT EXISTS table_count INT,
+    ADD COLUMN IF NOT EXISTS metadata JSONB,
+    ADD COLUMN IF NOT EXISTS embedding vector(1024);
 
 -- 文档分块表
 CREATE TABLE IF NOT EXISTS knowledge_document_chunk (
@@ -57,8 +70,8 @@ CREATE TABLE IF NOT EXISTS knowledge_document_chunk (
     chunk_strategy VARCHAR(50),
     chunk_start INT, -- 分块在原文中的起始位置
     chunk_end INT, -- 分块在原文中的结束位置
-    has_overlap CHAR(1) DEFAULT '0', -- 是否有重叠
-    embedding vector(512), -- 向量列 (BAAI/bge-small-zh-v1.5)
+    has_overlap VARCHAR(1) DEFAULT '0', -- 是否有重叠
+    embedding vector(1024), -- 向量列 (BAAI/bge-m3)
     metadata JSONB, -- 分块元数据
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

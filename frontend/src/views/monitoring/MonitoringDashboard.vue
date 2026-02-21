@@ -13,7 +13,10 @@
           value-format="YYYY-MM-DDTHH:mm:ss"
           @change="handleTimeRangeChange"
         />
-        <el-button type="primary" @click="handleRefresh">
+        <el-button
+          type="primary"
+          @click="handleRefresh"
+        >
           <el-icon><Refresh /></el-icon>
           刷新
         </el-button>
@@ -21,50 +24,75 @@
     </div>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="20" class="stats-row">
+    <el-row
+      :gutter="20"
+      class="stats-row"
+    >
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">总请求数</div>
-            <div class="stat-value">{{ performanceStats.totalCount || 0 }}</div>
+            <div class="stat-label">
+              总请求数
+            </div>
+            <div class="stat-value">
+              {{ performanceStats.totalCount || 0 }}
+            </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">成功率</div>
-            <div class="stat-value">{{ (performanceStats.successRate || 0).toFixed(2) }}%</div>
+            <div class="stat-label">
+              成功率
+            </div>
+            <div class="stat-value">
+              {{ (performanceStats.successRate || 0).toFixed(2) }}%
+            </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">平均响应时间</div>
-            <div class="stat-value">{{ (performanceStats.avgResponseTime || 0).toFixed(0) }}ms</div>
+            <div class="stat-label">
+              平均响应时间
+            </div>
+            <div class="stat-value">
+              {{ (performanceStats.avgResponseTime || 0).toFixed(0) }}ms
+            </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-label">总成本</div>
-            <div class="stat-value">¥{{ (costStats.totalCost || 0).toFixed(2) }}</div>
+            <div class="stat-label">
+              总成本
+            </div>
+            <div class="stat-value">
+              ¥{{ (costStats.totalCost || 0).toFixed(2) }}
+            </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 图表区域 -->
-    <el-row :gutter="20" class="charts-row">
+    <el-row
+      :gutter="20"
+      class="charts-row"
+    >
       <!-- 响应时间趋势图 -->
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
             <span>响应时间趋势</span>
           </template>
-          <div ref="responseTimeChartRef" class="chart-container"></div>
+          <div
+            ref="responseTimeChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
@@ -74,19 +102,28 @@
           <template #header>
             <span>成功率统计</span>
           </template>
-          <div ref="successRateChartRef" class="chart-container"></div>
+          <div
+            ref="successRateChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="charts-row">
+    <el-row
+      :gutter="20"
+      class="charts-row"
+    >
       <!-- Token使用量 -->
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
             <span>Token使用量</span>
           </template>
-          <div ref="tokenUsageChartRef" class="chart-container"></div>
+          <div
+            ref="tokenUsageChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
@@ -96,19 +133,28 @@
           <template #header>
             <span>成本统计</span>
           </template>
-          <div ref="costChartRef" class="chart-container"></div>
+          <div
+            ref="costChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="charts-row">
+    <el-row
+      :gutter="20"
+      class="charts-row"
+    >
       <!-- 模型使用情况 -->
       <el-col :span="12">
         <el-card class="chart-card">
           <template #header>
             <span>模型使用情况</span>
           </template>
-          <div ref="modelUsageChartRef" class="chart-container"></div>
+          <div
+            ref="modelUsageChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
 
@@ -118,7 +164,10 @@
           <template #header>
             <span>应用使用情况</span>
           </template>
-          <div ref="appUsageChartRef" class="chart-container"></div>
+          <div
+            ref="appUsageChartRef"
+            class="chart-container"
+          />
         </el-card>
       </el-col>
     </el-row>
@@ -133,14 +182,12 @@ import * as echarts from 'echarts'
 import { monitoringApi, type PerformanceStats, type CostStats } from '@/api/monitoring'
 
 // 时间范围
-const timeRange = ref<[string, string]>(() => {
-  const end = new Date()
-  const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000) // 默认最近7天
-  return [
-    start.toISOString().slice(0, 19),
-    end.toISOString().slice(0, 19)
-  ]
-})
+const end = new Date()
+const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000)
+const timeRange = ref<[string, string]>([
+  start.toISOString().slice(0, 19),
+  end.toISOString().slice(0, 19)
+])
 
 // 统计数据
 const performanceStats = ref<PerformanceStats>({
@@ -224,13 +271,13 @@ const loadTimeSeriesData = async () => {
     updateResponseTimeChart(responseTimeRes.data.data)
 
     // 成功率趋势
-    const successRateRes = await monitoringApi.getTimeSeriesData(
+    await monitoringApi.getTimeSeriesData(
       timeRange.value[0],
       timeRange.value[1],
       'DAY',
       'SUCCESS_RATE'
     )
-    updateSuccessRateChart(successRateRes.data.data)
+    updateSuccessRateChart()
 
     // Token使用量
     const tokenRes = await monitoringApi.getTimeSeriesData(
@@ -299,7 +346,7 @@ const updateResponseTimeChart = (data: Array<{ time: string; value: number }>) =
 }
 
 // 更新成功率图表
-const updateSuccessRateChart = (data: Array<{ time: string; value: number }>) => {
+const updateSuccessRateChart = () => {
   if (!successRateChart || !successRateChartRef.value) return
 
   const successCount = performanceStats.value.successCount

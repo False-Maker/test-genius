@@ -1,5 +1,8 @@
 <template>
-  <el-form :model="config" label-width="80px">
+  <el-form
+    :model="config"
+    label-width="80px"
+  >
     <el-form-item label="判断条件">
       <el-input 
         v-model="config.condition" 
@@ -10,12 +13,20 @@
     </el-form-item>
     <el-form-item label="比较模式">
       <el-radio-group v-model="config.mode">
-        <el-radio label="expression">表达式</el-radio>
-        <el-radio label="script">脚本</el-radio>
+        <el-radio label="expression">
+          表达式
+        </el-radio>
+        <el-radio label="script">
+          脚本
+        </el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="默认分支">
-      <el-switch v-model="config.hasDefaultBranch" active-text="开启" inactive-text="关闭" />
+      <el-switch
+        v-model="config.hasDefaultBranch"
+        active-text="开启"
+        inactive-text="关闭"
+      />
     </el-form-item>
   </el-form>
 </template>

@@ -32,5 +32,7 @@ public interface KnowledgeBaseService {
      * 关键词检索知识库文档
      */
     List<Map<String, Object>> searchDocumentsByKeyword(String keyword, String docType, int topK);
+
+    List<Map<String, Object>> listDocumentsByKb(Long kbId, int limit);
 }
 

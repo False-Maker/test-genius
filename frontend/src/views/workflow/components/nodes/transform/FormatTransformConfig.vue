@@ -1,19 +1,46 @@
 <template>
-  <el-form :model="config" label-width="80px">
+  <el-form
+    :model="config"
+    label-width="80px"
+  >
     <el-form-item label="源格式">
       <el-select v-model="config.sourceFormat">
-        <el-option label="JSON" value="json" />
-        <el-option label="XML" value="xml" />
-        <el-option label="YAML" value="yaml" />
-        <el-option label="CSV" value="csv" />
+        <el-option
+          label="JSON"
+          value="json"
+        />
+        <el-option
+          label="XML"
+          value="xml"
+        />
+        <el-option
+          label="YAML"
+          value="yaml"
+        />
+        <el-option
+          label="CSV"
+          value="csv"
+        />
       </el-select>
     </el-form-item>
     <el-form-item label="目标格式">
       <el-select v-model="config.targetFormat">
-        <el-option label="JSON" value="json" />
-        <el-option label="XML" value="xml" />
-        <el-option label="YAML" value="yaml" />
-        <el-option label="HTML" value="html" />
+        <el-option
+          label="JSON"
+          value="json"
+        />
+        <el-option
+          label="XML"
+          value="xml"
+        />
+        <el-option
+          label="YAML"
+          value="yaml"
+        />
+        <el-option
+          label="HTML"
+          value="html"
+        />
       </el-select>
     </el-form-item>
     <el-form-item label="映射模板">

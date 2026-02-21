@@ -1,72 +1,63 @@
-﻿<template>
-
-
+<template>
   <div class="data-document-generation">
-
-
     <el-card>
-
-
       <template #header>
-
-
         <div class="card-header">
-
-
           <h2>数据文档生成管理</h2>
 
 
           <span class="subtitle">生成等价类表和正交表</span>
-
-
         </div>
-
-
       </template>
 
 
 
 
 
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-
-
+      <el-tabs
+        v-model="activeTab"
+        @tab-change="handleTabChange"
+      >
         <!-- 等价类表生成 -->
 
 
-        <el-tab-pane label="等价类表生成" name="equivalence">
-
-
-          <el-form :model="equivalenceForm" :rules="equivalenceFormRules" ref="equivalenceFormRef" label-width="120px">
-
-
+        <el-tab-pane
+          label="等价类表生成"
+          name="equivalence"
+        >
+          <el-form
+            ref="equivalenceFormRef"
+            :model="equivalenceForm"
+            :rules="equivalenceFormRules"
+            label-width="120px"
+          >
             <el-form-item label="数据来源">
-
-
               <el-radio-group v-model="equivalenceForm.sourceType">
+                <el-radio label="requirement">
+                  按需求检索内容方式/用例复用
+                </el-radio>
 
 
-                <el-radio label="requirement">按需求检索内容方式/用例复用</el-radio>
+                <el-radio label="cases">
+                  按用例检索内容方式/用例复用
+                </el-radio>
 
 
-                <el-radio label="cases">按用例检索内容方式/用例复用</el-radio>
-
-
-                <el-radio label="manual">手动输入/用例复用</el-radio>
-
-
+                <el-radio label="manual">
+                  手动输入/用例复用
+                </el-radio>
               </el-radio-group>
-
-
             </el-form-item>
 
 
 
 
 
-            <el-form-item label="需求" prop="requirementId" v-if="equivalenceForm.sourceType === 'requirement'">
-
-
+            <el-form-item
+              v-if="equivalenceForm.sourceType === 'requirement'"
+              label="需求"
+              prop="requirementId"
+            >
               <el-select
 
 
@@ -86,11 +77,7 @@
 
 
                 :loading="requirementLoading"
-
-
               >
-
-
                 <el-option
 
 
@@ -104,23 +91,19 @@
 
 
                   :value="req.id"
-
-
                 />
-
-
               </el-select>
-
-
             </el-form-item>
 
 
 
 
 
-            <el-form-item label="用例列表" prop="caseIds" v-if="equivalenceForm.sourceType === 'cases'">
-
-
+            <el-form-item
+              v-if="equivalenceForm.sourceType === 'cases'"
+              label="用例列表"
+              prop="caseIds"
+            >
               <el-select
 
 
@@ -143,11 +126,7 @@
 
 
                 :loading="caseLoading"
-
-
               >
-
-
                 <el-option
 
 
@@ -161,26 +140,20 @@
 
 
                   :value="tc.id"
-
-
                 />
-
-
               </el-select>
-
-
             </el-form-item>
 
 
 
 
 
-            <el-form-item label="参数列表" prop="parameters" v-if="equivalenceForm.sourceType === 'manual'">
-
-
+            <el-form-item
+              v-if="equivalenceForm.sourceType === 'manual'"
+              label="参数列表"
+              prop="parameters"
+            >
               <div class="parameter-list">
-
-
                 <div
 
 
@@ -191,11 +164,7 @@
 
 
                   class="parameter-item"
-
-
                 >
-
-
                   <el-input
 
 
@@ -206,8 +175,6 @@
 
 
                     style="width: 200px; margin-right: 10px"
-
-
                   />
 
 
@@ -221,8 +188,6 @@
 
 
                     style="width: 150px; margin-right: 10px"
-
-
                   />
 
 
@@ -236,8 +201,6 @@
 
 
                     style="flex: 1; margin-right: 10px"
-
-
                   />
 
 
@@ -251,23 +214,27 @@
 
 
                     style="flex: 1; margin-right: 10px"
-
-
                   />
 
 
-                  <el-button type="danger" size="small" @click="removeParameter(index)">删除</el-button>
-
-
+                  <el-button
+                    type="danger"
+                    size="small"
+                    @click="removeParameter(index)"
+                  >
+                    删除
+                  </el-button>
                 </div>
 
 
-                <el-button type="primary" size="small" @click="addParameter">添加参数</el-button>
-
-
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="addParameter"
+                >
+                  添加参数
+                </el-button>
               </div>
-
-
             </el-form-item>
 
 
@@ -275,11 +242,10 @@
 
 
             <el-form-item label="表格标题">
-
-
-              <el-input v-model="equivalenceForm.title" placeholder="请输入表格标题（可选）" />
-
-
+              <el-input
+                v-model="equivalenceForm.title"
+                placeholder="请输入表格标题（可选）"
+              />
             </el-form-item>
 
 
@@ -287,23 +253,19 @@
 
 
             <el-form-item>
-
-
-              <el-button type="primary" @click="handleGenerateEquivalence" :loading="equivalenceLoading">
-
-
+              <el-button
+                type="primary"
+                :loading="equivalenceLoading"
+                @click="handleGenerateEquivalence"
+              >
                 生成等价类表
-
-
               </el-button>
 
 
-              <el-button @click="resetEquivalenceForm">重置</el-button>
-
-
+              <el-button @click="resetEquivalenceForm">
+                重置
+              </el-button>
             </el-form-item>
-
-
           </el-form>
 
 
@@ -313,37 +275,47 @@
           <!-- 等价类表结果展示 -->
 
 
-          <div v-if="equivalenceResult" class="result-section">
-
-
+          <div
+            v-if="equivalenceResult"
+            class="result-section"
+          >
             <el-divider>生成结果</el-divider>
 
 
             <div class="result-header">
-
-
               <h3>{{ equivalenceResult.title }}</h3>
 
 
               <div class="result-actions">
+                <el-button
+                  size="small"
+                  @click="exportEquivalenceExcel"
+                >
+                  导出Excel
+                </el-button>
 
 
-                <el-button size="small" @click="exportEquivalenceExcel">导出Excel</el-button>
-
-
-                <el-button size="small" @click="exportEquivalenceWord">导出Word</el-button>
-
-
+                <el-button
+                  size="small"
+                  @click="exportEquivalenceWord"
+                >
+                  导出Word
+                </el-button>
               </div>
-
-
             </div>
 
 
-            <el-table :data="equivalenceResult.testCases" border stripe style="width: 100%; margin-top: 20px">
-
-
-              <el-table-column prop="caseNumber" label="用例编号" width="120" />
+            <el-table
+              :data="equivalenceResult.testCases"
+              border
+              stripe
+              style="width: 100%; margin-top: 20px"
+            >
+              <el-table-column
+                prop="caseNumber"
+                label="用例编号"
+                width="120"
+              />
 
 
               <el-table-column
@@ -359,59 +331,47 @@
 
 
                 :label="param.parameterName"
-
-
               />
 
 
-              <el-table-column prop="isValid" label="有效性" width="100">
-
-
+              <el-table-column
+                prop="isValid"
+                label="有效性"
+                width="100"
+              >
                 <template #default="{ row }">
-
-
                   <el-tag :type="row.isValid ? 'success' : 'danger'">
-
-
                     {{ row.isValid ? '有效' : '无效' }}
-
-
                   </el-tag>
-
-
                 </template>
-
-
               </el-table-column>
-
-
             </el-table>
 
 
-            <div class="result-summary" style="margin-top: 20px">
-
-
+            <div
+              class="result-summary"
+              style="margin-top: 20px"
+            >
               <el-statistic-group>
+                <el-statistic
+                  title="总用例数"
+                  :value="equivalenceResult.totalCases"
+                />
 
 
-                <el-statistic title="总用例数" :value="equivalenceResult.totalCases" />
+                <el-statistic
+                  title="有效用例数"
+                  :value="equivalenceResult.validCases"
+                />
 
 
-                <el-statistic title="有效用例数" :value="equivalenceResult.validCases" />
-
-
-                <el-statistic title="无效用例数" :value="equivalenceResult.invalidCases" />
-
-
+                <el-statistic
+                  title="无效用例数"
+                  :value="equivalenceResult.invalidCases"
+                />
               </el-statistic-group>
-
-
             </div>
-
-
           </div>
-
-
         </el-tab-pane>
 
 
@@ -421,18 +381,21 @@
         <!-- 正交表生成 -->
 
 
-        <el-tab-pane label="正交表生成" name="orthogonal">
-
-
-          <el-form :model="orthogonalForm" :rules="orthogonalFormRules" ref="orthogonalFormRef" label-width="120px">
-
-
-            <el-form-item label="因素列表" prop="factors">
-
-
+        <el-tab-pane
+          label="正交表生成"
+          name="orthogonal"
+        >
+          <el-form
+            ref="orthogonalFormRef"
+            :model="orthogonalForm"
+            :rules="orthogonalFormRules"
+            label-width="120px"
+          >
+            <el-form-item
+              label="因素列表"
+              prop="factors"
+            >
               <div class="factor-list">
-
-
                 <div
 
 
@@ -443,11 +406,7 @@
 
 
                   class="factor-item"
-
-
                 >
-
-
                   <el-input
 
 
@@ -458,8 +417,6 @@
 
 
                     style="width: 200px; margin-right: 10px"
-
-
                   />
 
 
@@ -473,23 +430,27 @@
 
 
                     style="flex: 1; margin-right: 10px"
-
-
                   />
 
 
-                  <el-button type="danger" size="small" @click="removeFactor(index)">删除</el-button>
-
-
+                  <el-button
+                    type="danger"
+                    size="small"
+                    @click="removeFactor(index)"
+                  >
+                    删除
+                  </el-button>
                 </div>
 
 
-                <el-button type="primary" size="small" @click="addFactor">添加因素</el-button>
-
-
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="addFactor"
+                >
+                  添加因素
+                </el-button>
               </div>
-
-
             </el-form-item>
 
 
@@ -497,11 +458,10 @@
 
 
             <el-form-item label="表格标题">
-
-
-              <el-input v-model="orthogonalForm.title" placeholder="请输入表格标题（可选）" />
-
-
+              <el-input
+                v-model="orthogonalForm.title"
+                placeholder="请输入表格标题（可选）"
+              />
             </el-form-item>
 
 
@@ -509,23 +469,19 @@
 
 
             <el-form-item>
-
-
-              <el-button type="primary" @click="handleGenerateOrthogonal" :loading="orthogonalLoading">
-
-
+              <el-button
+                type="primary"
+                :loading="orthogonalLoading"
+                @click="handleGenerateOrthogonal"
+              >
                 生成正交表
-
-
               </el-button>
 
 
-              <el-button @click="resetOrthogonalForm">重置</el-button>
-
-
+              <el-button @click="resetOrthogonalForm">
+                重置
+              </el-button>
             </el-form-item>
-
-
           </el-form>
 
 
@@ -535,30 +491,33 @@
           <!-- 正交表结果展示 -->
 
 
-          <div v-if="orthogonalResult" class="result-section">
-
-
+          <div
+            v-if="orthogonalResult"
+            class="result-section"
+          >
             <el-divider>生成结果</el-divider>
 
 
             <div class="result-header">
-
-
               <h3>{{ orthogonalResult.title }}</h3>
 
 
               <div class="result-actions">
+                <el-button
+                  size="small"
+                  @click="exportOrthogonalExcel"
+                >
+                  导出Excel
+                </el-button>
 
 
-                <el-button size="small" @click="exportOrthogonalExcel">导出Excel</el-button>
-
-
-                <el-button size="small" @click="exportOrthogonalWord">导出Word</el-button>
-
-
+                <el-button
+                  size="small"
+                  @click="exportOrthogonalWord"
+                >
+                  导出Word
+                </el-button>
               </div>
-
-
             </div>
 
 
@@ -575,15 +534,20 @@
 
 
               style="margin: 20px 0"
-
-
             />
 
 
-            <el-table :data="orthogonalResult.testCases" border stripe style="width: 100%; margin-top: 20px">
-
-
-              <el-table-column prop="caseNumber" label="用例编号" width="120" />
+            <el-table
+              :data="orthogonalResult.testCases"
+              border
+              stripe
+              style="width: 100%; margin-top: 20px"
+            >
+              <el-table-column
+                prop="caseNumber"
+                label="用例编号"
+                width="120"
+              />
 
 
               <el-table-column
@@ -599,38 +563,24 @@
 
 
                 :label="factor.factorName"
-
-
               />
-
-
             </el-table>
 
 
-            <div class="result-summary" style="margin-top: 20px">
-
-
-              <el-statistic title="总用例数" :value="orthogonalResult.totalCases" />
-
-
+            <div
+              class="result-summary"
+              style="margin-top: 20px"
+            >
+              <el-statistic
+                title="总用例数"
+                :value="orthogonalResult.totalCases"
+              />
             </div>
-
-
           </div>
-
-
         </el-tab-pane>
-
-
       </el-tabs>
-
-
     </el-card>
-
-
   </div>
-
-
 </template>
 
 
@@ -646,7 +596,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
 
-import { dataDocumentApi, type EquivalenceTableRequest, type OrthogonalTableRequest, type EquivalenceParameter, type OrthogonalFactor } from '@/api/dataDocument'
+import { dataDocumentApi, type EquivalenceTableRequest, type OrthogonalTableRequest } from '@/api/dataDocument'
 
 
 import { requirementApi, type TestRequirement } from '@/api/requirement'
@@ -693,6 +643,8 @@ const testCaseList = ref<TestCase[]>([])
 
 const caseLoading = ref(false)
 
+const activeTab = ref('equivalence')
+
 
 
 
@@ -703,29 +655,36 @@ const caseLoading = ref(false)
 const equivalenceFormRef = ref()
 
 
-const equivalenceForm = reactive<EquivalenceTableRequest & { sourceType: string; parameters: EquivalenceParameter[] }>({
+type EquivalenceFormParameter = {
+  parameterName: string
+  parameterType: string
+  validClasses: string
+  invalidClasses: string
+}
 
+type EquivalenceForm = Omit<EquivalenceTableRequest, 'parameters'> & {
+  sourceType: string
+  parameters: EquivalenceFormParameter[]
+}
 
+type OrthogonalFormFactor = {
+  factorName: string
+  levels: string
+}
+
+const equivalenceForm = reactive<EquivalenceForm>({
   sourceType: 'requirement',
-
-
   requirementId: undefined,
-
-
   caseIds: undefined,
-
-
   parameters: [],
-
-
   title: ''
-
-
 })
 
-
-
-
+const orthogonalFormRef = ref()
+const orthogonalForm = reactive<Omit<OrthogonalTableRequest, 'factors'> & { factors: OrthogonalFormFactor[] }>({
+  factors: [],
+  title: ''
+})
 
 const equivalenceFormRules = {
 
@@ -1103,17 +1062,13 @@ const handleGenerateEquivalence = async () => {
         // 手动输入：转换参数格式
 
         request.parameters = equivalenceForm.parameters.map(p => ({
-
           parameterName: p.parameterName,
-
           parameterType: p.parameterType,
-
-          validClasses: p.validClasses.split(',').map(s => s.trim()).filter(s => s),
-
-          invalidClasses: p.invalidClasses ? p.invalidClasses.split(',').map(s => s.trim()).filter(s => s) : undefined
-
+          validClasses: p.validClasses.split(',').map((s: string) => s.trim()).filter((s: string) => s),
+          invalidClasses: p.invalidClasses
+            ? p.invalidClasses.split(',').map((s: string) => s.trim()).filter((s: string) => s)
+            : undefined
         }))
-
       }
 
 
@@ -1180,17 +1135,9 @@ const handleGenerateOrthogonal = async () => {
 
 
         factors: orthogonalForm.factors.map(f => ({
-
-
           factorName: f.factorName,
-
-
-          levels: f.levels.split(',').map(s => s.trim()).filter(s => s)
-
-
+          levels: f.levels.split(',').map((s: string) => s.trim()).filter((s: string) => s)
         }))
-
-
       }
 
 

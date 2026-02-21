@@ -1,7 +1,5 @@
 <template>
-
   <div class="file-upload">
-
     <el-upload
 
       ref="uploadRef"
@@ -23,57 +21,54 @@
       :disabled="disabled"
 
       :auto-upload="autoUpload"
-
     >
-
       <template v-if="drag">
-
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+        <el-icon class="el-icon--upload">
+          <upload-filled />
+        </el-icon>
 
         <div class="el-upload__text">
-
           将文件拖到此处，或<em>点击上传</em>
-
         </div>
-
       </template>
 
       <template v-else>
-
-        <el-button type="primary" :disabled="disabled">
-
+        <el-button
+          type="primary"
+          :disabled="disabled"
+        >
           <el-icon><upload /></el-icon>
 
           选择文件
-
         </el-button>
-
       </template>
 
       <template #tip>
-
         <div class="el-upload__tip">
-
           {{ tipText }}
-
         </div>
-
       </template>
-
     </el-upload>
 
 
 
     <!-- 文件列表 -->
 
-    <div v-if="fileList.length > 0" class="file-list">
-
-      <div v-for="file in fileList" :key="file.uid" class="file-item">
-
-        <el-link :href="file.url" target="_blank" type="primary">
-
+    <div
+      v-if="fileList.length > 0"
+      class="file-list"
+    >
+      <div
+        v-for="file in fileList"
+        :key="file.uid"
+        class="file-item"
+      >
+        <el-link
+          :href="file.url"
+          target="_blank"
+          type="primary"
+        >
           {{ file.name }}
-
         </el-link>
 
         <el-button
@@ -87,26 +82,19 @@
           text
 
           @click="handleDelete(file)"
-
         >
-
           删除
-
         </el-button>
-
       </div>
-
     </div>
-
   </div>
-
 </template>
 
 
 
 <script setup lang="ts">
 
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 import { ElMessage, type UploadFile, type UploadFiles, type UploadInstance } from 'element-plus'
 

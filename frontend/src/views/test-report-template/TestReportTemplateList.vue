@@ -1,42 +1,31 @@
 <template>
-
-
   <div class="test-report-template-list">
-
-
     <div class="page-header">
-
-
       <div class="header-left">
+        <h2 class="page-title">
+          报告模板管理
+        </h2>
 
 
-        <h2 class="page-title">报告模板管理</h2>
-
-
-        <p class="page-subtitle">管理测试报告的生成模�</p>
-
-
+        <p class="page-subtitle">
+          管理测试报告的生成模�
+        </p>
       </div>
 
 
       <div class="header-right">
-
-
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
-
-
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
 
 
           新建模板
-
-
         </el-button>
-
-
       </div>
-
-
     </div>
 
 
@@ -46,15 +35,19 @@
     <!-- 列表 -->
 
 
-    <el-card class="table-card" shadow="never">
-
-
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-
-
-        <el-skeleton :rows="10" animated />
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
 
 
@@ -71,161 +64,154 @@
 
 
         style="width: 100%"
-
-
       >
-
-
-        <el-table-column prop="templateCode" label="模板编码" width="160">
-
-
-           <template #default="scope">
-
-
+        <el-table-column
+          prop="templateCode"
+          label="模板编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.templateCode }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="templateName" label="模板名称" min-width="200" show-overflow-tooltip>
-
-
-          <template #default="scope">
-
-
-            <span class="name-text" @click="handleView(scope.row)">{{ scope.row.templateName }}</span>
-
-
-            <el-tag v-if="scope.row.isDefault === '1'" size="small" type="success" effect="plain" style="margin-left: 8px">默认</el-tag>
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="templateType" label="类型" width="120">
-
-
+        <el-table-column
+          prop="templateName"
+          label="模板名称"
+          min-width="200"
+          show-overflow-tooltip
+        >
           <template #default="scope">
+            <span
+              class="name-text"
+              @click="handleView(scope.row)"
+            >{{ scope.row.templateName }}</span>
 
 
-            <el-tag effect="light" round>{{ getReportTypeText(scope.row.templateType) }}</el-tag>
-
-
+            <el-tag
+              v-if="scope.row.isDefault === '1'"
+              size="small"
+              type="success"
+              effect="plain"
+              style="margin-left: 8px"
+            >
+              默认
+            </el-tag>
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="isActive" label="状�" width="100">
-
-
+        <el-table-column
+          prop="templateType"
+          label="类型"
+          width="120"
+        >
           <template #default="scope">
+            <el-tag
+              effect="light"
+              round
+            >
+              {{ getReportTypeText(scope.row.templateType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
 
 
+        <el-table-column
+          prop="isActive"
+          label="状�"
+          width="100"
+        >
+          <template #default="scope">
             <el-switch
 
 
-                v-model="scope.row.isActive"
+              v-model="scope.row.isActive"
 
 
-                active-value="1"
+              active-value="1"
 
 
-                inactive-value="0"
+              inactive-value="0"
 
 
-                @change="handleStatusChange(scope.row)"
-
-
+              @change="handleStatusChange(scope.row)"
             />
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="updateTime" label="更新时间" width="180" />
+        <el-table-column
+          prop="updateTime"
+          label="更新时间"
+          width="180"
+        />
 
 
-        <el-table-column label="操作" width="200" fixed="right">
-
-
+        <el-table-column
+          label="操作"
+          width="200"
+          fixed="right"
+        >
           <template #default="scope">
-
-
             <div class="action-buttons">
-
-
-              <el-tooltip content="编辑" placement="top">
-
-
-                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
-
-
+              <el-tooltip
+                content="编辑"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleEdit(scope.row)"
+                >
                   <el-icon><Edit /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
               
 
 
-              <el-tooltip content="设为默认" placement="top" v-if="scope.row.isDefault === '0' && scope.row.isActive === '1'">
-
-
-                <el-button circle size="small" type="warning" plain @click="handleSetDefault(scope.row)">
-
-
+              <el-tooltip
+                v-if="scope.row.isDefault === '0' && scope.row.isActive === '1'"
+                content="设为默认"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="warning"
+                  plain
+                  @click="handleSetDefault(scope.row)"
+                >
                   <el-icon><Star /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
 
 
 
-              <el-tooltip content="删除" placement="top">
-
-
-                <el-button circle size="small" type="danger" plain @click="handleDelete(scope.row)">
-
-
+              <el-tooltip
+                content="删除"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="danger"
+                  plain
+                  @click="handleDelete(scope.row)"
+                >
                   <el-icon><Delete /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
-
-
             </div>
-
-
           </template>
-
-
         </el-table-column>
-
-
       </el-table>
 
 
@@ -236,8 +222,6 @@
 
 
       <div class="pagination">
-
-
         <el-pagination
 
 
@@ -263,14 +247,8 @@
 
 
           @current-change="handlePageChange"
-
-
         />
-
-
       </div>
-
-
     </el-card>
 
 
@@ -293,11 +271,7 @@
 
 
       @close="handleDialogClose"
-
-
     >
-
-
       <el-form
 
 
@@ -311,140 +285,154 @@
 
 
         label-width="100px"
-
-
       >
-
-
-        <el-form-item label="模板名称" prop="templateName">
-
-
-          <el-input v-model="formData.templateName" placeholder="请输入模板名称" maxlength="100" show-word-limit />
-
-
+        <el-form-item
+          label="模板名称"
+          prop="templateName"
+        >
+          <el-input
+            v-model="formData.templateName"
+            placeholder="请输入模板名称"
+            maxlength="100"
+            show-word-limit
+          />
         </el-form-item>
 
 
-        <el-form-item label="模板类型" prop="templateType">
+        <el-form-item
+          label="模板类型"
+          prop="templateType"
+        >
+          <el-select
+            v-model="formData.templateType"
+            placeholder="请选择模板类型"
+            style="width: 100%"
+          >
+            <el-option
+              label="执行报告"
+              value="EXECUTION"
+            />
 
 
-          <el-select v-model="formData.templateType" placeholder="请选择模板类型" style="width: 100%">
+            <el-option
+              label="覆盖率报告"
+              value="COVERAGE"
+            />
 
 
-            <el-option label="执行报告" value="EXECUTION" />
+            <el-option
+              label="质量报告"
+              value="QUALITY"
+            />
 
 
-            <el-option label="覆盖率报告" value="COVERAGE" />
-
-
-            <el-option label="质量报告" value="QUALITY" />
-
-
-            <el-option label="风险报告" value="RISK" />
-
-
+            <el-option
+              label="风险报告"
+              value="RISK"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
-        <el-form-item label="文件格式" prop="fileFormat">
+        <el-form-item
+          label="文件格式"
+          prop="fileFormat"
+        >
+          <el-select
+            v-model="formData.fileFormat"
+            placeholder="请选择文件格式"
+            style="width: 100%"
+          >
+            <el-option
+              label="Word"
+              value="WORD"
+            />
 
 
-             <el-select v-model="formData.fileFormat" placeholder="请选择文件格式" style="width: 100%">
+            <el-option
+              label="PDF"
+              value="PDF"
+            />
 
 
-                <el-option label="Word" value="WORD" />
-
-
-                <el-option label="PDF" value="PDF" />
-
-
-                <el-option label="Excel" value="EXCEL" />
-
-
-             </el-select>
-
-
+            <el-option
+              label="Excel"
+              value="EXCEL"
+            />
+          </el-select>
         </el-form-item>
 
 
-        <el-form-item label="模板描述" prop="templateDescription">
-
-
-          <el-input v-model="formData.templateDescription" type="textarea" :rows="2" placeholder="请输入模板描述" />
-
-
+        <el-form-item
+          label="模板描述"
+          prop="templateDescription"
+        >
+          <el-input
+            v-model="formData.templateDescription"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入模板描述"
+          />
         </el-form-item>
 
 
-        <el-form-item label="模板内容" prop="templateContent">
+        <el-form-item
+          label="模板内容"
+          prop="templateContent"
+        >
+          <el-input 
 
 
-           <el-input 
+            v-model="formData.templateContent" 
 
 
-               v-model="formData.templateContent" 
+            type="textarea" 
 
 
-               type="textarea" 
+            :rows="10" 
 
 
-               :rows="10" 
+            placeholder="请输入模板内容（JSON格式）"
 
 
-               placeholder="请输入模板内容（JSON格式）"
-
-
-               style="font-family: monospace;"
-
-
-           />
-
-
+            style="font-family: monospace;"
+          />
         </el-form-item>
 
 
         <el-form-item label="默认模板">
-
-
-            <el-switch v-model="formData.isDefault" active-value="1" inactive-value="0" />
-
-
+          <el-switch
+            v-model="formData.isDefault"
+            active-value="1"
+            inactive-value="0"
+          />
         </el-form-item>
 
 
-         <el-form-item label="启用状态">
-
-
-            <el-switch v-model="formData.isActive" active-value="1" inactive-value="0" />
-
-
+        <el-form-item label="启用状态">
+          <el-switch
+            v-model="formData.isActive"
+            active-value="1"
+            inactive-value="0"
+          />
         </el-form-item>
-
-
       </el-form>
 
 
       <template #footer>
-
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-          确定
-
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
-
-
     </el-dialog>
 
 
@@ -464,59 +452,60 @@
 
 
       width="800px"
-
-
     >
-
-
-      <el-descriptions :column="2" border>
-
-
-        <el-descriptions-item label="模板编码">{{ viewData.templateCode }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="模板名称">{{ viewData.templateName }}</el-descriptions-item>
-
-
-         <el-descriptions-item label="模板类型">{{ getReportTypeText(viewData.templateType) }}</el-descriptions-item>
-
-
-         <el-descriptions-item label="文件格式">{{ viewData.fileFormat }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="状态">{{ viewData.isActive === '1' ? '启用' : '禁用' }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="默认模板">{{ viewData.isDefault === '1' ? '是' : '否' }}</el-descriptions-item>
-
-
-         <el-descriptions-item label="模板描述" :span="2">{{ viewData.templateDescription || '-' }}</el-descriptions-item>
-
-
-         <el-descriptions-item label="模板内容" :span="2">
-
-
-             <div class="json-content">
-
-
-                {{ viewData.templateContent }}
-
-
-             </div>
-
-
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="模板编码">
+          {{ viewData.templateCode }}
         </el-descriptions-item>
 
 
+        <el-descriptions-item label="模板名称">
+          {{ viewData.templateName }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="模板类型">
+          {{ getReportTypeText(viewData.templateType) }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="文件格式">
+          {{ viewData.fileFormat }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="状态">
+          {{ viewData.isActive === '1' ? '启用' : '禁用' }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="默认模板">
+          {{ viewData.isDefault === '1' ? '是' : '否' }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item
+          label="模板描述"
+          :span="2"
+        >
+          {{ viewData.templateDescription || '-' }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item
+          label="模板内容"
+          :span="2"
+        >
+          <div class="json-content">
+            {{ viewData.templateContent }}
+          </div>
+        </el-descriptions-item>
       </el-descriptions>
-
-
     </el-dialog>
-
-
   </div>
-
-
 </template>
 
 
@@ -569,7 +558,7 @@ const isEdit = ref(false)
 const formRef = ref<FormInstance>()
 
 
-const formData = reactive<Partial<TestReportTemplateRequestDTO>>({
+const formData = reactive<TestReportTemplateRequestDTO>({
   templateName: '',
   templateType: 'EXECUTION',
   templateContent: '{}',

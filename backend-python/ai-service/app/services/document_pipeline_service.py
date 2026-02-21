@@ -9,6 +9,7 @@ import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
+import json
 
 from app.services.document_parser_service import DocumentParserService
 from app.services.text_chunking_service import TextChunkingService, ChunkingStrategy
@@ -248,6 +249,7 @@ class DocumentPipelineService:
                 "modified": metadata.get("modified_time", ""),
                 "structure": metadata.get("structure", {})
             }
+            metadata_json = json.dumps(extra_metadata, ensure_ascii=False, default=str)
             
             # 插入文档
             insert_sql = """
@@ -258,7 +260,7 @@ class DocumentPipelineService:
             VALUES 
             (:doc_code, :kb_id, :doc_name, :doc_type, :doc_category, :doc_content,
              :file_size, :file_path, :language, :encoding, :page_count, :slide_count,
-             :row_count, :column_count, :table_count, :metadata::jsonb)
+             :row_count, :column_count, :table_count, CAST(:metadata AS jsonb))
             RETURNING id
             """
             
@@ -280,7 +282,7 @@ class DocumentPipelineService:
                     "row_count": row_count,
                     "column_count": column_count,
                     "table_count": table_count,
-                    "metadata": str(extra_metadata).replace("'", '"')
+                    "metadata": metadata_json
                 }
             )
             
@@ -313,6 +315,7 @@ class DocumentPipelineService:
                 has_overlap = chunk.get("metadata", {}).get("has_overlap", False)
                 embedding = chunk.get("embedding")
                 metadata = chunk.get("metadata", {})
+                metadata_json = json.dumps(metadata, ensure_ascii=False, default=str)
                 
                 # 转换向量格式
                 embedding_list = str(embedding) if embedding else None
@@ -325,7 +328,7 @@ class DocumentPipelineService:
                 VALUES 
                 (:doc_id, :chunk_id, :chunk_index, :chunk_content, :chunk_length,
                  :chunk_type, :chunk_strategy, :chunk_start, :chunk_end, :has_overlap,
-                 :embedding::vector, :metadata::jsonb)
+                 CAST(:embedding AS vector), CAST(:metadata AS jsonb))
                 ON CONFLICT (chunk_id) DO NOTHING
                 """
                 
@@ -343,7 +346,7 @@ class DocumentPipelineService:
                         "chunk_end": chunk_end,
                         "has_overlap": '1' if has_overlap else '0',
                         "embedding": embedding_list,
-                        "metadata": str(metadata).replace("'", '"')
+                        "metadata": metadata_json
                     }
                 )
                 

@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 
 export interface QualityScore {
   totalScore: number
@@ -6,6 +7,8 @@ export interface QualityScore {
   standardizationScore: number
   executabilityScore: number
   qualityLevel: string
+  details: QualityScoreDetails
+  suggestions?: string[]
 }
 
 export interface CompletenessScore {
@@ -23,19 +26,32 @@ export interface StandardizationScore {
   contentScore: number
 }
 
+export interface ExecutabilityScore {
+  totalScore: number
+  stepClarityScore: number
+  dataPreparationScore: number
+  environmentDependencyScore: number
+}
+
+export interface QualityScoreDetails {
+  completeness: CompletenessScore
+  standardization: StandardizationScore
+  executability: ExecutabilityScore
+}
+
 export const testCaseQualityApi = {
   // Assess Quality
   assessQuality(caseId: number) {
-    return request.get<any, QualityScore>(`/v1/test-case-quality/assess/${caseId}`)
+    return request.get<any, ApiResult<QualityScore>>(`/v1/test-case-quality/assess/${caseId}`)
   },
 
   // Check Completeness
   checkCompleteness(caseId: number) {
-    return request.get<any, CompletenessScore>(`/v1/test-case-quality/completeness/${caseId}`)
+    return request.get<any, ApiResult<CompletenessScore>>(`/v1/test-case-quality/completeness/${caseId}`)
   },
 
   // Check Standardization
   checkStandardization(caseId: number) {
-    return request.get<any, StandardizationScore>(`/v1/test-case-quality/standardization/${caseId}`)
+    return request.get<any, ApiResult<StandardizationScore>>(`/v1/test-case-quality/standardization/${caseId}`)
   }
 }

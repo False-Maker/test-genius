@@ -4,48 +4,135 @@
       <template #header>
         <div class="card-header">
           <span>Agent 管理</span>
-          <el-button type="primary" @click="handleCreate">创建 Agent</el-button>
+          <el-button
+            type="primary"
+            @click="handleCreate"
+          >
+            创建 Agent
+          </el-button>
         </div>
       </template>
 
       <!-- 搜索栏 -->
-      <el-form :inline="true" :model="searchForm" class="search-form">
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="Agent名称">
-          <el-input v-model="searchForm.agentName" placeholder="请输入Agent名称" clearable />
+          <el-input
+            v-model="searchForm.agentName"
+            placeholder="请输入Agent名称"
+            clearable
+          />
         </el-form-item>
         <el-form-item label="Agent类型">
-          <el-select v-model="searchForm.agentType" placeholder="请选择类型" clearable>
-            <el-option label="测试设计助手" value="TEST_DESIGN_ASSISTANT" />
-            <el-option label="用例优化" value="CASE_OPTIMIZATION" />
-            <el-option label="自定义" value="CUSTOM" />
+          <el-select
+            v-model="searchForm.agentType"
+            placeholder="请选择类型"
+            clearable
+          >
+            <el-option
+              label="测试设计助手"
+              value="TEST_DESIGN_ASSISTANT"
+            />
+            <el-option
+              label="用例优化"
+              value="CASE_OPTIMIZATION"
+            />
+            <el-option
+              label="自定义"
+              value="CUSTOM"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.isActive" placeholder="请选择状态" clearable>
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
+          <el-select
+            v-model="searchForm.isActive"
+            placeholder="请选择状态"
+            clearable
+          >
+            <el-option
+              label="启用"
+              value="1"
+            />
+            <el-option
+              label="禁用"
+              value="0"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            搜索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
 
       <!-- Agent列表 -->
-      <el-table :data="agentList" v-loading="loading" stripe>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="agentCode" label="编码" width="180" />
-        <el-table-column prop="agentName" label="名称" width="200" />
-        <el-table-column prop="agentType" label="类型" width="180">
+      <el-table
+        v-loading="loading"
+        :data="agentList"
+        stripe
+      >
+        <el-table-column
+          prop="id"
+          label="ID"
+          width="80"
+        />
+        <el-table-column
+          prop="agentCode"
+          label="编码"
+          width="180"
+        />
+        <el-table-column
+          prop="agentName"
+          label="名称"
+          width="200"
+        />
+        <el-table-column
+          prop="agentType"
+          label="类型"
+          width="180"
+        >
           <template #default="{ row }">
-            <el-tag v-if="row.agentType === 'TEST_DESIGN_ASSISTANT'" type="primary">测试设计助手</el-tag>
-            <el-tag v-else-if="row.agentType === 'CASE_OPTIMIZATION'" type="success">用例优化</el-tag>
-            <el-tag v-else type="info">自定义</el-tag>
+            <el-tag
+              v-if="row.agentType === 'TEST_DESIGN_ASSISTANT'"
+              type="primary"
+            >
+              测试设计助手
+            </el-tag>
+            <el-tag
+              v-else-if="row.agentType === 'CASE_OPTIMIZATION'"
+              type="success"
+            >
+              用例优化
+            </el-tag>
+            <el-tag
+              v-else
+              type="info"
+            >
+              自定义
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="agentDescription" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="isActive" label="状态" width="100">
+        <el-table-column
+          prop="agentDescription"
+          label="描述"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="isActive"
+          label="状态"
+          width="100"
+        >
           <template #default="{ row }">
             <el-switch
               v-model="row.isActive"
@@ -55,13 +142,43 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="creatorName" label="创建人" width="120" />
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column
+          prop="creatorName"
+          label="创建人"
+          width="120"
+        />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="240"
+          fixed="right"
+        >
           <template #default="{ row }">
-            <el-button link type="primary" @click="handleChat(row)">对话</el-button>
-            <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button
+              link
+              type="primary"
+              @click="handleChat(row)"
+            >
+              对话
+            </el-button>
+            <el-button
+              link
+              type="primary"
+              @click="handleEdit(row)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              link
+              type="danger"
+              @click="handleDelete(row)"
+            >
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -74,21 +191,59 @@
       width="800px"
       @close="handleDialogClose"
     >
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="Agent编码" prop="agentCode" v-if="!isEdit">
-          <el-input v-model="form.agentCode" placeholder="请输入Agent编码（自动生成）" disabled />
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-width="120px"
+      >
+        <el-form-item
+          v-if="!isEdit"
+          label="Agent编码"
+          prop="agentCode"
+        >
+          <el-input
+            v-model="form.agentCode"
+            placeholder="请输入Agent编码（自动生成）"
+            disabled
+          />
         </el-form-item>
-        <el-form-item label="Agent名称" prop="agentName">
-          <el-input v-model="form.agentName" placeholder="请输入Agent名称" />
+        <el-form-item
+          label="Agent名称"
+          prop="agentName"
+        >
+          <el-input
+            v-model="form.agentName"
+            placeholder="请输入Agent名称"
+          />
         </el-form-item>
-        <el-form-item label="Agent类型" prop="agentType">
-          <el-select v-model="form.agentType" placeholder="请选择Agent类型" style="width: 100%">
-            <el-option label="测试设计助手" value="TEST_DESIGN_ASSISTANT" />
-            <el-option label="用例优化" value="CASE_OPTIMIZATION" />
-            <el-option label="自定义" value="CUSTOM" />
+        <el-form-item
+          label="Agent类型"
+          prop="agentType"
+        >
+          <el-select
+            v-model="form.agentType"
+            placeholder="请选择Agent类型"
+            style="width: 100%"
+          >
+            <el-option
+              label="测试设计助手"
+              value="TEST_DESIGN_ASSISTANT"
+            />
+            <el-option
+              label="用例优化"
+              value="CASE_OPTIMIZATION"
+            />
+            <el-option
+              label="自定义"
+              value="CUSTOM"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="描述" prop="agentDescription">
+        <el-form-item
+          label="描述"
+          prop="agentDescription"
+        >
           <el-input
             v-model="form.agentDescription"
             type="textarea"
@@ -96,7 +251,10 @@
             placeholder="请输入Agent描述"
           />
         </el-form-item>
-        <el-form-item label="系统提示词" prop="systemPrompt">
+        <el-form-item
+          label="系统提示词"
+          prop="systemPrompt"
+        >
           <el-input
             v-model="form.systemPrompt"
             type="textarea"
@@ -104,19 +262,50 @@
             placeholder="请输入系统提示词"
           />
         </el-form-item>
-        <el-form-item label="最大迭代次数" prop="maxIterations">
-          <el-input-number v-model="form.maxIterations" :min="1" :max="50" />
+        <el-form-item
+          label="最大迭代次数"
+          prop="maxIterations"
+        >
+          <el-input-number
+            v-model="form.maxIterations"
+            :min="1"
+            :max="50"
+          />
         </el-form-item>
-        <el-form-item label="最大Token数" prop="maxTokens">
-          <el-input-number v-model="form.maxTokens" :min="100" :max="10000" :step="100" />
+        <el-form-item
+          label="最大Token数"
+          prop="maxTokens"
+        >
+          <el-input-number
+            v-model="form.maxTokens"
+            :min="100"
+            :max="10000"
+            :step="100"
+          />
         </el-form-item>
-        <el-form-item label="温度参数" prop="temperature">
-          <el-slider v-model="form.temperature" :min="0" :max="1" :step="0.1" show-input />
+        <el-form-item
+          label="温度参数"
+          prop="temperature"
+        >
+          <el-slider
+            v-model="form.temperature"
+            :min="0"
+            :max="1"
+            :step="0.1"
+            show-input
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
     </el-dialog>
   </div>

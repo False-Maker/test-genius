@@ -4,7 +4,12 @@
       <template #header>
         <div class="card-header">
           <span>批量测试</span>
-          <el-button size="small" type="primary" @click="handleBatchTest" :loading="loading">
+          <el-button
+            size="small"
+            type="primary"
+            :loading="loading"
+            @click="handleBatchTest"
+          >
             开始批量测试
           </el-button>
         </div>
@@ -12,7 +17,11 @@
 
       <!-- 配置区域 -->
       <div class="config-section">
-        <el-form :model="form" label-width="120px" size="default">
+        <el-form
+          :model="form"
+          label-width="120px"
+          size="default"
+        >
           <el-form-item label="测试用例">
             <el-input
               v-model="form.testCases"
@@ -20,7 +29,9 @@
               :rows="8"
               placeholder="每行一个测试用例（提示词），支持多行输入"
             />
-            <div class="form-tip">每行一个测试用例，共{{ testCaseCount }}个用例</div>
+            <div class="form-tip">
+              每行一个测试用例，共{{ testCaseCount }}个用例
+            </div>
           </el-form-item>
 
           <el-form-item label="选择模型">
@@ -33,7 +44,9 @@
                 {{ model.modelName }}
               </el-checkbox>
             </el-checkbox-group>
-            <div class="form-tip">至少选择一个模型进行测试</div>
+            <div class="form-tip">
+              至少选择一个模型进行测试
+            </div>
           </el-form-item>
 
           <el-form-item label="高级参数">
@@ -64,7 +77,10 @@
       </div>
 
       <!-- 测试结果 -->
-      <div v-if="testResults.length > 0" class="results-section">
+      <div
+        v-if="testResults.length > 0"
+        class="results-section"
+      >
         <el-divider>测试结果统计</el-divider>
 
         <!-- 统计信息 -->
@@ -72,26 +88,42 @@
           <el-row :gutter="20">
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">总用例数</div>
-                <div class="stat-value">{{ totalCases }}</div>
+                <div class="stat-label">
+                  总用例数
+                </div>
+                <div class="stat-value">
+                  {{ totalCases }}
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">成功数</div>
-                <div class="stat-value success">{{ successCount }}</div>
+                <div class="stat-label">
+                  成功数
+                </div>
+                <div class="stat-value success">
+                  {{ successCount }}
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">失败数</div>
-                <div class="stat-value danger">{{ failCount }}</div>
+                <div class="stat-label">
+                  失败数
+                </div>
+                <div class="stat-value danger">
+                  {{ failCount }}
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">成功率</div>
-                <div class="stat-value">{{ successRate }}%</div>
+                <div class="stat-label">
+                  成功率
+                </div>
+                <div class="stat-value">
+                  {{ successRate }}%
+                </div>
               </div>
             </el-col>
           </el-row>
@@ -99,33 +131,70 @@
 
         <!-- 模型成功率对比图表 -->
         <div class="chart-section">
-          <div ref="chartContainer" style="width: 100%; height: 300px"></div>
+          <div
+            ref="chartContainer"
+            style="width: 100%; height: 300px"
+          />
         </div>
 
         <!-- 详细结果表格 -->
-        <el-table :data="testResults" stripe style="width: 100%; margin-top: 20px" max-height="400">
-          <el-table-column prop="testCase" label="测试用例" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="model_code" label="模型" width="150" />
-          <el-table-column prop="status" label="状态" width="100">
+        <el-table
+          :data="testResults"
+          stripe
+          style="width: 100%; margin-top: 20px"
+          max-height="400"
+        >
+          <el-table-column
+            prop="testCase"
+            label="测试用例"
+            min-width="200"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="model_code"
+            label="模型"
+            width="150"
+          />
+          <el-table-column
+            prop="status"
+            label="状态"
+            width="100"
+          >
             <template #default="scope">
               <el-tag :type="scope.row.error ? 'danger' : 'success'">
                 {{ scope.row.error ? '失败' : '成功' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="response_time" label="响应时间(ms)" width="120">
+          <el-table-column
+            prop="response_time"
+            label="响应时间(ms)"
+            width="120"
+          >
             <template #default="scope">
               {{ scope.row.response_time || '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="tokens_used" label="Token数" width="120">
+          <el-table-column
+            prop="tokens_used"
+            label="Token数"
+            width="120"
+          >
             <template #default="scope">
               {{ scope.row.tokens_used || '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="error" label="错误信息" min-width="200" show-overflow-tooltip>
+          <el-table-column
+            prop="error"
+            label="错误信息"
+            min-width="200"
+            show-overflow-tooltip
+          >
             <template #default="scope">
-              <span v-if="scope.row.error" class="error-message">{{ scope.row.error }}</span>
+              <span
+                v-if="scope.row.error"
+                class="error-message"
+              >{{ scope.row.error }}</span>
               <span v-else>-</span>
             </template>
           </el-table-column>

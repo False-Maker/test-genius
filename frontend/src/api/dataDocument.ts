@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 
 // 等价类参数定义
 export interface EquivalenceParameter {
@@ -60,40 +61,39 @@ export interface OrthogonalTableResponse {
 export const dataDocumentApi = {
   // 生成等价类表
   generateEquivalenceTable(data: EquivalenceTableRequest) {
-    return request.post<EquivalenceTableResponse>('/v1/data-documents/equivalence-tables', data)
+    return request.post<any, ApiResult<EquivalenceTableResponse>>('/v1/data-documents/equivalence-tables', data)
   },
 
   // 生成正交表
   generateOrthogonalTable(data: OrthogonalTableRequest) {
-    return request.post<OrthogonalTableResponse>('/v1/data-documents/orthogonal-tables', data)
+    return request.post<any, ApiResult<OrthogonalTableResponse>>('/v1/data-documents/orthogonal-tables', data)
   },
 
   // 导出等价类表到Excel
   exportEquivalenceTableToExcel(data: EquivalenceTableResponse) {
-    return request.post('/v1/data-documents/equivalence-tables/export/excel', data, {
+    return request.post<any, Blob>('/v1/data-documents/equivalence-tables/export/excel', data, {
       responseType: 'blob'
     })
   },
 
   // 导出等价类表到Word
   exportEquivalenceTableToWord(data: EquivalenceTableResponse) {
-    return request.post('/v1/data-documents/equivalence-tables/export/word', data, {
+    return request.post<any, Blob>('/v1/data-documents/equivalence-tables/export/word', data, {
       responseType: 'blob'
     })
   },
 
   // 导出正交表到Excel
   exportOrthogonalTableToExcel(data: OrthogonalTableResponse) {
-    return request.post('/v1/data-documents/orthogonal-tables/export/excel', data, {
+    return request.post<any, Blob>('/v1/data-documents/orthogonal-tables/export/excel', data, {
       responseType: 'blob'
     })
   },
 
   // 导出正交表到Word
   exportOrthogonalTableToWord(data: OrthogonalTableResponse) {
-    return request.post('/v1/data-documents/orthogonal-tables/export/word', data, {
+    return request.post<any, Blob>('/v1/data-documents/orthogonal-tables/export/word', data, {
       responseType: 'blob'
     })
   }
 }
-

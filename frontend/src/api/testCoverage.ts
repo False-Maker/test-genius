@@ -1,5 +1,5 @@
 import request from './request'
-import type { PageResult } from './testReport'
+import type { ApiResult, PageResult } from './types'
 
 export interface TestCoverageAnalysisRequestDTO {
     analysisName: string
@@ -53,7 +53,7 @@ export const testCoverageApi = {
 
     // Get analysis list
     getAnalysisList(page: number = 0, size: number = 10) {
-        return request.get<any, PageResult<TestCoverageAnalysisResponseDTO>>('/v1/test-coverage', {
+        return request.get<any, ApiResult<PageResult<TestCoverageAnalysisResponseDTO>>>('/v1/test-coverage', {
             params: { page, size }
         })
     },

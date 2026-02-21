@@ -5,33 +5,93 @@
         <div class="card-header">
           <span>版本历史</span>
           <div>
-            <el-button size="small" type="warning" @click="handleShowAbTest">A/B测试</el-button>
-            <el-button size="small" type="primary" @click="handleCreateVersion">创建新版本</el-button>
+            <el-button
+              size="small"
+              type="warning"
+              @click="handleShowAbTest"
+            >
+              A/B测试
+            </el-button>
+            <el-button
+              size="small"
+              type="primary"
+              @click="handleCreateVersion"
+            >
+              创建新版本
+            </el-button>
           </div>
         </div>
       </template>
 
       <!-- 版本列表 -->
-      <el-table :data="versions" stripe style="width: 100%">
-        <el-table-column prop="versionNumber" label="版本号" width="100" />
-        <el-table-column prop="versionName" label="版本名称" width="200" />
-        <el-table-column prop="versionDescription" label="版本描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="changeLog" label="变更日志" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="isCurrent" label="状态" width="100">
+      <el-table
+        :data="versions"
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="versionNumber"
+          label="版本号"
+          width="100"
+        />
+        <el-table-column
+          prop="versionName"
+          label="版本名称"
+          width="200"
+        />
+        <el-table-column
+          prop="versionDescription"
+          label="版本描述"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="changeLog"
+          label="变更日志"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="isCurrent"
+          label="状态"
+          width="100"
+        >
           <template #default="scope">
             <el-tag :type="scope.row.isCurrent === '1' ? 'success' : 'info'">
               {{ scope.row.isCurrent === '1' ? '当前版本' : '历史版本' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createdByName" label="创建人" width="120" />
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column
+          prop="createdByName"
+          label="创建人"
+          width="120"
+        />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="280"
+          fixed="right"
+        >
           <template #default="scope">
-            <el-button size="small" link type="primary" @click="handleViewVersion(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleViewVersion(scope.row)"
+            >
               查看
             </el-button>
-            <el-button size="small" link type="warning" @click="handleCompareVersion(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="warning"
+              @click="handleCompareVersion(scope.row)"
+            >
               对比
             </el-button>
             <el-button
@@ -58,30 +118,65 @@
     </el-card>
 
     <!-- 版本详情对话框 -->
-    <el-dialog v-model="viewDialogVisible" title="版本详情" width="1000px">
-      <el-descriptions :column="2" border v-if="currentVersion">
-        <el-descriptions-item label="版本号">{{ currentVersion.versionNumber }}</el-descriptions-item>
-        <el-descriptions-item label="版本名称">{{ currentVersion.versionName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="版本描述" :span="2">
+    <el-dialog
+      v-model="viewDialogVisible"
+      title="版本详情"
+      width="1000px"
+    >
+      <el-descriptions
+        v-if="currentVersion"
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="版本号">
+          {{ currentVersion.versionNumber }}
+        </el-descriptions-item>
+        <el-descriptions-item label="版本名称">
+          {{ currentVersion.versionName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="版本描述"
+          :span="2"
+        >
           {{ currentVersion.versionDescription || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item label="变更日志" :span="2">
+        <el-descriptions-item
+          label="变更日志"
+          :span="2"
+        >
           {{ currentVersion.changeLog || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item label="创建人">{{ currentVersion.createdByName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentVersion.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="模板内容" :span="2">
+        <el-descriptions-item label="创建人">
+          {{ currentVersion.createdByName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ currentVersion.createTime }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="模板内容"
+          :span="2"
+        >
           <pre class="version-content">{{ currentVersion.templateContent }}</pre>
         </el-descriptions-item>
-        <el-descriptions-item label="模板变量" :span="2">
+        <el-descriptions-item
+          label="模板变量"
+          :span="2"
+        >
           <pre class="version-content">{{ currentVersion.templateVariables || '-' }}</pre>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
 
     <!-- 版本对比对话框 -->
-    <el-dialog v-model="compareDialogVisible" title="版本对比" width="1200px">
-      <div v-if="compareResult" class="version-compare">
+    <el-dialog
+      v-model="compareDialogVisible"
+      title="版本对比"
+      width="1200px"
+    >
+      <div
+        v-if="compareResult"
+        class="version-compare"
+      >
         <el-row :gutter="20">
           <el-col :span="12">
             <el-card>
@@ -138,10 +233,22 @@
     </el-dialog>
 
     <!-- 创建版本对话框 -->
-    <el-dialog v-model="createDialogVisible" title="创建新版本" width="800px">
-      <el-form ref="createFormRef" :model="createForm" :rules="createFormRules" label-width="120px">
+    <el-dialog
+      v-model="createDialogVisible"
+      title="创建新版本"
+      width="800px"
+    >
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createFormRules"
+        label-width="120px"
+      >
         <el-form-item label="版本名称">
-          <el-input v-model="createForm.versionName" placeholder="请输入版本名称" />
+          <el-input
+            v-model="createForm.versionName"
+            placeholder="请输入版本名称"
+          />
         </el-form-item>
         <el-form-item label="版本描述">
           <el-input
@@ -172,19 +279,29 @@
             v-model="createForm.templateVariables"
             type="textarea"
             :rows="4"
-            placeholder='请输入JSON格式的变量定义，例如：{"变量名": "变量说明"}'
+            placeholder="请输入JSON格式的变量定义，例如：{&quot;变量名&quot;: &quot;变量说明&quot;}"
           />
         </el-form-item>
         <el-form-item label="设为当前版本">
           <el-radio-group v-model="createForm.isCurrent">
-            <el-radio label="1">是</el-radio>
-            <el-radio label="0">否</el-radio>
+            <el-radio label="1">
+              是
+            </el-radio>
+            <el-radio label="0">
+              否
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="createLoading" @click="handleSubmitCreate">
+        <el-button @click="createDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="createLoading"
+          @click="handleSubmitCreate"
+        >
           确定
         </el-button>
       </template>
@@ -226,6 +343,7 @@ const versions = ref<PromptTemplateVersion[]>([])
 const viewDialogVisible = ref(false)
 const compareDialogVisible = ref(false)
 const createDialogVisible = ref(false)
+const abTestDialogVisible = ref(false)
 const currentVersion = ref<PromptTemplateVersion | null>(null)
 const compareResult = ref<VersionCompareResult | null>(null)
 const compareVersion1 = ref<PromptTemplateVersion | null>(null)

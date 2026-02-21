@@ -2,11 +2,20 @@
   <div class="test-coverage-analysis">
     <div class="page-header">
       <div class="header-left">
-        <h2 class="page-title">测试覆盖率分析管理</h2>
-        <p class="page-subtitle">分析测试用例对需求ID、功能、场景和代码的覆盖率情况</p>
+        <h2 class="page-title">
+          测试覆盖率分析管理
+        </h2>
+        <p class="page-subtitle">
+          分析测试用例对需求ID、功能、场景和代码的覆盖率情况
+        </p>
       </div>
       <div class="header-right">
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
           新建分析
         </el-button>
@@ -14,9 +23,19 @@
     </div>
 
     <!-- 列表 -->
-    <el-card class="table-card" shadow="never">
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-        <el-skeleton :rows="10" animated />
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
       <el-table
         v-else
@@ -24,35 +43,77 @@
         
         style="width: 100%"
       >
-        <el-table-column prop="analysisCode" label="分析编码" width="160">
-           <template #default="scope">
+        <el-table-column
+          prop="analysisCode"
+          label="分析编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.analysisCode }}</span>
-           </template>
-        </el-table-column>
-        <el-table-column prop="analysisName" label="分析名称" min-width="200" show-overflow-tooltip>
-          <template #default="scope">
-            <span class="name-text" @click="handleView(scope.row)">{{ scope.row.analysisName }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="coverageType" label="覆盖率类型" width="120">
+        <el-table-column
+          prop="analysisName"
+          label="分析名称"
+          min-width="200"
+          show-overflow-tooltip
+        >
           <template #default="scope">
-            <el-tag effect="light" round>{{ getCoverageTypeText(scope.row.coverageType) }}</el-tag>
+            <span
+              class="name-text"
+              @click="handleView(scope.row)"
+            >{{ scope.row.analysisName }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="coverageRate" label="覆盖率" width="200">
-           <template #default="scope">
-               <el-progress 
-                 :percentage="Math.round((scope.row.coverageRate || 0) * 100)" 
-                 :status="getProgressStatus(scope.row.coverageRate)"
-               />
-           </template>
+        <el-table-column
+          prop="coverageType"
+          label="覆盖率类型"
+          width="120"
+        >
+          <template #default="scope">
+            <el-tag
+              effect="light"
+              round
+            >
+              {{ getCoverageTypeText(scope.row.coverageType) }}
+            </el-tag>
+          </template>
         </el-table-column>
-        <el-table-column prop="analysisTime" label="分析时间" width="180" />
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column
+          prop="coverageRate"
+          label="覆盖率"
+          width="200"
+        >
+          <template #default="scope">
+            <el-progress 
+              :percentage="Math.round((scope.row.coverageRate || 0) * 100)" 
+              :status="getProgressStatus(scope.row.coverageRate)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="analysisTime"
+          label="分析时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="150"
+          fixed="right"
+        >
           <template #default="scope">
             <div class="action-buttons">
-              <el-tooltip content="查看详情" placement="top">
-                <el-button circle size="small" type="primary" plain @click="handleView(scope.row)">
+              <el-tooltip
+                content="查看详情"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleView(scope.row)"
+                >
                   <el-icon><View /></el-icon>
                 </el-button>
               </el-tooltip>
@@ -89,32 +150,77 @@
         :rules="formRules"
         label-width="100px"
       >
-        <el-form-item label="分析名称" prop="analysisName">
-          <el-input v-model="formData.analysisName" placeholder="请输入分析名称" maxlength="100" show-word-limit />
+        <el-form-item
+          label="分析名称"
+          prop="analysisName"
+        >
+          <el-input
+            v-model="formData.analysisName"
+            placeholder="请输入分析名称"
+            maxlength="100"
+            show-word-limit
+          />
         </el-form-item>
-        <el-form-item label="覆盖率类型" prop="coverageType">
-          <el-select v-model="formData.coverageType" placeholder="请选择覆盖率类型" style="width: 100%">
-            <el-option label="需求ID覆盖率" value="REQUIREMENT" />
-            <el-option label="功能覆盖率" value="FUNCTION" />
-            <el-option label="场景覆盖率" value="SCENARIO" />
-            <el-option label="代码覆盖率" value="CODE" />
+        <el-form-item
+          label="覆盖率类型"
+          prop="coverageType"
+        >
+          <el-select
+            v-model="formData.coverageType"
+            placeholder="请选择覆盖率类型"
+            style="width: 100%"
+          >
+            <el-option
+              label="需求ID覆盖率"
+              value="REQUIREMENT"
+            />
+            <el-option
+              label="功能覆盖率"
+              value="FUNCTION"
+            />
+            <el-option
+              label="场景覆盖率"
+              value="SCENARIO"
+            />
+            <el-option
+              label="代码覆盖率"
+              value="CODE"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="关联需求" prop="requirementId">
-           <el-input-number v-model="formData.requirementId" placeholder="需求ID" style="width: 100%" :min="1" />
+        <el-form-item
+          label="关联需求"
+          prop="requirementId"
+        >
+          <el-input-number
+            v-model="formData.requirementId"
+            placeholder="需求ID"
+            style="width: 100%"
+            :min="1"
+          />
         </el-form-item>
-        <el-form-item v-if="formData.coverageType === 'CODE'" label="覆盖率数据" prop="coverageData">
-            <el-input 
-               v-model="coverageDataInput" 
-               type="textarea" 
-               :rows="5" 
-               placeholder="请输入代码覆盖率数据（JSON格式）"
-            />
+        <el-form-item
+          v-if="formData.coverageType === 'CODE'"
+          label="覆盖率数据"
+          prop="coverageData"
+        >
+          <el-input 
+            v-model="coverageDataInput" 
+            type="textarea" 
+            :rows="5" 
+            placeholder="请输入代码覆盖率数据（JSON格式）"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
           开始分析
         </el-button>
       </template>
@@ -126,23 +232,46 @@
       title="分析详情"
       width="900px"
     >
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="分析编码">{{ viewData.analysisCode }}</el-descriptions-item>
-        <el-descriptions-item label="分析名称">{{ viewData.analysisName }}</el-descriptions-item>
-        <el-descriptions-item label="覆盖率类型">{{ getCoverageTypeText(viewData.coverageType) }}</el-descriptions-item>
-        <el-descriptions-item label="覆盖率">{{ (viewData.coverageRate ? (viewData.coverageRate * 100).toFixed(2) : 0) }}%</el-descriptions-item>
-        <el-descriptions-item label="总项数">{{ viewData.totalItems }}</el-descriptions-item>
-        <el-descriptions-item label="已覆盖项">{{ viewData.coveredItems }}</el-descriptions-item>
-        <el-descriptions-item label="分析时间">{{ viewData.analysisTime }}</el-descriptions-item>
-        <el-descriptions-item label="未覆盖项" :span="2">
-             <div class="json-content">
-                {{ viewData.uncoveredItems || '-' }}
-             </div>
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="分析编码">
+          {{ viewData.analysisCode }}
         </el-descriptions-item>
-        <el-descriptions-item label="详细数据" :span="2">
-             <div class="json-content">
-                {{ viewData.coverageDetails || '-'}}
-             </div>
+        <el-descriptions-item label="分析名称">
+          {{ viewData.analysisName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="覆盖率类型">
+          {{ getCoverageTypeText(viewData.coverageType) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="覆盖率">
+          {{ (viewData.coverageRate ? (viewData.coverageRate * 100).toFixed(2) : 0) }}%
+        </el-descriptions-item>
+        <el-descriptions-item label="总项数">
+          {{ viewData.totalItems }}
+        </el-descriptions-item>
+        <el-descriptions-item label="已覆盖项">
+          {{ viewData.coveredItems }}
+        </el-descriptions-item>
+        <el-descriptions-item label="分析时间">
+          {{ viewData.analysisTime }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="未覆盖项"
+          :span="2"
+        >
+          <div class="json-content">
+            {{ viewData.uncoveredItems || '-' }}
+          </div>
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="详细数据"
+          :span="2"
+        >
+          <div class="json-content">
+            {{ viewData.coverageDetails || '-' }}
+          </div>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>

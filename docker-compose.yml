@@ -50,6 +50,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       APP_AI_SERVICE_URL: http://backend-python:8000
+      # 与 volumes 挂载点一致，确保上传与需求分析读取同一目录
+      APP_UPLOAD_BASE_PATH: /app/uploads
     volumes:
       - uploads_data:/app/uploads
     depends_on:
@@ -80,6 +82,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       APP_AI_SERVICE_URL: http://backend-python:8000
+      # 与 volumes 挂载点一致
+      APP_UPLOAD_BASE_PATH: /workspace/uploads
     volumes:
       - ./backend-java:/workspace
       - maven_repo:/root/.m2

@@ -1,14 +1,29 @@
 <template>
-  <el-form :model="config" label-width="80px">
+  <el-form
+    :model="config"
+    label-width="80px"
+  >
     <el-form-item label="生成策略">
       <el-select v-model="config.strategy">
-        <el-option label="直接生成 (Zero-Shot)" value="zero_shot" />
-        <el-option label="少样本学习 (Few-Shot)" value="few_shot" />
-        <el-option label="思维链 (CoT)" value="cot" />
+        <el-option
+          label="直接生成 (Zero-Shot)"
+          value="zero_shot"
+        />
+        <el-option
+          label="少样本学习 (Few-Shot)"
+          value="few_shot"
+        />
+        <el-option
+          label="思维链 (CoT)"
+          value="cot"
+        />
       </el-select>
     </el-form-item>
     <el-form-item label="上下文注入">
-      <el-switch v-model="config.injectContext" active-text="注入知识库上下文" />
+      <el-switch
+        v-model="config.injectContext"
+        active-text="注入知识库上下文"
+      />
     </el-form-item>
     <el-form-item label="提示词模板">
       <el-input 

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS agent (
     max_iterations INT DEFAULT 10,  -- 最大迭代次数
     max_tokens INT DEFAULT 4000,  -- 最大token数
     temperature DECIMAL(3,2) DEFAULT 0.7,  -- 温度参数
-    is_active CHAR(1) DEFAULT '1',
+    is_active VARCHAR(1) DEFAULT '1',
     creator_id BIGINT,
     creator_name VARCHAR(100),
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS agent_tool (
     tool_schema JSONB NOT NULL,  -- 工具schema（OpenAPI格式）
     tool_implementation VARCHAR(500),  -- 工具实现类/函数路径
     tool_config JSONB,  -- 工具配置
-    is_builtin CHAR(1) DEFAULT '0',  -- 是否内置工具
-    is_active CHAR(1) DEFAULT '1',
+    is_builtin VARCHAR(1) DEFAULT '0',  -- 是否内置工具
+    is_active VARCHAR(1) DEFAULT '1',
     permission_level VARCHAR(50) DEFAULT 'NORMAL',  -- 权限级别：NORMAL, ADMIN
     creator_id BIGINT,
     creator_name VARCHAR(100),
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS agent_tool_relation (
     id BIGSERIAL PRIMARY KEY,
     agent_id BIGINT NOT NULL,
     tool_id BIGINT NOT NULL,
-    is_enabled CHAR(1) DEFAULT '1',
+    is_enabled VARCHAR(1) DEFAULT '1',
     tool_order INT DEFAULT 0,  -- 工具排序
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (agent_id) REFERENCES agent(id),
@@ -129,4 +129,11 @@ CREATE INDEX IF NOT EXISTS idx_agent_tool_call_status ON agent_tool_call(call_st
 
 CREATE INDEX IF NOT EXISTS idx_agent_tool_relation_agent_id ON agent_tool_relation(agent_id);
 CREATE INDEX IF NOT EXISTS idx_agent_tool_relation_tool_id ON agent_tool_relation(tool_id);
+ALTER TABLE agent
+    ALTER COLUMN is_active TYPE VARCHAR(1);
+ALTER TABLE agent_tool
+    ALTER COLUMN is_builtin TYPE VARCHAR(1),
+    ALTER COLUMN is_active TYPE VARCHAR(1);
+ALTER TABLE agent_tool_relation
+    ALTER COLUMN is_enabled TYPE VARCHAR(1);
 

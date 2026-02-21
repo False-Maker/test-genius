@@ -4,7 +4,12 @@
       <template #header>
         <div class="card-header">
           <span>模型性能对比</span>
-          <el-button size="small" type="primary" @click="handleCompare" :loading="loading">
+          <el-button
+            size="small"
+            type="primary"
+            :loading="loading"
+            @click="handleCompare"
+          >
             开始对比
           </el-button>
         </div>
@@ -12,7 +17,11 @@
 
       <!-- 配置区域 -->
       <div class="config-section">
-        <el-form :model="form" label-width="120px" size="default">
+        <el-form
+          :model="form"
+          label-width="120px"
+          size="default"
+        >
           <el-form-item label="提示词">
             <el-input
               v-model="form.prompt"
@@ -32,7 +41,9 @@
                 {{ model.modelName }}
               </el-checkbox>
             </el-checkbox-group>
-            <div class="form-tip">至少选择一个模型进行对比</div>
+            <div class="form-tip">
+              至少选择一个模型进行对比
+            </div>
           </el-form-item>
 
           <el-form-item label="高级参数">
@@ -63,7 +74,10 @@
       </div>
 
       <!-- 对比结果 -->
-      <div v-if="results.length > 0" class="results-section">
+      <div
+        v-if="results.length > 0"
+        class="results-section"
+      >
         <el-divider>对比结果</el-divider>
 
         <!-- 性能统计 -->
@@ -71,26 +85,42 @@
           <el-row :gutter="20">
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">总耗时</div>
-                <div class="stat-value">{{ totalTime }}ms</div>
+                <div class="stat-label">
+                  总耗时
+                </div>
+                <div class="stat-value">
+                  {{ totalTime }}ms
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">成功</div>
-                <div class="stat-value success">{{ successCount }}</div>
+                <div class="stat-label">
+                  成功
+                </div>
+                <div class="stat-value success">
+                  {{ successCount }}
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">失败</div>
-                <div class="stat-value danger">{{ failCount }}</div>
+                <div class="stat-label">
+                  失败
+                </div>
+                <div class="stat-value danger">
+                  {{ failCount }}
+                </div>
               </div>
             </el-col>
             <el-col :span="6">
               <div class="stat-item">
-                <div class="stat-label">平均响应时间</div>
-                <div class="stat-value">{{ avgResponseTime }}ms</div>
+                <div class="stat-label">
+                  平均响应时间
+                </div>
+                <div class="stat-value">
+                  {{ avgResponseTime }}ms
+                </div>
               </div>
             </el-col>
           </el-row>
@@ -98,42 +128,80 @@
 
         <!-- 性能对比图表 -->
         <div class="chart-section">
-          <div ref="chartContainer" style="width: 100%; height: 300px"></div>
+          <div
+            ref="chartContainer"
+            style="width: 100%; height: 300px"
+          />
         </div>
 
         <!-- 详细结果表格 -->
-        <el-table :data="results" stripe style="width: 100%; margin-top: 20px">
-          <el-table-column prop="model_code" label="模型" width="150" />
-          <el-table-column prop="response_time" label="响应时间(ms)" width="120">
+        <el-table
+          :data="results"
+          stripe
+          style="width: 100%; margin-top: 20px"
+        >
+          <el-table-column
+            prop="model_code"
+            label="模型"
+            width="150"
+          />
+          <el-table-column
+            prop="response_time"
+            label="响应时间(ms)"
+            width="120"
+          >
             <template #default="scope">
               <span :class="getResponseTimeClass(scope.row.response_time)">
                 {{ scope.row.response_time || '-' }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="tokens_used" label="Token数" width="120">
+          <el-table-column
+            prop="tokens_used"
+            label="Token数"
+            width="120"
+          >
             <template #default="scope">
               {{ scope.row.tokens_used || '-' }}
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="100">
+          <el-table-column
+            prop="status"
+            label="状态"
+            width="100"
+          >
             <template #default="scope">
               <el-tag :type="scope.row.error ? 'danger' : 'success'">
                 {{ scope.row.error ? '失败' : '成功' }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="content" label="响应内容" min-width="300" show-overflow-tooltip>
+          <el-table-column
+            prop="content"
+            label="响应内容"
+            min-width="300"
+            show-overflow-tooltip
+          >
             <template #default="scope">
-              <div v-if="scope.row.error" class="error-message">
+              <div
+                v-if="scope.row.error"
+                class="error-message"
+              >
                 {{ scope.row.error }}
               </div>
-              <div v-else class="response-content">
+              <div
+                v-else
+                class="response-content"
+              >
                 {{ scope.row.content || '-' }}
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="120" fixed="right">
+          <el-table-column
+            label="操作"
+            width="120"
+            fixed="right"
+          >
             <template #default="scope">
               <el-button
                 size="small"
@@ -150,8 +218,15 @@
     </el-card>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailVisible" title="模型响应详情" width="800px">
-      <el-descriptions :column="2" border>
+    <el-dialog
+      v-model="detailVisible"
+      title="模型响应详情"
+      width="800px"
+    >
+      <el-descriptions
+        :column="2"
+        border
+      >
         <el-descriptions-item label="模型代码">
           {{ currentDetail?.model_code }}
         </el-descriptions-item>
@@ -166,11 +241,20 @@
             {{ currentDetail?.error ? '失败' : '成功' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="响应内容" :span="2">
-          <div v-if="currentDetail?.error" class="error-message">
+        <el-descriptions-item
+          label="响应内容"
+          :span="2"
+        >
+          <div
+            v-if="currentDetail?.error"
+            class="error-message"
+          >
             {{ currentDetail.error }}
           </div>
-          <pre v-else class="response-content">{{ currentDetail?.content || '-' }}</pre>
+          <pre
+            v-else
+            class="response-content"
+          >{{ currentDetail?.content || '-' }}</pre>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>

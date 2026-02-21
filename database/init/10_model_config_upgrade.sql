@@ -9,7 +9,9 @@ ALTER TABLE model_config ADD COLUMN IF NOT EXISTS performance_score DECIMAL(5,2)
 ALTER TABLE model_config ADD COLUMN IF NOT EXISTS task_types TEXT;
 
 -- 添加是否推荐模型字段
-ALTER TABLE model_config ADD COLUMN IF NOT EXISTS is_recommended CHAR(1) DEFAULT '0';
+ALTER TABLE model_config ADD COLUMN IF NOT EXISTS is_recommended VARCHAR(1) DEFAULT '0';
+ALTER TABLE model_config
+    ALTER COLUMN is_recommended TYPE VARCHAR(1);
 
 -- 添加最后评分更新时间字段
 ALTER TABLE model_config ADD COLUMN IF NOT EXISTS last_score_update_time TIMESTAMP NULL;

@@ -2,6 +2,7 @@ package com.sinosoft.testdesign.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -78,7 +79,7 @@ public class Agent {
      * 温度参数
      */
     @Column(name = "temperature", precision = 3, scale = 2)
-    private Double temperature = 0.7;
+    private BigDecimal temperature = new BigDecimal("0.70");
     
     /**
      * 是否启用

@@ -3,7 +3,10 @@
     <div class="header">
       <h2>知识库管理</h2>
       <div class="header-actions">
-        <el-button type="primary" @click="handleCreate">
+        <el-button
+          type="primary"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
           创建知识库
         </el-button>
@@ -11,19 +14,47 @@
     </div>
 
     <!-- 知识库列表 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
         v-loading="loading"
         :data="knowledgeBaseList"
         stripe
         style="width: 100%"
       >
-        <el-table-column prop="kbCode" label="知识库编码" width="180" />
-        <el-table-column prop="kbName" label="知识库名称" min-width="200" />
-        <el-table-column prop="kbDescription" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="documentCount" label="文档数量" width="120" />
-        <el-table-column prop="chunkCount" label="分块数量" width="120" />
-        <el-table-column prop="lastSyncTime" label="最后同步时间" width="180">
+        <el-table-column
+          prop="kbCode"
+          label="知识库编码"
+          width="180"
+        />
+        <el-table-column
+          prop="kbName"
+          label="知识库名称"
+          min-width="200"
+        />
+        <el-table-column
+          prop="kbDescription"
+          label="描述"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="documentCount"
+          label="文档数量"
+          width="120"
+        />
+        <el-table-column
+          prop="chunkCount"
+          label="分块数量"
+          width="120"
+        />
+        <el-table-column
+          prop="lastSyncTime"
+          label="最后同步时间"
+          width="180"
+        >
           <template #default="scope">
             <span v-if="scope.row.lastSyncTime">
               {{ formatDateTime(scope.row.lastSyncTime) }}
@@ -31,21 +62,50 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="300" fixed="right">
+        <el-table-column
+          label="操作"
+          width="300"
+          fixed="right"
+        >
           <template #default="scope">
-            <el-button size="small" link type="primary" @click="handleUpload(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleUpload(scope.row)"
+            >
               上传文档
             </el-button>
-            <el-button size="small" link type="primary" @click="handleSync(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleSync(scope.row)"
+            >
               同步
             </el-button>
-            <el-button size="small" link type="primary" @click="handleViewDocuments(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleViewDocuments(scope.row)"
+            >
               文档列表
             </el-button>
-            <el-button size="small" link type="primary" @click="handleManagePermissions(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleManagePermissions(scope.row)"
+            >
               权限管理
             </el-button>
-            <el-button size="small" link type="danger" @click="handleDelete(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="danger"
+              @click="handleDelete(scope.row)"
+            >
               删除
             </el-button>
           </template>
@@ -66,7 +126,10 @@
         :rules="kbFormRules"
         label-width="120px"
       >
-        <el-form-item label="知识库编码" prop="kbCode">
+        <el-form-item
+          label="知识库编码"
+          prop="kbCode"
+        >
           <el-input
             v-model="kbFormData.kbCode"
             placeholder="请输入知识库编码"
@@ -74,14 +137,20 @@
             :disabled="isEdit"
           />
         </el-form-item>
-        <el-form-item label="知识库名称" prop="kbName">
+        <el-form-item
+          label="知识库名称"
+          prop="kbName"
+        >
           <el-input
             v-model="kbFormData.kbName"
             placeholder="请输入知识库名称"
             maxlength="200"
           />
         </el-form-item>
-        <el-form-item label="描述" prop="kbDescription">
+        <el-form-item
+          label="描述"
+          prop="kbDescription"
+        >
           <el-input
             v-model="kbFormData.kbDescription"
             type="textarea"
@@ -90,18 +159,42 @@
             maxlength="500"
           />
         </el-form-item>
-        <el-form-item label="知识库类型" prop="kbType">
-          <el-select v-model="kbFormData.kbType" placeholder="请选择知识库类型">
-            <el-option label="测试规范" value="测试规范" />
-            <el-option label="业务知识" value="业务知识" />
-            <el-option label="用例模板" value="用例模板" />
-            <el-option label="通用知识" value="通用知识" />
+        <el-form-item
+          label="知识库类型"
+          prop="kbType"
+        >
+          <el-select
+            v-model="kbFormData.kbType"
+            placeholder="请选择知识库类型"
+          >
+            <el-option
+              label="测试规范"
+              value="测试规范"
+            />
+            <el-option
+              label="业务知识"
+              value="业务知识"
+            />
+            <el-option
+              label="用例模板"
+              value="用例模板"
+            />
+            <el-option
+              label="通用知识"
+              value="通用知识"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="kbDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmitKB">
+        <el-button @click="kbDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmitKB"
+        >
           确定
         </el-button>
       </template>
@@ -128,7 +221,9 @@
             :limit="1"
             drag
           >
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <el-icon class="el-icon--upload">
+              <upload-filled />
+            </el-icon>
             <div class="el-upload__text">
               将文件拖到此处，或<em>点击上传</em>
             </div>
@@ -141,8 +236,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="uploadDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="uploadLoading" @click="handleUploadSubmit">
+        <el-button @click="uploadDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="uploadLoading"
+          @click="handleUploadSubmit"
+        >
           上传
         </el-button>
       </template>
@@ -162,8 +263,12 @@
       >
         <el-form-item label="同步类型">
           <el-radio-group v-model="syncFormData.syncType">
-            <el-radio label="incremental">增量同步</el-radio>
-            <el-radio label="full">全量同步</el-radio>
+            <el-radio label="incremental">
+              增量同步
+            </el-radio>
+            <el-radio label="full">
+              全量同步
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="源文件路径">
@@ -174,9 +279,18 @@
         </el-form-item>
         <el-form-item label="分块策略">
           <el-select v-model="syncFormData.chunkingStrategy">
-            <el-option label="段落" value="paragraph" />
-            <el-option label="句子" value="sentence" />
-            <el-option label="固定大小" value="fixed" />
+            <el-option
+              label="段落"
+              value="paragraph"
+            />
+            <el-option
+              label="句子"
+              value="sentence"
+            />
+            <el-option
+              label="固定大小"
+              value="fixed"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="分块大小">
@@ -197,8 +311,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="syncDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="syncLoading" @click="handleSyncSubmit">
+        <el-button @click="syncDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="syncLoading"
+          @click="handleSyncSubmit"
+        >
           开始同步
         </el-button>
       </template>
@@ -235,7 +355,7 @@ const fileList = ref<any[]>([])
 const knowledgeBaseList = ref<KnowledgeBase[]>([])
 const currentKB = ref<KnowledgeBase | null>(null)
 
-const kbFormData = reactive<Partial<KnowledgeBase>>({
+const kbFormData = reactive<KnowledgeBase>({
   kbCode: '',
   kbName: '',
   kbDescription: '',
@@ -273,7 +393,7 @@ const loadKnowledgeBases = async () => {
     const userId = userStore.userInfo?.id || 1 // 如果未登录使用默认ID 1
     const response = await knowledgeBaseApi.getUserKnowledgeBases(userId)
     if (response.data) {
-      knowledgeBaseList.value = Array.isArray(response.data) ? response.data : response.data.knowledge_bases || []
+      knowledgeBaseList.value = Array.isArray(response.data) ? response.data : []
       
       // 加载每个知识库的统计信息
       for (const kb of knowledgeBaseList.value) {
@@ -450,12 +570,15 @@ const handleSyncSubmit = async () => {
   try {
     const response = await knowledgeBaseApi.syncKnowledgeBase(syncFormData)
     
-    if (response.data?.success) {
+    const result = response.data
+    const success = typeof result === 'boolean' ? result : result?.success
+    const errorMessage = typeof result === 'boolean' ? undefined : result?.error
+    if (success) {
       ElMessage.success('同步任务已启动')
       syncDialogVisible.value = false
       loadKnowledgeBases()
     } else {
-      ElMessage.error(response.data?.error || '同步失败')
+      ElMessage.error(errorMessage || '同步失败')
     }
   } catch (error: any) {
     console.error('同步失败:', error)

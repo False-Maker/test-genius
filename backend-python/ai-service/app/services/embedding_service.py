@@ -7,37 +7,55 @@
 2. OpenAI模式 (EMBEDDING_PROVIDER=openai): 使用 OpenAI Embeddings API
 """
 import logging
-from typing import List, Optional
+import os
+from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app import config
+import torch
 
 logger = logging.getLogger(__name__)
 
 # 延迟加载模型，避免启动时阻塞
 _local_model = None
+_local_model_kind = None
 _openai_client = None
 
 
-def _get_local_model():
+def _get_local_model() -> Tuple[object, str]:
     """
     延迟加载本地 sentence-transformers 模型
     """
-    global _local_model
+    global _local_model, _local_model_kind
     if _local_model is None:
         try:
-            from sentence_transformers import SentenceTransformer
             model_name = config.EMBEDDING_MODEL_NAME
             logger.info(f"正在加载本地嵌入模型: {model_name}")
-            _local_model = SentenceTransformer(model_name)
-            logger.info(f"本地嵌入模型加载成功: {model_name}, 维度: {_local_model.get_sentence_embedding_dimension()}")
+            cpu_count = os.cpu_count() or 1
+            torch.set_num_threads(min(8, cpu_count))
+            torch.set_num_interop_threads(min(4, cpu_count))
+            max_seq_length = config.EMBEDDING_MAX_SEQ_LENGTH
+            if model_name == "BAAI/bge-m3":
+                from FlagEmbedding import BGEM3FlagModel
+                _local_model = BGEM3FlagModel(model_name, use_fp16=False, device="cpu")
+                _local_model_kind = "bge-m3"
+            else:
+                from sentence_transformers import SentenceTransformer
+                _local_model = SentenceTransformer(model_name, device="cpu")
+                _local_model.max_seq_length = max_seq_length
+                _local_model = _local_model.to(dtype=torch.float32)
+                _local_model_kind = "sentence-transformers"
+            if _local_model_kind == "bge-m3":
+                logger.info(f"本地嵌入模型加载成功: {model_name}, 维度: 1024")
+            else:
+                logger.info(f"本地嵌入模型加载成功: {model_name}, 维度: {_local_model.get_sentence_embedding_dimension()}")
         except ImportError:
             logger.error("sentence-transformers 未安装，请运行: pip install sentence-transformers")
             raise
         except Exception as e:
             logger.error(f"加载本地嵌入模型失败: {str(e)}")
             raise
-    return _local_model
+    return _local_model, _local_model_kind
 
 
 def _get_openai_client():
@@ -135,7 +153,14 @@ class EmbeddingService:
         """
         使用本地 sentence-transformers 模型获取向量
         """
-        model = _get_local_model()
+        model, model_kind = _get_local_model()
+        if model_kind == "bge-m3":
+            embeddings = model.encode([text], max_length=config.EMBEDDING_MAX_SEQ_LENGTH)
+            if isinstance(embeddings, dict):
+                embeddings = embeddings.get("dense_vecs") or embeddings.get("embeddings") or embeddings.get("dense_embedding")
+            if hasattr(embeddings, "tolist"):
+                embeddings = embeddings.tolist()
+            return embeddings[0]
         embedding = model.encode(text, convert_to_numpy=True)
         return embedding.tolist()
     
@@ -177,8 +202,14 @@ class EmbeddingService:
         """
         批量使用本地模型获取向量
         """
-        model = _get_local_model()
-        # sentence-transformers 原生支持批量编码
+        model, model_kind = _get_local_model()
+        if model_kind == "bge-m3":
+            embeddings = model.encode(texts, max_length=config.EMBEDDING_MAX_SEQ_LENGTH)
+            if isinstance(embeddings, dict):
+                embeddings = embeddings.get("dense_vecs") or embeddings.get("embeddings") or embeddings.get("dense_embedding")
+            if hasattr(embeddings, "tolist"):
+                embeddings = embeddings.tolist()
+            return embeddings
         embeddings = model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
         return [emb.tolist() for emb in embeddings]
     

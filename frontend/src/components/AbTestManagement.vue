@@ -4,47 +4,97 @@
       <template #header>
         <div class="card-header">
           <span>A/B测试管理</span>
-          <el-button size="small" type="primary" @click="handleCreateAbTest">创建A/B测试</el-button>
+          <el-button
+            size="small"
+            type="primary"
+            @click="handleCreateAbTest"
+          >
+            创建A/B测试
+          </el-button>
         </div>
       </template>
 
       <!-- A/B测试列表 -->
-      <el-table :data="abTests" stripe style="width: 100%" v-loading="loading">
-        <el-table-column prop="testName" label="测试名称" min-width="200" />
-        <el-table-column prop="testDescription" label="测试描述" min-width="200" show-overflow-tooltip />
-        <el-table-column label="版本A" width="120">
+      <el-table
+        v-loading="loading"
+        :data="abTests"
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="testName"
+          label="测试名称"
+          min-width="200"
+        />
+        <el-table-column
+          prop="testDescription"
+          label="测试描述"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          label="版本A"
+          width="120"
+        >
           <template #default="scope">
             <el-tag>版本 {{ getVersionNumber(scope.row.versionAId) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="版本B" width="120">
+        <el-table-column
+          label="版本B"
+          width="120"
+        >
           <template #default="scope">
             <el-tag>版本 {{ getVersionNumber(scope.row.versionBId) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="流量分配" width="150">
+        <el-table-column
+          label="流量分配"
+          width="150"
+        >
           <template #default="scope">
             {{ scope.row.trafficSplitA }}% / {{ scope.row.trafficSplitB }}%
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column
+          prop="status"
+          label="状态"
+          width="100"
+        >
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)">
               {{ getStatusText(scope.row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="autoSelectEnabled" label="自动选择" width="100">
+        <el-table-column
+          prop="autoSelectEnabled"
+          label="自动选择"
+          width="100"
+        >
           <template #default="scope">
             <el-tag :type="scope.row.autoSelectEnabled === '1' ? 'success' : 'info'">
               {{ scope.row.autoSelectEnabled === '1' ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="300" fixed="right">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="300"
+          fixed="right"
+        >
           <template #default="scope">
-            <el-button size="small" link type="primary" @click="handleViewStatistics(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleViewStatistics(scope.row)"
+            >
               统计
             </el-button>
             <el-button
@@ -89,10 +139,25 @@
     </el-card>
 
     <!-- 创建A/B测试对话框 -->
-    <el-dialog v-model="createDialogVisible" title="创建A/B测试" width="800px">
-      <el-form ref="createFormRef" :model="createForm" :rules="createFormRules" label-width="120px">
-        <el-form-item label="测试名称" prop="testName">
-          <el-input v-model="createForm.testName" placeholder="请输入测试名称" />
+    <el-dialog
+      v-model="createDialogVisible"
+      title="创建A/B测试"
+      width="800px"
+    >
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createFormRules"
+        label-width="120px"
+      >
+        <el-form-item
+          label="测试名称"
+          prop="testName"
+        >
+          <el-input
+            v-model="createForm.testName"
+            placeholder="请输入测试名称"
+          />
         </el-form-item>
         <el-form-item label="测试描述">
           <el-input
@@ -102,8 +167,15 @@
             placeholder="请输入测试描述"
           />
         </el-form-item>
-        <el-form-item label="版本A" prop="versionAId">
-          <el-select v-model="createForm.versionAId" placeholder="请选择版本A" style="width: 100%">
+        <el-form-item
+          label="版本A"
+          prop="versionAId"
+        >
+          <el-select
+            v-model="createForm.versionAId"
+            placeholder="请选择版本A"
+            style="width: 100%"
+          >
             <el-option
               v-for="version in availableVersions"
               :key="version.id"
@@ -112,8 +184,15 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="版本B" prop="versionBId">
-          <el-select v-model="createForm.versionBId" placeholder="请选择版本B" style="width: 100%">
+        <el-form-item
+          label="版本B"
+          prop="versionBId"
+        >
+          <el-select
+            v-model="createForm.versionBId"
+            placeholder="请选择版本B"
+            style="width: 100%"
+          >
             <el-option
               v-for="version in availableVersions"
               :key="version.id"
@@ -145,15 +224,24 @@
               />
             </el-col>
           </el-row>
-          <div class="form-tip">流量分配比例之和必须等于100</div>
+          <div class="form-tip">
+            流量分配比例之和必须等于100
+          </div>
         </el-form-item>
         <el-form-item label="自动选择">
           <el-radio-group v-model="createForm.autoSelectEnabled">
-            <el-radio label="1">启用</el-radio>
-            <el-radio label="0">禁用</el-radio>
+            <el-radio label="1">
+              启用
+            </el-radio>
+            <el-radio label="0">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="createForm.autoSelectEnabled === '1'" label="最小样本数">
+        <el-form-item
+          v-if="createForm.autoSelectEnabled === '1'"
+          label="最小样本数"
+        >
           <el-input-number
             v-model="createForm.minSamples"
             :min="10"
@@ -162,25 +250,53 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item v-if="createForm.autoSelectEnabled === '1'" label="选择标准">
-          <el-select v-model="createForm.selectionCriteria" style="width: 100%">
-            <el-option label="成功率" value="success_rate" />
-            <el-option label="响应时间" value="response_time" />
-            <el-option label="用户评分" value="user_rating" />
+        <el-form-item
+          v-if="createForm.autoSelectEnabled === '1'"
+          label="选择标准"
+        >
+          <el-select
+            v-model="createForm.selectionCriteria"
+            style="width: 100%"
+          >
+            <el-option
+              label="成功率"
+              value="success_rate"
+            />
+            <el-option
+              label="响应时间"
+              value="response_time"
+            />
+            <el-option
+              label="用户评分"
+              value="user_rating"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="createLoading" @click="handleSubmitCreate">
+        <el-button @click="createDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="createLoading"
+          @click="handleSubmitCreate"
+        >
           确定
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 统计信息对话框 -->
-    <el-dialog v-model="statisticsDialogVisible" title="A/B测试统计" width="1000px">
-      <div v-if="statistics" class="statistics-content">
+    <el-dialog
+      v-model="statisticsDialogVisible"
+      title="A/B测试统计"
+      width="1000px"
+    >
+      <div
+        v-if="statistics"
+        class="statistics-content"
+      >
         <!-- 总体统计 -->
         <el-card style="margin-bottom: 20px">
           <template #header>
@@ -189,14 +305,23 @@
           <el-row :gutter="20">
             <el-col :span="8">
               <div class="stat-item">
-                <div class="stat-label">总执行次数</div>
-                <div class="stat-value">{{ statistics.totalExecutions }}</div>
+                <div class="stat-label">
+                  总执行次数
+                </div>
+                <div class="stat-value">
+                  {{ statistics.totalExecutions }}
+                </div>
               </div>
             </el-col>
             <el-col :span="8">
               <div class="stat-item">
-                <div class="stat-label">更优版本</div>
-                <div class="stat-value" :class="statistics.betterVersion === 'A' ? 'success' : 'warning'">
+                <div class="stat-label">
+                  更优版本
+                </div>
+                <div
+                  class="stat-value"
+                  :class="statistics.betterVersion === 'A' ? 'success' : 'warning'"
+                >
                   版本 {{ statistics.betterVersion }}
                 </div>
               </div>
@@ -211,7 +336,10 @@
               <template #header>
                 <span>版本A统计</span>
               </template>
-              <el-descriptions :column="1" border>
+              <el-descriptions
+                :column="1"
+                border
+              >
                 <el-descriptions-item label="执行次数">
                   {{ statistics.versionA.totalExecutions }}
                 </el-descriptions-item>
@@ -235,7 +363,10 @@
               <template #header>
                 <span>版本B统计</span>
               </template>
-              <el-descriptions :column="1" border>
+              <el-descriptions
+                :column="1"
+                border
+              >
                 <el-descriptions-item label="执行次数">
                   {{ statistics.versionB.totalExecutions }}
                 </el-descriptions-item>
@@ -261,7 +392,10 @@
           <template #header>
             <span>性能对比图表</span>
           </template>
-          <div ref="chartContainer" style="width: 100%; height: 300px"></div>
+          <div
+            ref="chartContainer"
+            style="width: 100%; height: 300px"
+          />
         </el-card>
       </div>
     </el-dialog>

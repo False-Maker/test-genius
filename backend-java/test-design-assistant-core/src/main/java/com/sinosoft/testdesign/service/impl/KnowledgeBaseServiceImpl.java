@@ -122,5 +122,23 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
             throw new BusinessException("关键词检索知识库文档失败: " + e.getMessage());
         }
     }
+
+    @Override
+    public List<Map<String, Object>> listDocumentsByKb(Long kbId, int limit) {
+        try {
+            String url = aiServiceUrl + "/api/v1/knowledge/documents/by-kb/" + kbId + "?limit=" + limit;
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            if (response != null && Boolean.TRUE.equals(response.get("success"))) {
+                return objectMapper.convertValue(response.get("documents"),
+                        new TypeReference<List<Map<String, Object>>>() {});
+            } else {
+                log.warn("查询知识库文档失败: {}", response);
+                return List.of();
+            }
+        } catch (Exception e) {
+            log.error("查询知识库文档失败", e);
+            throw new BusinessException("查询知识库文档失败: " + e.getMessage());
+        }
+    }
 }
 

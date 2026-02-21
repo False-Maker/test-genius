@@ -206,6 +206,37 @@ async def get_knowledge_base_statistics(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"查询统计信息失败: {str(e)}")
 
+@router.get("/documents/by-kb/{kb_id}")
+async def list_documents_by_kb(
+    kb_id: int,
+    limit: int = 20,
+    db: Session = Depends(get_db)
+):
+    try:
+        from sqlalchemy import text
+        sql = """
+        SELECT id, doc_code, doc_name, doc_type, doc_category, doc_content, doc_url
+        FROM knowledge_document
+        WHERE kb_id = :kb_id AND is_active = '1'
+        ORDER BY id DESC
+        LIMIT :limit
+        """
+        result = db.execute(text(sql), {"kb_id": kb_id, "limit": limit})
+        rows = result.fetchall()
+        docs = []
+        for r in rows:
+            docs.append({
+                "id": r[0],
+                "docCode": r[1],
+                "docName": r[2],
+                "docType": r[3],
+                "docCategory": r[4],
+                "docContent": r[5],
+                "docUrl": r[6]
+            })
+        return {"success": True, "documents": docs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"查询失败: {str(e)}")
 
 # ==================== 知识库管理相关API（第四阶段增强）====================
 
@@ -400,18 +431,27 @@ async def get_sync_logs(
         raise HTTPException(status_code=500, detail=f"获取同步日志失败: {str(e)}")
 
 
+class UploadDocumentRequest(BaseModel):
+    """文档上传请求（JSON格式）"""
+    kb_id: int
+    file_name: str
+    file_content: str  # Base64 编码的文件内容
+    creator_id: Optional[int] = None
+
+
 @router.post("/upload")
 async def upload_document(
-    kb_id: int = Form(...),
-    file_name: str = Form(...),
-    file_content: str = Form(...),
-    creator_id: int = Form(None),
+    request: UploadDocumentRequest,
     db: Session = Depends(get_db)
 ):
     """
-    上传文档到知识库
+    上传文档到知识库（JSON格式请求）
     """
     try:
+        kb_id = request.kb_id
+        file_name = request.file_name
+        file_content = request.file_content
+        creator_id = request.creator_id
         # 解码Base64内容
         import base64
         import os

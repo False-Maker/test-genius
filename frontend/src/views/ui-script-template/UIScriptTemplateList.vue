@@ -1,42 +1,31 @@
 <template>
-
-
   <div class="ui-script-template-list">
-
-
     <div class="page-header">
-
-
       <div class="header-left">
+        <h2 class="page-title">
+          UI脚本模板管理
+        </h2>
 
 
-        <h2 class="page-title">UI脚本模板管理</h2>
-
-
-        <p class="page-subtitle">管理UI自动化测试脚本的生成模板，支持多种框架和语言</p>
-
-
+        <p class="page-subtitle">
+          管理UI自动化测试脚本的生成模板，支持多种框架和语言
+        </p>
       </div>
 
 
       <div class="header-right">
-
-
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
-
-
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
 
 
           新建模板
-
-
         </el-button>
-
-
       </div>
-
-
     </div>
 
 
@@ -46,108 +35,114 @@
     <!-- 搜索�?-->
 
 
-    <el-card class="search-card" shadow="never">
-
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="模板名称称">
-
-
-          <el-input v-model="searchForm.templateName" placeholder="请输入模板名称" clearable @keyup.enter="handleSearch" />
-
-
+          <el-input
+            v-model="searchForm.templateName"
+            placeholder="请输入模板名称"
+            clearable
+            @keyup.enter="handleSearch"
+          />
         </el-form-item>
 
 
         <el-form-item label="模板类型">
+          <el-select
+            v-model="searchForm.templateType"
+            placeholder="请选择类型"
+            clearable
+            style="width: 150px"
+          >
+            <el-option
+              label="Selenium"
+              value="SELENIUM"
+            />
 
 
-          <el-select v-model="searchForm.templateType" placeholder="请选择类型" clearable style="width: 150px">
+            <el-option
+              label="Playwright"
+              value="PLAYWRIGHT"
+            />
 
 
-            <el-option label="Selenium" value="SELENIUM" />
-
-
-            <el-option label="Playwright" value="PLAYWRIGHT" />
-
-
-            <el-option label="Puppeteer" value="PUPPETEER" />
-
-
+            <el-option
+              label="Puppeteer"
+              value="PUPPETEER"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
         <el-form-item label="脚本语言">
+          <el-select
+            v-model="searchForm.scriptLanguage"
+            placeholder="请选择语言"
+            clearable
+            style="width: 150px"
+          >
+            <el-option
+              label="Java"
+              value="JAVA"
+            />
 
 
-          <el-select v-model="searchForm.scriptLanguage" placeholder="请选择语言" clearable style="width: 150px">
+            <el-option
+              label="Python"
+              value="PYTHON"
+            />
 
 
-            <el-option label="Java" value="JAVA" />
-
-
-            <el-option label="Python" value="PYTHON" />
-
-
-            <el-option label="JavaScript" value="JAVASCRIPT" />
-
-
+            <el-option
+              label="JavaScript"
+              value="JAVASCRIPT"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
         <el-form-item label="状态�">
+          <el-select
+            v-model="searchForm.isActive"
+            placeholder="请选择状态态�"
+            clearable
+            style="width: 150px"
+          >
+            <el-option
+              label="启用"
+              value="1"
+            />
 
 
-          <el-select v-model="searchForm.isActive" placeholder="请选择状态态�" clearable style="width: 150px">
-
-
-            <el-option label="启用" value="1" />
-
-
-            <el-option label="禁用" value="0" />
-
-
+            <el-option
+              label="禁用"
+              value="0"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
         <el-form-item>
-
-
-          <el-button type="primary" @click="handleSearch">
-
-
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
             <el-icon><Search /></el-icon> 查询
-
-
           </el-button>
 
 
           <el-button @click="resetSearch">
-
-
             <el-icon><Refresh /></el-icon> 重置
-
-
           </el-button>
-
-
         </el-form-item>
-
-
       </el-form>
-
-
     </el-card>
 
 
@@ -157,15 +152,19 @@
     <!-- 列表 -->
 
 
-    <el-card class="table-card" shadow="never">
-
-
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-
-
-        <el-skeleton :rows="10" animated />
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
 
 
@@ -182,65 +181,61 @@
 
 
         style="width: 100%"
-
-
       >
-
-
-        <el-table-column prop="templateCode" label="模板编码" width="160">
-
-
-           <template #default="scope">
-
-
+        <el-table-column
+          prop="templateCode"
+          label="模板编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.templateCode }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="templateName" label="模板名称称" min-width="200" show-overflow-tooltip />
-
-
-        <el-table-column prop="templateType" label="类型" width="120">
-
-
-          <template #default="scope">
-
-
-            <el-tag effect="light">{{ scope.row.templateType }}</el-tag>
-
-
           </template>
-
-
         </el-table-column>
 
 
-         <el-table-column prop="scriptLanguage" label="语言" width="120">
+        <el-table-column
+          prop="templateName"
+          label="模板名称称"
+          min-width="200"
+          show-overflow-tooltip
+        />
 
 
+        <el-table-column
+          prop="templateType"
+          label="类型"
+          width="120"
+        >
           <template #default="scope">
-
-
-            <el-tag type="info" effect="plain">{{ scope.row.scriptLanguage }}</el-tag>
-
-
+            <el-tag effect="light">
+              {{ scope.row.templateType }}
+            </el-tag>
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="isActive" label="状态�" width="100">
-
-
+        <el-table-column
+          prop="scriptLanguage"
+          label="语言"
+          width="120"
+        >
           <template #default="scope">
+            <el-tag
+              type="info"
+              effect="plain"
+            >
+              {{ scope.row.scriptLanguage }}
+            </el-tag>
+          </template>
+        </el-table-column>
 
 
+        <el-table-column
+          prop="isActive"
+          label="状态�"
+          width="100"
+        >
+          <template #default="scope">
             <el-switch
 
 
@@ -253,42 +248,39 @@
               inactive-value="0"
 
 
-              @change="(val) => handleStatusChange(scope.row, val as string)"
-
-
+              @change="handleStatusChange(scope.row, $event)"
             />
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="updateTime" label="更新时间" width="180" />
+        <el-table-column
+          prop="updateTime"
+          label="更新时间"
+          width="180"
+        />
 
 
-        <el-table-column label="操作" width="150" fixed="right">
-
-
+        <el-table-column
+          label="操作"
+          width="150"
+          fixed="right"
+        >
           <template #default="scope">
-
-
             <div class="action-buttons">
-
-
-              <el-tooltip content="编辑" placement="top">
-
-
-                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
-
-
+              <el-tooltip
+                content="编辑"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleEdit(scope.row)"
+                >
                   <el-icon><Edit /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
@@ -308,50 +300,28 @@
 
 
                 @confirm="handleDelete(scope.row)"
-
-
               >
-
-
                 <template #reference>
-
-
                   <div class="delete-btn-wrapper">
-
-
-                    <el-tooltip content="删除" placement="top">
-
-
-                      <el-button circle size="small" type="danger" plain>
-
-
+                    <el-tooltip
+                      content="删除"
+                      placement="top"
+                    >
+                      <el-button
+                        circle
+                        size="small"
+                        type="danger"
+                        plain
+                      >
                         <el-icon><Delete /></el-icon>
-
-
                       </el-button>
-
-
                     </el-tooltip>
-
-
                   </div>
-
-
                 </template>
-
-
               </el-popconfirm>
-
-
             </div>
-
-
           </template>
-
-
         </el-table-column>
-
-
       </el-table>
 
 
@@ -362,8 +332,6 @@
 
 
       <div class="pagination">
-
-
         <el-pagination
 
 
@@ -389,14 +357,8 @@
 
 
           @current-change="handlePageChange"
-
-
         />
-
-
       </div>
-
-
     </el-card>
 
 
@@ -418,15 +380,11 @@
       width="800px"
 
 
-      @close="handleDialogClose"
-
-
       top="5vh"
 
 
+      @close="handleDialogClose"
     >
-
-
       <el-form
 
 
@@ -440,215 +398,201 @@
 
 
         label-width="100px"
-
-
       >
-
-
         <el-row :gutter="20">
-
-
-            <el-col :span="24">
-
-
-                <el-form-item label="模板名称" prop="templateName">
-
-
-                  <el-input v-model="formData.templateName" placeholder="请输入模板名称" />
-
-
-                </el-form-item>
-
-
-            </el-col>
-
-
+          <el-col :span="24">
+            <el-form-item
+              label="模板名称"
+              prop="templateName"
+            >
+              <el-input
+                v-model="formData.templateName"
+                placeholder="请输入模板名称"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
 
 
         <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="模板类型"
+              prop="templateType"
+            >
+              <el-select
+                v-model="formData.templateType"
+                placeholder="请选择类型"
+                style="width: 100%"
+              >
+                <el-option
+                  label="Selenium"
+                  value="SELENIUM"
+                />
 
 
-            <el-col :span="12">
+                <el-option
+                  label="Playwright"
+                  value="PLAYWRIGHT"
+                />
 
 
-                <el-form-item label="模板类型" prop="templateType">
+                <el-option
+                  label="Puppeteer"
+                  value="PUPPETEER"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
 
 
-                  <el-select v-model="formData.templateType" placeholder="请选择类型" style="width: 100%">
+          <el-col :span="12">
+            <el-form-item
+              label="脚本语言"
+              prop="scriptLanguage"
+            >
+              <el-select
+                v-model="formData.scriptLanguage"
+                placeholder="请选择语言"
+                style="width: 100%"
+              >
+                <el-option
+                  label="Java"
+                  value="JAVA"
+                />
 
 
-                    <el-option label="Selenium" value="SELENIUM" />
+                <el-option
+                  label="Python"
+                  value="PYTHON"
+                />
 
 
-                    <el-option label="Playwright" value="PLAYWRIGHT" />
-
-
-                    <el-option label="Puppeteer" value="PUPPETEER" />
-
-
-                  </el-select>
-
-
-                </el-form-item>
-
-
-            </el-col>
-
-
-            <el-col :span="12">
-
-
-                 <el-form-item label="脚本语言" prop="scriptLanguage">
-
-
-                  <el-select v-model="formData.scriptLanguage" placeholder="请选择语言" style="width: 100%">
-
-
-                    <el-option label="Java" value="JAVA" />
-
-
-                    <el-option label="Python" value="PYTHON" />
-
-
-                    <el-option label="JavaScript" value="JAVASCRIPT" />
-
-
-                  </el-select>
-
-
-                </el-form-item>
-
-
-            </el-col>
-
-
+                <el-option
+                  label="JavaScript"
+                  value="JAVASCRIPT"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
 
 
         
 
 
-        <el-form-item label="适用场景" prop="applicableScenarios">
-
-
-           <el-input v-model="formData.applicableScenarios" type="textarea" :rows="2" placeholder="请输入适用场景描述" />
-
-
+        <el-form-item
+          label="适用场景"
+          prop="applicableScenarios"
+        >
+          <el-input
+            v-model="formData.applicableScenarios"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入适用场景描述"
+          />
         </el-form-item>
 
 
 
 
 
-        <el-form-item label="模板内容" prop="templateContent">
+        <el-form-item
+          label="模板内容"
+          prop="templateContent"
+        >
+          <el-input 
 
 
-           <el-input 
+            v-model="formData.templateContent" 
 
 
-             v-model="formData.templateContent" 
+            type="textarea" 
 
 
-             type="textarea" 
+            :rows="10" 
 
 
-             :rows="10" 
+            placeholder="请输入模板内容"
 
 
-             placeholder="请输入模板内容"
-
-
-             class="code-input"
-
-
-            />
-
-
+            class="code-input"
+          />
         </el-form-item>
 
 
 
 
 
-        <el-form-item label="变量定义" prop="templateVariables">
+        <el-form-item
+          label="变量定义"
+          prop="templateVariables"
+        >
+          <el-input 
 
 
-           <el-input 
+            v-model="formData.templateVariables" 
 
 
-             v-model="formData.templateVariables" 
+            type="textarea" 
 
 
-             type="textarea" 
+            :rows="4" 
 
 
-             :rows="4" 
-
-
-             placeholder="请输入变量定义(JSON格式)" 
-
-
-            />
-
-
-        </el-form-item>
-
-
-        
-
-
-         <el-form-item label="模板描述" prop="templateDescription">
-
-
-           <el-input v-model="formData.templateDescription" type="textarea" :rows="2" placeholder="请输入模板描述" />
-
-
+            placeholder="请输入变量定义(JSON格式)"
+          />
         </el-form-item>
 
 
         
 
 
-        <el-form-item label="启用状态" prop="isActive">
-
-
-            <el-switch v-model="formData.isActive" active-value="1" inactive-value="0" />
-
-
+        <el-form-item
+          label="模板描述"
+          prop="templateDescription"
+        >
+          <el-input
+            v-model="formData.templateDescription"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入模板描述"
+          />
         </el-form-item>
 
 
+        
 
 
-
+        <el-form-item
+          label="启用状态"
+          prop="isActive"
+        >
+          <el-switch
+            v-model="formData.isActive"
+            active-value="1"
+            inactive-value="0"
+          />
+        </el-form-item>
       </el-form>
 
 
       <template #footer>
-
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-          确定
-
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
-
-
     </el-dialog>
-
-
   </div>
-
-
 </template>
 
 

@@ -1,42 +1,31 @@
 <template>
-
-
   <div class="test-specification-list">
-
-
     <div class="page-header">
-
-
       <div class="header-left">
+        <h2 class="page-title">
+          测试规约管理
+        </h2>
 
 
-        <h2 class="page-title">测试规约管理</h2>
-
-
-        <p class="page-subtitle">管理测试规约、字段测试要点和逻辑测试要点</p>
-
-
+        <p class="page-subtitle">
+          管理测试规约、字段测试要点和逻辑测试要点
+        </p>
       </div>
 
 
       <div class="header-right">
-
-
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
-
-
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
 
 
           新建规约
-
-
         </el-button>
-
-
       </div>
-
-
     </div>
 
 
@@ -46,84 +35,81 @@
     <!-- 搜索�?-->
 
 
-    <el-card class="search-card" shadow="never">
-
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="规约名称">
-
-
-          <el-input v-model="searchForm.specName" placeholder="请输入规约名�" clearable @keyup.enter="handleSearch" />
-
-
+          <el-input
+            v-model="searchForm.specName"
+            placeholder="请输入规约名�"
+            clearable
+            @keyup.enter="handleSearch"
+          />
         </el-form-item>
 
 
         <el-form-item label="规约类型">
+          <el-select
+            v-model="searchForm.specType"
+            placeholder="请选择类型"
+            clearable
+            style="width: 150px"
+          >
+            <el-option
+              label="应用�"
+              value="APPLICATION"
+            />
 
 
-          <el-select v-model="searchForm.specType" placeholder="请选择类型" clearable style="width: 150px">
-
-
-            <el-option label="应用�" value="APPLICATION" />
-
-
-            <el-option label="公共" value="PUBLIC" />
-
-
+            <el-option
+              label="公共"
+              value="PUBLIC"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
-         <el-form-item label="状�">
+        <el-form-item label="状�">
+          <el-select
+            v-model="searchForm.isActive"
+            placeholder="请选择状态�"
+            clearable
+            style="width: 150px"
+          >
+            <el-option
+              label="启用"
+              value="1"
+            />
 
 
-          <el-select v-model="searchForm.isActive" placeholder="请选择状态�" clearable style="width: 150px">
-
-
-            <el-option label="启用" value="1" />
-
-
-            <el-option label="禁用" value="0" />
-
-
+            <el-option
+              label="禁用"
+              value="0"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
         <el-form-item>
-
-
-          <el-button type="primary" @click="handleSearch">
-
-
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
             <el-icon><Search /></el-icon> 查询
-
-
           </el-button>
 
 
           <el-button @click="resetSearch">
-
-
             <el-icon><Refresh /></el-icon> 重置
-
-
           </el-button>
-
-
         </el-form-item>
-
-
       </el-form>
-
-
     </el-card>
 
 
@@ -133,15 +119,19 @@
     <!-- 列表 -->
 
 
-    <el-card class="table-card" shadow="never">
-
-
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-
-
-        <el-skeleton :rows="10" animated />
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
 
 
@@ -158,74 +148,69 @@
 
 
         style="width: 100%"
-
-
       >
-
-
-        <el-table-column prop="specCode" label="规约编码" width="160">
-
-
-           <template #default="scope">
-
-
+        <el-table-column
+          prop="specCode"
+          label="规约编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.specCode }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="specName" label="规约名称" min-width="200" show-overflow-tooltip />
-
-
-        <el-table-column prop="specType" label="类型" width="120">
-
-
-          <template #default="scope">
-
-
-            <el-tag :type="scope.row.specType === 'PUBLIC' ? 'success' : 'primary'">
-
-
-                {{ scope.row.specType === 'PUBLIC' ? '公共' : '应用'}}
-
-
-            </el-tag>
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="specCategory" label="分类" width="120" show-overflow-tooltip />
+        <el-table-column
+          prop="specName"
+          label="规约名称"
+          min-width="200"
+          show-overflow-tooltip
+        />
 
 
-        <el-table-column prop="currentVersion" label="当前版本" width="100">
-
-
-             <template #default="scope">
-
-
-                <el-tag effect="plain" type="info">{{ scope.row.currentVersion || 'V1.0' }}</el-tag>
-
-
-             </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="isActive" label="状�" width="100">
-
-
+        <el-table-column
+          prop="specType"
+          label="类型"
+          width="120"
+        >
           <template #default="scope">
+            <el-tag :type="scope.row.specType === 'PUBLIC' ? 'success' : 'primary'">
+              {{ scope.row.specType === 'PUBLIC' ? '公共' : '应用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
 
 
+        <el-table-column
+          prop="specCategory"
+          label="分类"
+          width="120"
+          show-overflow-tooltip
+        />
+
+
+        <el-table-column
+          prop="currentVersion"
+          label="当前版本"
+          width="100"
+        >
+          <template #default="scope">
+            <el-tag
+              effect="plain"
+              type="info"
+            >
+              {{ scope.row.currentVersion || 'V1.0' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+
+        <el-table-column
+          prop="isActive"
+          label="状�"
+          width="100"
+        >
+          <template #default="scope">
             <el-switch
 
 
@@ -238,57 +223,55 @@
               inactive-value="0"
 
 
-              @change="(val) => handleStatusChange(scope.row, val as string)"
-
-
+              @change="handleStatusChange(scope.row, $event)"
             />
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="updateTime" label="更新时间" width="180" />
+        <el-table-column
+          prop="updateTime"
+          label="更新时间"
+          width="180"
+        />
 
 
-        <el-table-column label="操作" width="200" fixed="right">
-
-
+        <el-table-column
+          label="操作"
+          width="200"
+          fixed="right"
+        >
           <template #default="scope">
-
-
             <div class="action-buttons">
-
-
-              <el-tooltip content="编辑" placement="top">
-
-
-                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
-
-
+              <el-tooltip
+                content="编辑"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleEdit(scope.row)"
+                >
                   <el-icon><Edit /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
-               <el-tooltip content="详情" placement="top">
-
-
-                <el-button circle size="small" type="info" plain @click="handleDetail(scope.row)">
-
-
+              <el-tooltip
+                content="详情"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="info"
+                  plain
+                  @click="handleDetail(scope.row)"
+                >
                   <el-icon><View /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
@@ -308,50 +291,28 @@
 
 
                 @confirm="handleDelete(scope.row)"
-
-
               >
-
-
                 <template #reference>
-
-
                   <div class="delete-btn-wrapper">
-
-
-                    <el-tooltip content="删除" placement="top">
-
-
-                      <el-button circle size="small" type="danger" plain>
-
-
+                    <el-tooltip
+                      content="删除"
+                      placement="top"
+                    >
+                      <el-button
+                        circle
+                        size="small"
+                        type="danger"
+                        plain
+                      >
                         <el-icon><Delete /></el-icon>
-
-
                       </el-button>
-
-
                     </el-tooltip>
-
-
                   </div>
-
-
                 </template>
-
-
               </el-popconfirm>
-
-
             </div>
-
-
           </template>
-
-
         </el-table-column>
-
-
       </el-table>
 
 
@@ -362,8 +323,6 @@
 
 
       <div class="pagination">
-
-
         <el-pagination
 
 
@@ -389,14 +348,8 @@
 
 
           @current-change="handlePageChange"
-
-
         />
-
-
       </div>
-
-
     </el-card>
 
 
@@ -418,15 +371,11 @@
       width="800px"
 
 
-      @close="handleDialogClose"
-
-
       top="5vh"
 
 
+      @close="handleDialogClose"
     >
-
-
       <el-form
 
 
@@ -440,17 +389,15 @@
 
 
         label-width="120px"
-
-
       >
-
-
-        <el-form-item label="规约名称" prop="specName">
-
-
-          <el-input v-model="formData.specName" placeholder="请输入规约名�" />
-
-
+        <el-form-item
+          label="规约名称"
+          prop="specName"
+        >
+          <el-input
+            v-model="formData.specName"
+            placeholder="请输入规约名�"
+          />
         </el-form-item>
 
 
@@ -458,122 +405,124 @@
 
 
         <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="规约类型"
+              prop="specType"
+            >
+              <el-select
+                v-model="formData.specType"
+                placeholder="请选择"
+                style="width: 100%"
+              >
+                <el-option
+                  label="应用�"
+                  value="APPLICATION"
+                />
 
 
-             <el-col :span="12">
+                <el-option
+                  label="公共"
+                  value="PUBLIC"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
 
 
-                <el-form-item label="规约类型" prop="specType">
-
-
-                  <el-select v-model="formData.specType" placeholder="请选择" style="width: 100%">
-
-
-                    <el-option label="应用�" value="APPLICATION" />
-
-
-                    <el-option label="公共" value="PUBLIC" />
-
-
-                  </el-select>
-
-
-                </el-form-item>
-
-
-             </el-col>
-
-
-             <el-col :span="12">
-
-
-                <el-form-item label="规约分类" prop="specCategory">
-
-
-                  <el-input v-model="formData.specCategory" placeholder="请输入分�" />
-
-
-                </el-form-item>
-
-
-             </el-col>
-
-
+          <el-col :span="12">
+            <el-form-item
+              label="规约分类"
+              prop="specCategory"
+            >
+              <el-input
+                v-model="formData.specCategory"
+                placeholder="请输入分�"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
 
 
 
 
 
-        <el-form-item label="适用模块" prop="applicableModules">
-
-
-          <el-input v-model="formData.applicableModules" placeholder="多个模块用逗号分隔" />
-
-
+        <el-form-item
+          label="适用模块"
+          prop="applicableModules"
+        >
+          <el-input
+            v-model="formData.applicableModules"
+            placeholder="多个模块用逗号分隔"
+          />
         </el-form-item>
 
 
         
 
 
-        <el-form-item label="适用测试分层" prop="applicableLayers">
-
-
-           <el-input v-model="formData.applicableLayers" placeholder="多个分层用逗号分隔" />
-
-
+        <el-form-item
+          label="适用测试分层"
+          prop="applicableLayers"
+        >
+          <el-input
+            v-model="formData.applicableLayers"
+            placeholder="多个分层用逗号分隔"
+          />
         </el-form-item>
 
 
         
 
 
-        <el-form-item label="适用测试方法" prop="applicableMethods">
-
-
-           <el-input v-model="formData.applicableMethods" placeholder="多个方法用逗号分隔" />
-
-
+        <el-form-item
+          label="适用测试方法"
+          prop="applicableMethods"
+        >
+          <el-input
+            v-model="formData.applicableMethods"
+            placeholder="多个方法用逗号分隔"
+          />
         </el-form-item>
 
 
 
 
 
-        <el-form-item label="规约内容" prop="specContent">
+        <el-form-item
+          label="规约内容"
+          prop="specContent"
+        >
+          <el-input 
 
 
-           <el-input 
+            v-model="formData.specContent" 
 
 
-             v-model="formData.specContent" 
+            type="textarea" 
 
 
-             type="textarea" 
+            :rows="6" 
 
 
-             :rows="6" 
-
-
-             placeholder="请输入规约内容(JSON格式)" 
-
-
-            />
-
-
+            placeholder="请输入规约内容(JSON格式)"
+          />
         </el-form-item>
 
 
 
 
 
-        <el-form-item label="规约描述" prop="specDescription">
-
-
-           <el-input v-model="formData.specDescription" type="textarea" :rows="3" placeholder="请输入描述" />
-
-
+        <el-form-item
+          label="规约描述"
+          prop="specDescription"
+        >
+          <el-input
+            v-model="formData.specDescription"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入描述"
+          />
         </el-form-item>
 
 
@@ -581,101 +530,74 @@
 
 
         <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item
+              label="生效日期"
+              prop="effectiveDate"
+            >
+              <el-date-picker
 
 
-             <el-col :span="12">
+                v-model="formData.effectiveDate"
 
 
-                 <el-form-item label="生效日期" prop="effectiveDate">
+                type="date"
 
 
-                    <el-date-picker
+                placeholder="选择日期"
 
 
-                        v-model="formData.effectiveDate"
+                value-format="YYYY-MM-DD"
 
 
-                        type="date"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
 
 
-                        placeholder="选择日期"
+          <el-col :span="12">
+            <el-form-item
+              label="失效日期"
+              prop="expireDate"
+            >
+              <el-date-picker
 
 
-                        value-format="YYYY-MM-DD"
+                v-model="formData.expireDate"
 
 
-                        style="width: 100%"
+                type="date"
 
 
-                    />
+                placeholder="选择日期"
 
 
-                </el-form-item>
+                value-format="YYYY-MM-DD"
 
 
-             </el-col>
-
-
-             <el-col :span="12">
-
-
-                <el-form-item label="失效日期" prop="expireDate">
-
-
-                    <el-date-picker
-
-
-                        v-model="formData.expireDate"
-
-
-                        type="date"
-
-
-                        placeholder="选择日期"
-
-
-                        value-format="YYYY-MM-DD"
-
-
-                         style="width: 100%"
-
-
-                    />
-
-
-                </el-form-item>
-
-
-             </el-col>
-
-
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
         </el-row>
-
-
-
-
-
       </el-form>
 
 
       <template #footer>
-
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-          确定
-
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
-
-
     </el-dialog>
 
 
@@ -688,84 +610,78 @@
     <el-dialog
 
 
-        v-model="detailVisible"
+      v-model="detailVisible"
 
 
-        title="规约详情"
+      title="规约详情"
 
 
-        width="800px"
-
-
+      width="800px"
     >
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="规约编码">
+          {{ currentDetail?.specCode }}
+        </el-descriptions-item>
 
 
-        <el-descriptions :column="2" border>
+        <el-descriptions-item label="规约名称">
+          {{ currentDetail?.specName }}
+        </el-descriptions-item>
 
 
-            <el-descriptions-item label="规约编码">{{ currentDetail?.specCode }}</el-descriptions-item>
+        <el-descriptions-item label="类型">
+          {{ currentDetail?.specType }}
+        </el-descriptions-item>
 
 
-            <el-descriptions-item label="规约名称">{{ currentDetail?.specName }}</el-descriptions-item>
+        <el-descriptions-item label="分类">
+          {{ currentDetail?.specCategory }}
+        </el-descriptions-item>
 
 
-            <el-descriptions-item label="类型">{{ currentDetail?.specType }}</el-descriptions-item>
+        <el-descriptions-item
+          label="适用模块"
+          :span="2"
+        >
+          {{ currentDetail?.applicableModules }}
+        </el-descriptions-item>
 
 
-            <el-descriptions-item label="分类">{{ currentDetail?.specCategory }}</el-descriptions-item>
+        <el-descriptions-item
+          label="适用分层"
+          :span="2"
+        >
+          {{ currentDetail?.applicableLayers }}
+        </el-descriptions-item>
+      </el-descriptions>
 
 
-             <el-descriptions-item label="适用模块" :span="2">{{ currentDetail?.applicableModules }}</el-descriptions-item>
+      <div style="margin-top: 20px;">
+        <h4>规约内容</h4>
 
 
-             <el-descriptions-item label="适用分层" :span="2">{{ currentDetail?.applicableLayers }}</el-descriptions-item>
+        <pre style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; overflow: auto; max-height: 300px;">{{ currentDetail?.specContent }}</pre>
+      </div>
 
 
-        </el-descriptions>
+      <div style="margin-top: 20px;">
+        <h4>描述</h4>
 
 
-        <div style="margin-top: 20px;">
+        <p>{{ currentDetail?.specDescription }}</p>
+      </div>
 
 
-            <h4>规约内容</h4>
-
-
-            <pre style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 4px; overflow: auto; max-height: 300px;">{{ currentDetail?.specContent }}</pre>
-
-
-        </div>
-
-
-         <div style="margin-top: 20px;">
-
-
-            <h4>描述</h4>
-
-
-            <p>{{ currentDetail?.specDescription }}</p>
-
-
-        </div>
-
-
-        <template #footer>
-
-
-             <el-button @click="detailVisible = false">关闭</el-button>
-
-
-        </template>
-
-
+      <template #footer>
+        <el-button @click="detailVisible = false">
+          关闭
+        </el-button>
+      </template>
     </el-dialog>
-
-
-
-
-
   </div>
-
-
 </template>
 
 
@@ -803,7 +719,7 @@ const searchForm = reactive({
   specType: '',
   isActive: ''
 })
-const formData = reactive<Partial<TestSpecificationRequestDTO>>({
+const formData = reactive<TestSpecificationRequestDTO>({
   specName: '',
   specType: 'APPLICATION',
   specCategory: '',

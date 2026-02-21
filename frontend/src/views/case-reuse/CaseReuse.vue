@@ -3,8 +3,13 @@
     <div class="header">
       <h2>用例复用管理</h2>
       <div class="header-actions">
-        <el-button @click="handleInit">初始化向量表</el-button>
-        <el-button type="primary" @click="handleCreateSuite">
+        <el-button @click="handleInit">
+          初始化向量表
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleCreateSuite"
+        >
           <el-icon><Plus /></el-icon>
           创建测试套件
         </el-button>
@@ -12,16 +17,32 @@
     </div>
 
     <!-- 搜索条件�?-->
-    <el-card class="search-card" shadow="never">
-      <el-form :inline="true" :model="searchForm" class="search-form">
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="检索方式">
           <el-radio-group v-model="searchType">
-            <el-radio label="semantic">语义检索</el-radio>
-            <el-radio label="keyword">关键词检索</el-radio>
-            <el-radio label="recommend">用例推荐</el-radio>
+            <el-radio label="semantic">
+              语义检索
+            </el-radio>
+            <el-radio label="keyword">
+              关键词检索
+            </el-radio>
+            <el-radio label="recommend">
+              用例推荐
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="检索内容" v-if="searchType !== 'recommend'">
+        <el-form-item
+          v-if="searchType !== 'recommend'"
+          label="检索内容"
+        >
           <el-input
             v-model="searchForm.caseText"
             type="textarea"
@@ -30,7 +51,10 @@
             style="width: 400px"
           />
         </el-form-item>
-        <el-form-item label="用例ID" v-if="searchType === 'recommend'">
+        <el-form-item
+          v-if="searchType === 'recommend'"
+          label="用例ID"
+        >
           <el-input-number
             v-model="searchForm.caseId"
             :min="1"
@@ -69,14 +93,24 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">检索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            检索
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 用例列表 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
         v-loading="loading"
         :data="caseList"
@@ -84,10 +118,26 @@
         style="width: 100%"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="caseCode" label="用例编码" width="180" />
-        <el-table-column prop="caseName" label="用例名称" min-width="200" />
-        <el-table-column prop="similarity" label="相似度" width="100" v-if="searchType === 'semantic' || searchType === 'recommend'">
+        <el-table-column
+          type="selection"
+          width="55"
+        />
+        <el-table-column
+          prop="caseCode"
+          label="用例编码"
+          width="180"
+        />
+        <el-table-column
+          prop="caseName"
+          label="用例名称"
+          min-width="200"
+        />
+        <el-table-column
+          v-if="searchType === 'semantic' || searchType === 'recommend'"
+          prop="similarity"
+          label="相似度"
+          width="100"
+        >
           <template #default="scope">
             <span v-if="scope.row.similarity !== undefined">
               {{ (scope.row.similarity * 100).toFixed(1) }}%
@@ -95,14 +145,36 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="caseType" label="用例类型" width="100" />
-        <el-table-column prop="casePriority" label="优先级" width="100" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column
+          prop="caseType"
+          label="用例类型"
+          width="100"
+        />
+        <el-table-column
+          prop="casePriority"
+          label="优先级"
+          width="100"
+        />
+        <el-table-column
+          label="操作"
+          width="200"
+          fixed="right"
+        >
           <template #default="scope">
-            <el-button size="small" link type="primary" @click="handleView(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleView(scope.row)"
+            >
               查看
             </el-button>
-            <el-button size="small" link type="success" @click="handleUpdateEmbedding(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="success"
+              @click="handleUpdateEmbedding(scope.row)"
+            >
               更新向量
             </el-button>
           </template>
@@ -122,7 +194,10 @@
         :rules="suiteFormRules"
         label-width="120px"
       >
-        <el-form-item label="套件名称" prop="suiteName">
+        <el-form-item
+          label="套件名称"
+          prop="suiteName"
+        >
           <el-input
             v-model="suiteForm.suiteName"
             placeholder="请输入测试套件名称"
@@ -139,12 +214,22 @@
               {{ testCase.caseCode }} - {{ testCase.caseName }}
             </el-tag>
           </div>
-          <el-empty v-else description="请先选择用例" :image-size="80" />
+          <el-empty
+            v-else
+            description="请先选择用例"
+            :image-size="80"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="suiteDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="suiteLoading" @click="handleSubmitSuite">
+        <el-button @click="suiteDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="suiteLoading"
+          @click="handleSubmitSuite"
+        >
           确定
         </el-button>
       </template>
@@ -153,11 +238,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { caseReuseApi, type SimilarCase } from '@/api/caseReuse'
 import { commonApi, type TestLayer, type TestDesignMethod } from '@/api/common'
+
+const loading = ref(false)
+const searchType = ref<'semantic' | 'keyword' | 'recommend'>('semantic')
+const searchForm = reactive({
+  caseText: '',
+  caseId: undefined as number | undefined,
+  layerId: undefined as number | undefined,
+  methodId: undefined as number | undefined
+})
+const caseList = ref<SimilarCase[]>([])
+const selectedCases = ref<SimilarCase[]>([])
+const suiteDialogVisible = ref(false)
+const suiteLoading = ref(false)
+const suiteFormRef = ref<FormInstance>()
+const suiteForm = reactive({
+  suiteName: ''
+})
+const layerList = ref<TestLayer[]>([])
+const methodList = ref<TestDesignMethod[]>([])
 
 // 响应式数据表单验证规则
 const suiteFormRules: FormRules = {

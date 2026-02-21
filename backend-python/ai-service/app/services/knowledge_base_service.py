@@ -47,7 +47,7 @@ class KnowledgeBaseService:
                 doc_category VARCHAR(100), -- 文档分类
                 doc_content TEXT, -- 文档内容
                 doc_url VARCHAR(1000), -- 文档URL
-                embedding vector(512), -- 向量列 (BAAI/bge-small-zh-v1.5)
+                embedding vector(1024), -- 向量列 (BAAI/bge-m3)
                 is_active CHAR(1) DEFAULT '1',
                 creator_id BIGINT,
                 create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

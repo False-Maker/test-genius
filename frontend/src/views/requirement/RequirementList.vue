@@ -1,76 +1,10 @@
 <template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   <div class="requirement-list">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <div class="page-header">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       <div class="header-left">
+        <h2 class="page-title">
+          需求ID管理
+        </h2>
 
 
 
@@ -94,54 +28,9 @@
 
 
 
-        <h2 class="page-title">需求ID管理</h2>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <p class="page-subtitle">管理和维护所有的测试需求ID文档</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <p class="page-subtitle">
+          管理和维护所有的测试需求ID文档
+        </p>
       </div>
 
 
@@ -167,53 +56,12 @@
 
 
       <div class="header-right">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
 
 
@@ -239,77 +87,8 @@
 
 
           新建需求ID
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </div>
 
 
@@ -382,78 +161,16 @@
 
 
 
-    <el-card class="search-card" shadow="never">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="需求ID名称">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <el-input
 
 
@@ -574,6 +291,30 @@
 
 
 
+            style="width: 240px"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             @clear="handleSearch"
 
 
@@ -599,77 +340,7 @@
 
 
             @keyup.enter="handleSearch"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            style="width: 240px"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -695,29 +366,6 @@
 
 
         <el-form-item label="需求ID状态">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <el-select
 
 
@@ -839,30 +487,11 @@
 
 
             @change="handleSearch"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           >
+            <el-option
+              label="草稿"
+              value="DRAFT"
+            />
 
 
 
@@ -886,7 +515,10 @@
 
 
 
-            <el-option label="草稿" value="DRAFT" />
+            <el-option
+              label="审核中"
+              value="REVIEWING"
+            />
 
 
 
@@ -910,7 +542,10 @@
 
 
 
-            <el-option label="审核中" value="REVIEWING" />
+            <el-option
+              label="已通过"
+              value="APPROVED"
+            />
 
 
 
@@ -934,78 +569,11 @@
 
 
 
-            <el-option label="已通过" value="APPROVED" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-option label="已关闭" value="CLOSED" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <el-option
+              label="已关闭"
+              value="CLOSED"
+            />
           </el-select>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -1031,6 +599,13 @@
 
 
         <el-form-item>
+          <el-button
+            type="primary"
+            plain
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
 
 
 
@@ -1054,102 +629,11 @@
 
 
 
-          <el-button type="primary" plain @click="handleSearch">查询</el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <el-button @click="handleReset">重置</el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </el-form>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </el-card>
 
 
@@ -1222,78 +706,19 @@
 
 
 
-    <el-card class="table-card" shadow="never">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-skeleton :rows="10" animated />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
 
 
@@ -1415,149 +840,15 @@
 
 
         style="width: 100%"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-table-column prop="requirementCode" label="需求ID编码" width="160">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-           <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-table-column
+          prop="requirementCode"
+          label="需求ID编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.requirementCode }}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-           </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          </template>
         </el-table-column>
 
 
@@ -1582,102 +873,15 @@
 
 
 
-        <el-table-column prop="requirementName" label="需求ID名称" min-width="200" show-overflow-tooltip>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-table-column
+          prop="requirementName"
+          label="需求ID名称"
+          min-width="200"
+          show-overflow-tooltip
+        >
           <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <span class="name-text">{{ scope.row.requirementName }}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-table-column>
 
 
@@ -1702,102 +906,19 @@
 
 
 
-        <el-table-column prop="requirementType" label="需求ID类型" width="120">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-table-column
+          prop="requirementType"
+          label="需求ID类型"
+          width="120"
+        >
           <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-tag effect="light" round>{{ scope.row.requirementType || '-' }}</el-tag>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <el-tag
+              effect="light"
+              round
+            >
+              {{ scope.row.requirementType || '-' }}
+            </el-tag>
           </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-table-column>
 
 
@@ -1822,102 +943,14 @@
 
 
 
-        <el-table-column prop="businessModule" label="业务模块" width="120">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-table-column
+          prop="businessModule"
+          label="业务模块"
+          width="120"
+        >
           <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             {{ scope.row.businessModule || '-' }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-table-column>
 
 
@@ -1942,79 +975,14 @@
 
 
 
-        <el-table-column prop="requirementStatus" label="状态" width="100">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-table-column
+          prop="requirementStatus"
+          label="状态"
+          width="100"
+        >
           <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <div class="status-indicator">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              <span :class="['dot', getStatusType(scope.row.requirementStatus)]"></span>
+              <span :class="['dot', getStatusType(scope.row.requirementStatus)]" />
 
 
 
@@ -2039,77 +1007,8 @@
 
 
               <span>{{ getStatusText(scope.row.requirementStatus) }}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-table-column>
 
 
@@ -2134,7 +1033,11 @@
 
 
 
-        <el-table-column prop="creatorName" label="创建人" width="120" />
+        <el-table-column
+          prop="creatorName"
+          label="创建人"
+          width="120"
+        />
 
 
 
@@ -2158,7 +1061,11 @@
 
 
 
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
 
 
 
@@ -2182,174 +1089,26 @@
 
 
 
-        <el-table-column label="操作" width="280" fixed="right">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-table-column
+          label="操作"
+          width="280"
+          fixed="right"
+        >
           <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <div class="action-buttons">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              <el-tooltip content="查看详情" placement="top">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-button circle size="small" type="info" plain @click="handleView(scope.row)">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+              <el-tooltip
+                content="查看详情"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="info"
+                  plain
+                  @click="handleView(scope.row)"
+                >
                   <el-icon><View /></el-icon>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               </el-tooltip>
 
 
@@ -2374,102 +1133,19 @@
 
 
 
-              <el-tooltip content="编辑需求ID" placement="top">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+              <el-tooltip
+                content="编辑需求ID"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleEdit(scope.row)"
+                >
                   <el-icon><Edit /></el-icon>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               </el-tooltip>
 
 
@@ -2494,102 +1170,19 @@
 
 
 
-              <el-tooltip content="智能分析" placement="top">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-button circle size="small" type="success" plain @click="handleAnalyze(scope.row)">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+              <el-tooltip
+                content="智能分析"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="success"
+                  plain
+                  @click="handleAnalyze(scope.row)"
+                >
                   <el-icon><MagicStick /></el-icon>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               </el-tooltip>
 
 
@@ -2638,78 +1231,18 @@
 
 
 
-              <el-dropdown trigger="click" @command="(cmd) => handleStatusChange(scope.row, cmd)">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-button circle size="small" type="warning" plain class="more-btn">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+              <el-dropdown
+                trigger="click"
+                @command="(cmd: string) => handleStatusChange(scope.row, cmd)"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="warning"
+                  plain
+                  class="more-btn"
+                >
                   <el-icon><More /></el-icon>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </el-button>
 
 
@@ -2735,53 +1268,7 @@
 
 
                 <template #dropdown>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                   <el-dropdown-menu>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     <el-dropdown-item
 
 
@@ -2855,77 +1342,8 @@
 
 
                       :command="status.value"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                       {{ status.label }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </el-dropdown-item>
 
 
@@ -2950,7 +1368,8 @@
 
 
 
-                    <el-dropdown-item divided 
+                    <el-dropdown-item
+                      divided 
 
 
 
@@ -2998,30 +1417,6 @@
 
 
 
-                      @click="handleDelete(scope.row)"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                       style="color: var(--el-color-danger)"
 
 
@@ -3046,222 +1441,16 @@
 
 
 
+                      @click="handleDelete(scope.row)"
                     >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                       删除需求ID
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </el-dropdown-item>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                   </el-dropdown-menu>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               </el-dropdown>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-table-column>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </el-table>
 
 
@@ -3335,29 +1524,6 @@
 
 
       <div class="pagination">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <el-pagination
 
 
@@ -3551,77 +1717,8 @@
 
 
           @current-change="handlePageChange"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </el-card>
 
 
@@ -3815,53 +1912,7 @@
 
 
       @close="handleDialogClose"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       <el-form
 
 
@@ -3959,57 +2010,12 @@
 
 
         label-width="120px"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-form-item label="需求ID名称" prop="requirementName">
-
-
-                  <el-input
+        <el-form-item
+          label="需求ID名称"
+          prop="requirementName"
+        >
+          <el-input
 
 
 
@@ -4106,53 +2112,7 @@
 
 
             show-word-limit
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -4177,10 +2137,21 @@
 
 
 
-        <el-form-item label="需求ID类型" prop="requirementType">
+        <el-form-item
+          label="需求ID类型"
+          prop="requirementType"
+        >
+          <el-select
+            v-model="formData.requirementType"
+            placeholder="请选择需求ID类型"
+            style="width: 100%"
+          >
+            <el-option
+              label="新功能"
+              value="新功能"
+            />
 
 
-                  <el-select v-model="formData.requirementType" placeholder="请选择需求ID类型" style="width: 100%">
 
 
 
@@ -4202,9 +2173,12 @@
 
 
 
+            <el-option
+              label="优化"
+              value="优化"
+            />
 
 
-            <el-option label="新功能" value="新功能" />
 
 
 
@@ -4226,80 +2200,11 @@
 
 
 
-
-
-            <el-option label="优化" value="优化" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-option label="缺陷修复" value="缺陷修复" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <el-option
+              label="缺陷修复"
+              value="缺陷修复"
+            />
           </el-select>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -4324,10 +2229,11 @@
 
 
 
-        <el-form-item label="业务模块" prop="businessModule">
-
-
-                  <el-input
+        <el-form-item
+          label="业务模块"
+          prop="businessModule"
+        >
+          <el-input
 
 
 
@@ -4400,53 +2306,7 @@
 
 
             maxlength="100"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -4468,10 +2328,11 @@
 
 
 
-        <el-form-item label="需求ID描述" prop="requirementDescription">
-
-
-                  <el-input
+        <el-form-item
+          label="需求ID描述"
+          prop="requirementDescription"
+        >
+          <el-input
 
 
 
@@ -4568,53 +2429,7 @@
 
 
             placeholder="请输入需求ID描述"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -4639,10 +2454,12 @@
 
 
 
-                         <el-form-item label="需求ID文档" prop="requirementDocument">
-
-
- <FileUpload
+        <el-form-item
+          label="需求ID文档"
+          prop="requirementDocument"
+        >
+          <FileUpload
+            v-model="formData.requirementDocUrl"
 
 
 
@@ -4763,53 +2580,7 @@
 
 
             @success="handleFileUploadSuccess"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -4834,10 +2605,21 @@
 
 
 
-        <el-form-item label="需求ID状态" prop="requirementStatus">
+        <el-form-item
+          label="需求ID状态"
+          prop="requirementStatus"
+        >
+          <el-select
+            v-model="formData.requirementStatus"
+            placeholder="请选择状态"
+            style="width: 100%"
+          >
+            <el-option
+              label="草稿"
+              value="DRAFT"
+            />
 
 
-                  <el-select v-model="formData.requirementStatus" placeholder="请选择状态" style="width: 100%">
 
 
 
@@ -4859,9 +2641,12 @@
 
 
 
+            <el-option
+              label="审核中"
+              value="REVIEWING"
+            />
 
 
-            <el-option label="草稿" value="DRAFT" />
 
 
 
@@ -4883,9 +2668,12 @@
 
 
 
+            <el-option
+              label="已通过"
+              value="APPROVED"
+            />
 
 
-            <el-option label="审核中" value="REVIEWING" />
 
 
 
@@ -4907,104 +2695,12 @@
 
 
 
-
-
-            <el-option label="已通过" value="APPROVED" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-option label="已关闭" value="CLOSED" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <el-option
+              label="已关闭"
+              value="CLOSED"
+            />
           </el-select>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-form-item>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </el-form>
 
 
@@ -5030,101 +2726,8 @@
 
 
       <template #footer>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          确定
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
 
@@ -5149,30 +2752,14 @@
 
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </el-dialog>
 
 
@@ -5318,125 +2905,13 @@
 
 
       width="800px"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <el-descriptions :column="2" border>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      <el-descriptions
+        :column="2"
+        border
+      >
         <el-descriptions-item label="需求ID编码">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.requirementCode }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5462,53 +2937,7 @@
 
 
         <el-descriptions-item label="需求ID名称">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.requirementName }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5534,53 +2963,7 @@
 
 
         <el-descriptions-item label="需求ID类型">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.requirementType || '-' }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5606,53 +2989,7 @@
 
 
         <el-descriptions-item label="业务模块">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.businessModule || '-' }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5678,101 +3015,9 @@
 
 
         <el-descriptions-item label="需求ID状态">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           <el-tag :type="getStatusType(viewData.requirementStatus)">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             {{ getStatusText(viewData.requirementStatus) }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-tag>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5798,53 +3043,7 @@
 
 
         <el-descriptions-item label="版本号">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.version }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5870,53 +3069,7 @@
 
 
         <el-descriptions-item label="创建人">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.creatorName || '-' }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -5942,53 +3095,7 @@
 
 
         <el-descriptions-item label="创建时间">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.createTime }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -6014,53 +3121,7 @@
 
 
         <el-descriptions-item label="更新时间">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           {{ viewData.updateTime }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -6085,54 +3146,13 @@
 
 
 
-        <el-descriptions-item label="需求ID描述" :span="2">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <div style="white-space: pre-wrap">{{ viewData.requirementDescription || '-' }}</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-descriptions-item
+          label="需求ID描述"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap">
+            {{ viewData.requirementDescription || '-' }}
+          </div>
         </el-descriptions-item>
 
 
@@ -6157,30 +3177,10 @@
 
 
 
-        <el-descriptions-item label="需求ID文档" :span="2">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-descriptions-item
+          label="需求ID文档"
+          :span="2"
+        >
           <el-link
 
 
@@ -6194,110 +3194,14 @@
 
 
             type="primary"
-
-
           >
-
-
             查看文档
-
-
           </el-link>
 
 
           <span v-else>-</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions-item>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       </el-descriptions>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </el-dialog>
 
 
@@ -6443,30 +3347,17 @@
 
 
       width="900px"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     >
+      <div
+        v-if="analysisLoading"
+        style="text-align: center; padding: 40px"
+      >
+        <el-icon
+          class="is-loading"
+          style="font-size: 32px; color: var(--el-color-primary)"
+        >
+          <Loading />
+        </el-icon>
 
 
 
@@ -6490,78 +3381,9 @@
 
 
 
-      <div v-if="analysisLoading" style="text-align: center; padding: 40px">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-icon class="is-loading" style="font-size: 32px; color: var(--el-color-primary)"><Loading /></el-icon>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <p style="margin-top: 10px; color: #909399">正在智能分析需求ID文档...</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <p style="margin-top: 10px; color: #909399">
+          正在智能分析需求ID文档...
+        </p>
       </div>
 
 
@@ -6587,101 +3409,12 @@
 
 
       <div v-else-if="analysisResult">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-descriptions :column="2" border>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-descriptions
+          :column="2"
+          border
+        >
           <el-descriptions-item label="需求ID名称">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             {{ analysisResult.requirementName }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-descriptions-item>
 
 
@@ -6707,53 +3440,7 @@
 
 
           <el-descriptions-item label="分析时间">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             {{ analysisResult.analysisTime }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-descriptions-item>
 
 
@@ -6778,30 +3465,10 @@
 
 
 
-          <el-descriptions-item label="关键词" :span="2">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <el-descriptions-item
+            label="关键词"
+            :span="2"
+          >
             <el-tag
 
 
@@ -6899,101 +3566,9 @@
 
 
               style="margin-right: 8px; margin-bottom: 8px"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             >
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               {{ keyword }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </el-tag>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-descriptions-item>
 
 
@@ -7019,53 +3594,7 @@
 
 
           <el-descriptions-item label="内容长度">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             {{ analysisResult.contentLength }} 字符
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-descriptions-item>
 
 
@@ -7091,77 +3620,8 @@
 
 
           <el-descriptions-item label="句子数量">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             {{ analysisResult.sentenceCount }} 句
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-descriptions-item>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </el-descriptions>
 
 
@@ -7235,6 +3695,16 @@
 
 
         <div v-if="analysisResult.testPoints && analysisResult.testPoints.length > 0">
+          <el-table
+            :data="analysisResult.testPoints"
+            border
+            stripe
+          >
+            <el-table-column
+              prop="point"
+              label="测试要点"
+              min-width="200"
+            />
 
 
 
@@ -7258,7 +3728,11 @@
 
 
 
-          <el-table :data="analysisResult.testPoints" border stripe>
+            <el-table-column
+              prop="description"
+              label="描述"
+              min-width="300"
+            />
 
 
 
@@ -7282,150 +3756,18 @@
 
 
 
-            <el-table-column prop="point" label="测试要点" min-width="200" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-table-column prop="description" label="描述" min-width="300" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-table-column prop="priority" label="优先级" width="100">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <el-table-column
+              prop="priority"
+              label="优先级"
+              width="100"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-tag v-if="scope.row.priority" :type="getPriorityType(scope.row.priority)" effect="dark">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                <el-tag
+                  v-if="scope.row.priority"
+                  :type="getPriorityType(scope.row.priority)"
+                  effect="dark"
+                >
                   {{ scope.row.priority }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </el-tag>
 
 
@@ -7451,101 +3793,9 @@
 
 
                 <span v-else>-</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             </el-table-column>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
 
 
@@ -7570,7 +3820,10 @@
 
 
 
-        <el-empty v-else description="暂无测试要点" />
+        <el-empty
+          v-else
+          description="暂无测试要点"
+        />
 
 
 
@@ -7643,6 +3896,16 @@
 
 
         <div v-if="analysisResult.businessRules && analysisResult.businessRules.length > 0">
+          <el-table
+            :data="analysisResult.businessRules"
+            border
+            stripe
+          >
+            <el-table-column
+              prop="rule"
+              label="业务规则"
+              min-width="200"
+            />
 
 
 
@@ -7666,7 +3929,11 @@
 
 
 
-          <el-table :data="analysisResult.businessRules" border stripe>
+            <el-table-column
+              prop="description"
+              label="描述"
+              min-width="300"
+            />
 
 
 
@@ -7690,198 +3957,21 @@
 
 
 
-            <el-table-column prop="rule" label="业务规则" min-width="200" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-table-column prop="description" label="描述" min-width="300" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <el-table-column prop="type" label="类型" width="120">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-               <template #default="scope">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-tag type="info" effect="plain">{{ scope.row.type }}</el-tag>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-               </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <el-table-column
+              prop="type"
+              label="类型"
+              width="120"
+            >
+              <template #default="scope">
+                <el-tag
+                  type="info"
+                  effect="plain"
+                >
+                  {{ scope.row.type }}
+                </el-tag>
+              </template>
             </el-table-column>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           </el-table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
 
 
@@ -7906,30 +3996,10 @@
 
 
 
-        <el-empty v-else description="暂无业务规则" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-empty
+          v-else
+          description="暂无业务规则"
+        />
       </div>
 
 
@@ -7955,125 +4025,12 @@
 
 
       <template #footer>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <el-button @click="analysisDialogVisible = false">关闭</el-button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <el-button @click="analysisDialogVisible = false">
+          关闭
+        </el-button>
       </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </el-dialog>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </template>
 
 
@@ -8194,7 +4151,7 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 
 
 
-import { Plus, ArrowDown, Loading, View, Edit, MagicStick, More, Search } from '@element-plus/icons-vue'
+import { Plus, Loading, View, Edit, MagicStick, More } from '@element-plus/icons-vue'
 
 
 
@@ -8242,7 +4199,6 @@ import { requirementApi, type TestRequirement } from '@/api/requirement'
 
 
 
-import type { PageResult } from '@/api/types'
 
 
 
@@ -8818,7 +4774,7 @@ const formData = reactive<TestRequirement>({
 
 
 
-const viewData = ref<TestRequirement>({})
+const viewData = ref<TestRequirement>({ requirementName: '' })
 
 
 
@@ -14023,7 +9979,7 @@ const handleSubmit = async () => {
 
 
 
-const handleFileUploadSuccess = (response: FileUploadResponse) => {
+const handleFileUploadSuccess = (_response: FileUploadResponse) => {
 
 
 
@@ -14144,6 +10100,12 @@ const handleFileUploadSuccess = (response: FileUploadResponse) => {
 
 
 const handleAnalyze = async (row: TestRequirement) => {
+  const hasDescription = !!row.requirementDescription?.trim()
+  const hasDoc = !!row.requirementDocUrl?.trim()
+  if (!hasDescription && !hasDoc) {
+    ElMessage.warning('需求ID描述和文档内容不能同时为空，请先填写描述或上传文档')
+    return
+  }
 
 
 
@@ -14335,7 +10297,34 @@ const handleAnalyze = async (row: TestRequirement) => {
 
 
 
-      analysisResult.value = response.data
+      const data = response.data as any
+      const keyInfo = data.keyInfo || data.key_info || {}
+      const keywords = data.keywords ?? keyInfo.keywords ?? []
+      const contentLength =
+        data.contentLength ??
+        keyInfo.content_length ??
+        keyInfo.contentLength ??
+        (data.requirementText ? data.requirementText.length : 0)
+      const sentenceCount = data.sentenceCount ?? keyInfo.sentence_count ?? keyInfo.sentenceCount ?? 0
+      const testPoints = (data.testPoints || []).map((item: any) => ({
+        point: item.point ?? item.name ?? '',
+        description: item.description,
+        priority: item.priority
+      }))
+      const businessRules = (data.businessRules || []).map((item: any) => ({
+        rule: item.rule ?? item.name ?? '',
+        description: item.description,
+        type: item.type
+      }))
+      analysisResult.value = {
+        ...data,
+        keywords,
+        contentLength,
+        sentenceCount,
+        testPoints,
+        businessRules,
+        analysisTime: data.analysisTime ?? new Date().toLocaleString()
+      }
 
 
 

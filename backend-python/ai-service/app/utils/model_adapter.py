@@ -4,6 +4,7 @@
 使用LangChain统一接口
 兼容 LangChain 0.3.x
 """
+
 from typing import Optional, Dict, Any
 import httpx
 import json
@@ -32,38 +33,107 @@ def _normalize_api_endpoint(api_endpoint: str) -> str:
     """
     规范化API端点URL
     移除可能存在的 /chat/completions 后缀，因为 LangChain 会自动追加
-    
+
     Args:
         api_endpoint: 原始API端点
-        
+
     Returns:
         规范化后的API端点
     """
     if not api_endpoint:
         return api_endpoint
-    
+
     # 移除末尾的 /chat/completions（不区分大小写）
-    endpoint = api_endpoint.rstrip('/')
-    if endpoint.lower().endswith('/chat/completions'):
-        endpoint = endpoint[:-len('/chat/completions')]
-    
+    endpoint = api_endpoint.rstrip("/")
+    if endpoint.lower().endswith("/chat/completions"):
+        endpoint = endpoint[: -len("/chat/completions")]
+
     return endpoint
+
+
+class OpenAIAdapter:
+    """OpenAI模型适配器"""
+
+    @staticmethod
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
+        """
+        创建OpenAI LLM实例
+        """
+        if ChatOpenAI is None:
+            # 如果ChatOpenAI不可用，使用HTTP方式
+            return HTTPLLMAdapter.create_llm(
+                api_key, api_endpoint, model_version, max_tokens, temperature
+            )
+
+        # 规范化API端点，移除可能存在的 /chat/completions 后缀
+        normalized_endpoint = (
+            _normalize_api_endpoint(api_endpoint) if api_endpoint else ""
+        )
+
+        # LangChain 0.3.x 兼容：新版本 API
+        try:
+            # 尝试新版本 API（langchain-openai 0.2.x）
+            params = {
+                "model": model_version,
+                "api_key": api_key,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "timeout": 60.0,
+            }
+            # 如果提供了自定义endpoint，则使用base_url
+            if normalized_endpoint:
+                params["base_url"] = normalized_endpoint
+
+            return ChatOpenAI(**params)
+        except (TypeError, ValueError):
+            # 兼容旧版本 API（langchain-openai 0.0.x）
+            try:
+                params = {
+                    "model": model_version,
+                    "openai_api_key": api_key,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                    "timeout": 60,
+                }
+                # 如果提供了自定义endpoint，则使用openai_api_base
+                if normalized_endpoint:
+                    params["openai_api_base"] = normalized_endpoint
+
+                return ChatOpenAI(**params)
+            except Exception:
+                # 如果都失败，使用 HTTP 适配器
+                return HTTPLLMAdapter.create_llm(
+                    api_key, api_endpoint, model_version, max_tokens, temperature
+                )
 
 
 class DeepSeekAdapter:
     """DeepSeek模型适配器"""
-    
+
     @staticmethod
-    def create_llm(api_key: str, api_endpoint: str, model_version: str, 
-                   max_tokens: int, temperature: float):
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """
         创建DeepSeek LLM实例
         DeepSeek兼容OpenAI API
         """
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
-            return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
-        
+            return HTTPLLMAdapter.create_llm(
+                api_key, api_endpoint, model_version, max_tokens, temperature
+            )
+
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -74,7 +144,7 @@ class DeepSeekAdapter:
                 base_url=api_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0
+                timeout=60.0,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -85,30 +155,39 @@ class DeepSeekAdapter:
                     openai_api_base=api_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60
+                    timeout=60,
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
-                return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
+                return HTTPLLMAdapter.create_llm(
+                    api_key, api_endpoint, model_version, max_tokens, temperature
+                )
 
 
 class DoubaoAdapter:
     """豆包模型适配器（字节跳动）"""
-    
+
     @staticmethod
-    def create_llm(api_key: str, api_endpoint: str, model_version: str,
-                   max_tokens: int, temperature: float):
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """
         创建豆包 LLM实例
         豆包兼容OpenAI API
         """
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
-            return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
-        
+            return HTTPLLMAdapter.create_llm(
+                api_key, api_endpoint, model_version, max_tokens, temperature
+            )
+
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
         normalized_endpoint = _normalize_api_endpoint(api_endpoint)
-        
+
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -119,7 +198,7 @@ class DoubaoAdapter:
                 base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0
+                timeout=60.0,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -130,30 +209,39 @@ class DoubaoAdapter:
                     openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60
+                    timeout=60,
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
-                return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
+                return HTTPLLMAdapter.create_llm(
+                    api_key, api_endpoint, model_version, max_tokens, temperature
+                )
 
 
 class KimiAdapter:
     """Kimi模型适配器（月之暗面）"""
-    
+
     @staticmethod
-    def create_llm(api_key: str, api_endpoint: str, model_version: str,
-                   max_tokens: int, temperature: float):
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """
         创建Kimi LLM实例
         Kimi兼容OpenAI API
         """
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
-            return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
-        
+            return HTTPLLMAdapter.create_llm(
+                api_key, api_endpoint, model_version, max_tokens, temperature
+            )
+
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
         normalized_endpoint = _normalize_api_endpoint(api_endpoint)
-        
+
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -164,7 +252,7 @@ class KimiAdapter:
                 base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0
+                timeout=60.0,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -175,19 +263,26 @@ class KimiAdapter:
                     openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60
+                    timeout=60,
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
-                return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
+                return HTTPLLMAdapter.create_llm(
+                    api_key, api_endpoint, model_version, max_tokens, temperature
+                )
 
 
 class QianwenAdapter:
     """通义千问模型适配器（阿里巴巴）"""
-    
+
     @staticmethod
-    def create_llm(api_key: str, api_endpoint: str, model_version: str,
-                   max_tokens: int, temperature: float):
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """
         创建通义千问 LLM实例
         通义千问使用DashScope API，需要特殊处理
@@ -202,11 +297,11 @@ class QianwenAdapter:
                     dashscope_api_key=api_key,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60
+                    timeout=60,
                 )
             except Exception:
                 pass
-        
+
         # 如果ChatTongyi不可用，使用HTTP方式
         return HTTPLLMAdapter.create_llm(
             api_key, api_endpoint, model_version, max_tokens, temperature
@@ -215,21 +310,28 @@ class QianwenAdapter:
 
 class ZhipuAdapter:
     """智谱模型适配器（智谱AI）"""
-    
+
     @staticmethod
-    def create_llm(api_key: str, api_endpoint: str, model_version: str,
-                   max_tokens: int, temperature: float):
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """
         创建智谱 LLM实例
         智谱兼容OpenAI API
         """
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
-            return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
-        
+            return HTTPLLMAdapter.create_llm(
+                api_key, api_endpoint, model_version, max_tokens, temperature
+            )
+
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
         normalized_endpoint = _normalize_api_endpoint(api_endpoint)
-        
+
         # LangChain 0.3.x 兼容：新版本 API
         # 注意：新版本可能使用不同的参数名，这里提供兼容性处理
         try:
@@ -240,7 +342,7 @@ class ZhipuAdapter:
                 base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0
+                timeout=60.0,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -251,52 +353,60 @@ class ZhipuAdapter:
                     openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60
+                    timeout=60,
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
-                return HTTPLLMAdapter.create_llm(api_key, api_endpoint, model_version, max_tokens, temperature)
+                return HTTPLLMAdapter.create_llm(
+                    api_key, api_endpoint, model_version, max_tokens, temperature
+                )
 
 
 class HTTPLLMAdapter:
     """HTTP方式调用LLM的通用适配器（用于不兼容OpenAI API的模型）"""
-    
+
     @staticmethod
-    def create_llm(api_key: str, api_endpoint: str, model_version: str,
-                   max_tokens: int, temperature: float):
+    def create_llm(
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """创建HTTP方式调用的LLM（简化版本）"""
+
         # 这里返回一个可调用对象
         class HTTPLLMWrapper:
-            def __init__(self, api_key, api_endpoint, model_version, max_tokens, temperature):
+            def __init__(
+                self, api_key, api_endpoint, model_version, max_tokens, temperature
+            ):
                 self.api_key = api_key
                 self.api_endpoint = api_endpoint
                 self.model_version = model_version
                 self.max_tokens = max_tokens
                 self.temperature = temperature
-            
+
             def invoke(self, prompt: str) -> str:
                 """调用模型"""
                 headers = {
                     "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 }
-                
+
                 payload = {
                     "model": self.model_version,
                     "messages": [{"role": "user", "content": prompt}],
                     "max_tokens": self.max_tokens,
-                    "temperature": self.temperature
+                    "temperature": self.temperature,
                 }
-                
+
                 with httpx.Client(timeout=60.0) as client:
                     response = client.post(
-                        self.api_endpoint,
-                        headers=headers,
-                        json=payload
+                        self.api_endpoint, headers=headers, json=payload
                     )
                     response.raise_for_status()
                     result = response.json()
-                    
+
                     # 提取响应内容（根据实际API响应格式调整）
                     if "choices" in result and len(result["choices"]) > 0:
                         return result["choices"][0]["message"]["content"]
@@ -304,14 +414,17 @@ class HTTPLLMAdapter:
                         return result["output"]["text"]
                     else:
                         return str(result)
-        
-        return HTTPLLMWrapper(api_key, api_endpoint, model_version, max_tokens, temperature)
+
+        return HTTPLLMWrapper(
+            api_key, api_endpoint, model_version, max_tokens, temperature
+        )
 
 
 class ModelAdapterFactory:
     """模型适配器工厂"""
-    
+
     _adapters = {
+        "OPENAI": OpenAIAdapter,
         "DEEPSEEK": DeepSeekAdapter,
         "DOUBAO": DoubaoAdapter,
         "KIMI": KimiAdapter,
@@ -319,13 +432,20 @@ class ModelAdapterFactory:
         "ZHIPU": ZhipuAdapter,
         "智谱": ZhipuAdapter,  # 支持中文名称
     }
-    
+
     @classmethod
-    def create_llm(cls, model_type: str, api_key: str, api_endpoint: str,
-                    model_version: str, max_tokens: int, temperature: float):
+    def create_llm(
+        cls,
+        model_type: str,
+        api_key: str,
+        api_endpoint: str,
+        model_version: str,
+        max_tokens: int,
+        temperature: float,
+    ):
         """
         创建LLM实例
-        
+
         Args:
             model_type: 模型类型（DEEPSEEK/DOUBAO/KIMI/QIANWEN/ZHIPU/智谱）
             api_key: API密钥
@@ -333,7 +453,7 @@ class ModelAdapterFactory:
             model_version: 模型版本
             max_tokens: 最大token数
             temperature: 温度参数
-            
+
         Returns:
             LLM实例
         """
@@ -341,8 +461,7 @@ class ModelAdapterFactory:
         if not adapter_class:
             # 默认使用HTTP适配器
             adapter_class = HTTPLLMAdapter
-        
+
         return adapter_class.create_llm(
             api_key, api_endpoint, model_version, max_tokens, temperature
         )
-

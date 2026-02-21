@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 import type { PageResult } from './testReport'
 
 // --- Test Specification ---
@@ -107,7 +108,7 @@ export const testSpecificationApi = {
     },
 
     getSpecificationList(page: number = 0, size: number = 10, specName?: string, specType?: string, isActive?: string) {
-        return request.get<any, PageResult<TestSpecificationResponseDTO>>('/v1/specifications', {
+        return request.get<any, ApiResult<PageResult<TestSpecificationResponseDTO>>>('/v1/specifications', {
             params: { page, size, specName, specType, isActive }
         })
     },

@@ -11,13 +11,20 @@
         <el-input
           v-model="searchKeyword"
           placeholder="搜索工作流名称或编码"
-          prefix-icon="Search"
+          :prefix-icon="Search"
           clearable
           @clear="handleSearch"
           @keyup.enter="handleSearch"
         />
-        <el-button type="primary" @click="handleSearch">搜索</el-button>
-        <el-button @click="handleReset">重置</el-button>
+        <el-button
+          type="primary"
+          @click="handleSearch"
+        >
+          搜索
+        </el-button>
+        <el-button @click="handleReset">
+          重置
+        </el-button>
       </div>
 
       <!-- 工作流列表 -->
@@ -26,14 +33,35 @@
         :data="filteredWorkflows"
         stripe
         highlight-current-row
-        @current-change="handleCurrentChange"
         height="400px"
+        @current-change="handleCurrentChange"
       >
-        <el-table-column prop="workflowCode" label="编码" width="180" />
-        <el-table-column prop="workflowName" label="名称" min-width="200" />
-        <el-table-column prop="workflowType" label="类型" width="120" />
-        <el-table-column prop="version" label="版本" width="80" align="center" />
-        <el-table-column prop="updateTime" label="更新时间" width="180">
+        <el-table-column
+          prop="workflowCode"
+          label="编码"
+          width="180"
+        />
+        <el-table-column
+          prop="workflowName"
+          label="名称"
+          min-width="200"
+        />
+        <el-table-column
+          prop="workflowType"
+          label="类型"
+          width="120"
+        />
+        <el-table-column
+          prop="version"
+          label="版本"
+          width="80"
+          align="center"
+        />
+        <el-table-column
+          prop="updateTime"
+          label="更新时间"
+          width="180"
+        >
           <template #default="{ row }">
             {{ formatTime(row.updateTime) }}
           </template>
@@ -42,8 +70,14 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :disabled="!selectedWorkflow" @click="handleConfirm">
+      <el-button @click="visible = false">
+        取消
+      </el-button>
+      <el-button
+        type="primary"
+        :disabled="!selectedWorkflow"
+        @click="handleConfirm"
+      >
         确定
       </el-button>
     </template>

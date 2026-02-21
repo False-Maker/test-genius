@@ -8,7 +8,10 @@
         <div class="logo-icon">
           <span class="logo-text-inner">TG</span>
         </div>
-        <h1 class="logo-text" v-show="!isCollapse">
+        <h1
+          v-show="!isCollapse"
+          class="logo-text"
+        >
           Test Genius
         </h1>
       </div>
@@ -23,7 +26,10 @@
         :collapse="isCollapse"
         :collapse-transition="false"
       >
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           核心功能
         </div>
 
@@ -37,7 +43,10 @@
           <span>用例管理</span>
         </el-menu-item>
 
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           AI 能力
         </div>
 
@@ -51,7 +60,10 @@
           <span>智能复用</span>
         </el-menu-item>
 
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           规约与设计
         </div>
 
@@ -65,7 +77,10 @@
           <span>规约检查</span>
         </el-menu-item>
 
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           测试评估
         </div>
 
@@ -94,7 +109,10 @@
           <span>质量评估</span>
         </el-menu-item>
 
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           测试执行
         </div>
 
@@ -123,7 +141,10 @@
           <span>执行管理</span>
         </el-menu-item>
 
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           设计文档
         </div>
 
@@ -137,7 +158,10 @@
           <span>数据文档生成</span>
         </el-menu-item>
 
-        <div class="menu-group-title" v-show="!isCollapse">
+        <div
+          v-show="!isCollapse"
+          class="menu-group-title"
+        >
           配置与资产
         </div>
 
@@ -161,7 +185,10 @@
     <el-container class="main-container">
       <el-header class="app-header">
         <div class="header-left">
-          <div class="collapse-btn" @click="toggleCollapse">
+          <div
+            class="collapse-btn"
+            @click="toggleCollapse"
+          >
             <el-icon :size="20">
               <Expand v-if="isCollapse" />
               <Fold v-else />
@@ -169,7 +196,9 @@
           </div>
 
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/' }">
+              首页
+            </el-breadcrumb-item>
             <el-breadcrumb-item>{{ $route.meta.title || '当前页面' }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
@@ -177,7 +206,10 @@
         <div class="header-right">
           <el-dropdown trigger="click">
             <span class="user-profile">
-              <el-avatar :size="32" class="user-avatar">
+              <el-avatar
+                :size="32"
+                class="user-avatar"
+              >
                 A
               </el-avatar>
               <span class="username">管理员</span>
@@ -187,7 +219,9 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>个人中心</el-dropdown-item>
-                <el-dropdown-item divided>退出登录</el-dropdown-item>
+                <el-dropdown-item divided>
+                  退出登录
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -196,7 +230,10 @@
 
       <el-main class="app-content">
         <router-view v-slot="{ Component }">
-          <transition name="fade-transform" mode="out-in">
+          <transition
+            name="fade-transform"
+            mode="out-in"
+          >
             <keep-alive :include="['RequirementList', 'TestCaseList', 'PromptTemplateList', 'ModelConfigList', 'KnowledgeBaseList']">
               <component :is="Component" />
             </keep-alive>
@@ -389,13 +426,11 @@ const toggleCollapse = () => {
         margin-right: 8px;
         font-size: 14px;
         font-weight: 500;
-
-      .el-icon {
-
-        color: $text-secondary;
-
       }
 
+      .el-icon {
+        color: $text-secondary;
+      }
     }
 
   }
@@ -435,9 +470,7 @@ const toggleCollapse = () => {
     
 
     &:hover {
-
-      background: rgba($neon-cyan, 0.3);
-
+      background: rgba($acid-green, 0.3);
     }
 
   }

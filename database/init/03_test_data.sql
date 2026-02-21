@@ -208,6 +208,14 @@ ON CONFLICT (case_code) DO NOTHING;
 -- ============================================
 -- 3. 测试执行任务数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_execution_task'
+) THEN
 INSERT INTO test_execution_task (task_code, task_name, task_type, requirement_id, case_id, script_type, script_language, task_status, progress, success_count, fail_count, creator_id, creator_name, create_time, update_time, finish_time) VALUES
 ('TASK-20240117-001', '投保功能自动化测试执行', 'MANUAL_EXECUTION',
  (SELECT id FROM test_requirement WHERE requirement_code = 'REQ-20240117-001'),
@@ -225,10 +233,20 @@ INSERT INTO test_execution_task (task_code, task_name, task_type, requirement_id
  'SELENIUM', 'PYTHON', 'PENDING', 0, 0, 0,
  1, '王五', CURRENT_TIMESTAMP - INTERVAL '3 hours', CURRENT_TIMESTAMP - INTERVAL '3 hours', NULL)
 ON CONFLICT (task_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 4. 测试执行记录数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_execution_record'
+) THEN
 INSERT INTO test_execution_record (record_code, task_id, case_id, execution_type, execution_status, execution_result, execution_log, error_message, execution_duration, executed_by, executed_by_name, execution_time, finish_time) VALUES
 ('REC-20240117-001', 
  (SELECT id FROM test_execution_task WHERE task_code = 'TASK-20240117-001'),
@@ -268,10 +286,20 @@ INSERT INTO test_execution_record (record_code, task_id, case_id, execution_type
 2024-01-17 11:01:00 - 验证审核结果失败：审核状态未更新',
  '元素定位失败：无法找到审核状态元素', 60000, 1, '李四', CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP - INTERVAL '1 day')
 ON CONFLICT (record_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 5. UI脚本模板数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'ui_script_template'
+) THEN
 INSERT INTO ui_script_template (template_code, template_name, template_type, script_language, template_content, template_variables, applicable_scenarios, template_description, version, is_active, creator_id, create_time, update_time) VALUES
 ('TMP-20240117-001', 'Selenium Python基础脚本模板', 'SELENIUM', 'PYTHON',
 'from selenium import webdriver
@@ -310,10 +338,20 @@ test("{test_name}", async ({ page }) => {
 '{"test_name": "测试名称", "page_url": "页面URL", "operations": "操作步骤", "assertions": "断言验证"}',
 '适用于Playwright JavaScript自动化测试的基础脚本模板', 'Playwright JavaScript基础脚本模板，包含页面打开、操作执行、结果验证等基础功能', 1, '1', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (template_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 6. 测试报告模板数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_report_template'
+) THEN
 INSERT INTO test_report_template (template_code, template_name, template_type, template_content, template_variables, file_format, template_description, is_default, is_active, version, creator_id, create_time, update_time) VALUES
 ('TMP-20240117-003', '标准测试报告模板', 'STANDARD',
 '# 测试报告
@@ -364,10 +402,20 @@ INSERT INTO test_report_template (template_code, template_name, template_type, t
 '{"overview": "测试概述", "test_plan": "测试计划", "test_execution": "测试执行", "test_analysis": "测试结果分析", "risk_assessment": "风险评估", "recommendations": "改进建议"}',
 'PDF', '详细测试报告模板，包含完整的测试信息和分析', '0', '1', 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (template_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 7. 测试报告数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_report'
+) THEN
 INSERT INTO test_report (report_code, report_name, report_type, template_id, requirement_id, execution_task_id, report_content, report_summary, report_status, file_format, creator_id, creator_name, create_time, update_time, publish_time) VALUES
 ('RPT-20240117-001', '投保功能测试报告', 'STANDARD',
  (SELECT id FROM test_report_template WHERE template_code = 'TMP-20240117-003'),
@@ -384,10 +432,20 @@ INSERT INTO test_report (report_code, report_name, report_type, template_id, req
  '测试执行中，部分用例失败，需要修复', 'DRAFT', 'WORD',
  1, '李四', CURRENT_TIMESTAMP - INTERVAL '12 hours', CURRENT_TIMESTAMP - INTERVAL '12 hours', NULL)
 ON CONFLICT (report_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 8. 测试覆盖分析数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_coverage_analysis'
+) THEN
 INSERT INTO test_coverage_analysis (analysis_code, analysis_name, requirement_id, coverage_type, total_items, covered_items, coverage_rate, uncovered_items, coverage_details, analyzer_id, analysis_time) VALUES
 ('COV-20240117-001', '投保功能需求覆盖分析', 
  (SELECT id FROM test_requirement WHERE requirement_code = 'REQ-20240117-001'),
@@ -402,10 +460,20 @@ INSERT INTO test_coverage_analysis (analysis_code, analysis_name, requirement_id
  '{"coverage_details": [{"item": "自动审核功能", "covered": true, "case_count": 1}, {"item": "人工审核功能", "covered": true, "case_count": 2}, {"item": "审核界面优化", "covered": true, "case_count": 1}, {"item": "小额理赔自动审核", "covered": true, "case_count": 1}, {"item": "大额理赔人工审核", "covered": true, "case_count": 1}, {"item": "审核历史记录查询功能", "covered": false, "case_count": 0}, {"item": "审核超时提醒功能", "covered": false, "case_count": 0}]}',
  1, CURRENT_TIMESTAMP - INTERVAL '12 hours')
 ON CONFLICT (analysis_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 9. 风险评估数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_risk_assessment'
+) THEN
 INSERT INTO test_risk_assessment (assessment_code, assessment_name, requirement_id, execution_task_id, risk_level, risk_score, risk_items, feasibility_score, feasibility_recommendation, assessment_details, assessor_id, assessment_time) VALUES
 ('RISK-20240117-001', '投保功能上线风险评估',
  (SELECT id FROM test_requirement WHERE requirement_code = 'REQ-20240117-001'),
@@ -426,10 +494,20 @@ INSERT INTO test_risk_assessment (assessment_code, assessment_name, requirement_
  '{"assessment_summary": "理赔审核功能测试进行中，部分用例失败，需要修复", "coverage_analysis": "需求覆盖率达到75%，部分功能未覆盖", "execution_analysis": "测试执行通过率66.67%，存在失败用例，需要修复", "risk_analysis": "风险等级为MEDIUM，风险评分55分，上线可行性评分65分"}',
  1, CURRENT_TIMESTAMP - INTERVAL '12 hours')
 ON CONFLICT (assessment_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 10. 测试规约数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_specification'
+) THEN
 INSERT INTO test_specification (spec_code, spec_name, spec_type, spec_category, spec_description, spec_content, applicable_modules, applicable_layers, applicable_methods, current_version, is_active, effective_date, expire_date, creator_id, creator_name, create_time, update_time, version) VALUES
 ('SPEC-20240117-001', '投保业务测试规约', 'APPLICATION', '投保',
  '投保业务测试规约，定义投保功能测试的标准和要求',
@@ -450,10 +528,20 @@ INSERT INTO test_specification (spec_code, spec_name, spec_type, spec_category, 
  'v1.0', '1', CURRENT_DATE, CURRENT_DATE + INTERVAL '1 year',
  1, '王五', CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 1)
 ON CONFLICT (spec_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 11. 规约版本数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'spec_version'
+) THEN
 INSERT INTO spec_version (spec_id, version_number, version_name, version_description, spec_content, change_log, is_current, created_by, created_by_name, create_time) VALUES
 ((SELECT id FROM test_specification WHERE spec_code = 'SPEC-20240117-001'), 'v1.0', '初始版本', '投保业务测试规约初始版本',
  '{"spec_content": "投保业务测试规约v1.0内容"}', '初始版本创建', '1', 1, '张三', CURRENT_TIMESTAMP - INTERVAL '5 days'),
@@ -462,10 +550,20 @@ INSERT INTO spec_version (spec_id, version_number, version_name, version_descrip
 ((SELECT id FROM test_specification WHERE spec_code = 'SPEC-20240117-003'), 'v1.0', '初始版本', '公共测试规约初始版本',
  '{"spec_content": "公共测试规约v1.0内容"}', '初始版本创建', '1', 1, '王五', CURRENT_TIMESTAMP - INTERVAL '3 days')
 ON CONFLICT (spec_id, version_number) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 12. 字段测试要点数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'field_test_point'
+) THEN
 INSERT INTO field_test_point (point_code, spec_id, field_name, field_type, test_requirement, test_method, test_cases, validation_rules, is_required, is_active, display_order, creator_id, creator_name, create_time, update_time) VALUES
 ('FTP-20240117-001',
  (SELECT id FROM test_specification WHERE spec_code = 'SPEC-20240117-001'),
@@ -489,10 +587,20 @@ INSERT INTO field_test_point (point_code, spec_id, field_name, field_type, test_
  '{"min": 0, "type": "decimal", "max_depends_on": "product"}',
  '1', '1', 2, 1, '张三', CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '5 days')
 ON CONFLICT (point_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 13. 逻辑测试要点数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'logic_test_point'
+) THEN
 INSERT INTO logic_test_point (point_code, spec_id, logic_name, logic_type, logic_description, test_requirement, test_method, test_cases, validation_rules, applicable_scenarios, is_active, display_order, creator_id, creator_name, create_time, update_time) VALUES
 ('LTP-20240117-001',
  (SELECT id FROM test_specification WHERE spec_code = 'SPEC-20240117-001'),
@@ -519,6 +627,8 @@ INSERT INTO logic_test_point (point_code, spec_id, logic_name, logic_type, logic
  '{"auto_review_threshold": 1000, "auto_review_rule": "金额<1000元自动审核通过", "manual_review_rule": "金额>=1000元需要人工审核"}',
  '理赔业务场景', '1', 1, 1, '李四', CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days')
 ON CONFLICT (point_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 14. 用例生成任务数据
@@ -565,14 +675,32 @@ ON CONFLICT (doc_code) DO NOTHING;
 -- ============================================
 -- 16. 用例套件数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_case_suite'
+) THEN
 INSERT INTO test_case_suite (suite_code, suite_name, suite_description, creator_id, create_time, update_time) VALUES
 ('SUITE-20240117-001', '投保功能完整测试套件', '包含投保功能的所有测试用例', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days'),
 ('SUITE-20240117-002', '理赔功能完整测试套件', '包含理赔功能的所有测试用例', 1, CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP - INTERVAL '2 days')
 ON CONFLICT (suite_code) DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 17. 测试套件用例关联数据
 -- ============================================
+DO $$
+BEGIN
+IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'test_suite_case'
+) THEN
 INSERT INTO test_suite_case (suite_id, case_id, case_order) VALUES
 ((SELECT id FROM test_case_suite WHERE suite_code = 'SUITE-20240117-001'),
  (SELECT id FROM test_case WHERE case_code = 'CASE-20240117-001'), 1),
@@ -583,24 +711,11 @@ INSERT INTO test_suite_case (suite_id, case_id, case_order) VALUES
 ((SELECT id FROM test_case_suite WHERE suite_code = 'SUITE-20240117-002'),
  (SELECT id FROM test_case WHERE case_code = 'CASE-20240117-004'), 1)
 ON CONFLICT DO NOTHING;
+END IF;
+END $$;
 
 -- ============================================
 -- 数据插入完成提示
 -- ============================================
-SELECT '测试数据插入完成！' AS message,
-       (SELECT COUNT(*) FROM test_requirement) AS requirement_count,
-       (SELECT COUNT(*) FROM test_case) AS case_count,
-       (SELECT COUNT(*) FROM test_execution_task) AS execution_task_count,
-       (SELECT COUNT(*) FROM test_execution_record) AS execution_record_count,
-       (SELECT COUNT(*) FROM ui_script_template) AS script_template_count,
-       (SELECT COUNT(*) FROM test_report_template) AS report_template_count,
-       (SELECT COUNT(*) FROM test_report) AS report_count,
-       (SELECT COUNT(*) FROM test_coverage_analysis) AS coverage_analysis_count,
-       (SELECT COUNT(*) FROM test_risk_assessment) AS risk_assessment_count,
-       (SELECT COUNT(*) FROM test_specification) AS specification_count,
-       (SELECT COUNT(*) FROM field_test_point) AS field_test_point_count,
-       (SELECT COUNT(*) FROM logic_test_point) AS logic_test_point,
-       (SELECT COUNT(*) FROM case_generation_task) AS generation_task_count,
-       (SELECT COUNT(*) FROM knowledge_document) AS knowledge_document_count,
-       (SELECT COUNT(*) FROM test_case_suite) AS suite_count;
+SELECT '测试数据插入完成！' AS message;
 

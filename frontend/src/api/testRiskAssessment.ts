@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 import type { PageResult } from './testReport'
 
 export interface TestRiskAssessmentRequestDTO {
@@ -63,7 +64,7 @@ export const testRiskAssessmentApi = {
 
     // Get assessment list
     getAssessmentList(page: number = 0, size: number = 10) {
-        return request.get<any, PageResult<TestRiskAssessmentResponseDTO>>('/v1/test-risk-assessment', {
+        return request.get<any, ApiResult<PageResult<TestRiskAssessmentResponseDTO>>>('/v1/test-risk-assessment', {
             params: { page, size }
         })
     },

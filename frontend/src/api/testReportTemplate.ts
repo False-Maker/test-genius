@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 import type { PageResult } from './testReport'
 
 export interface TestReportTemplateRequestDTO {
@@ -38,7 +39,7 @@ export const testReportTemplateApi = {
 
     // Get template list
     getTemplateList(page: number = 0, size: number = 10) {
-        return request.get<any, PageResult<TestReportTemplateResponseDTO>>('/v1/test-report-templates', {
+        return request.get<any, ApiResult<PageResult<TestReportTemplateResponseDTO>>>('/v1/test-report-templates', {
             params: { page, size }
         })
     },

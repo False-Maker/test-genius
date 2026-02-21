@@ -1,42 +1,31 @@
 <template>
-
-
   <div class="test-risk-assessment">
-
-
     <div class="page-header">
-
-
       <div class="header-left">
+        <h2 class="page-title">
+          风险评估管理
+        </h2>
 
 
-        <h2 class="page-title">风险评估管理</h2>
-
-
-        <p class="page-subtitle">评估需求ID和执行任务的风险等级及上线可行�</p>
-
-
+        <p class="page-subtitle">
+          评估需求ID和执行任务的风险等级及上线可行�
+        </p>
       </div>
 
 
       <div class="header-right">
-
-
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
-
-
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
 
 
           新建评估
-
-
         </el-button>
-
-
       </div>
-
-
     </div>
 
 
@@ -46,15 +35,19 @@
     <!-- 列表 -->
 
 
-    <el-card class="table-card" shadow="never">
-
-
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-
-
-        <el-skeleton :rows="10" animated />
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
 
 
@@ -71,128 +64,102 @@
 
 
         style="width: 100%"
-
-
       >
-
-
-        <el-table-column prop="assessmentCode" label="评估编码" width="160">
-
-
-           <template #default="scope">
-
-
+        <el-table-column
+          prop="assessmentCode"
+          label="评估编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.assessmentCode }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="assessmentName" label="评估名称" min-width="200" show-overflow-tooltip>
-
-
-          <template #default="scope">
-
-
-            <span class="name-text" @click="handleView(scope.row)">{{ scope.row.assessmentName }}</span>
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="riskLevel" label="风险等级" width="120">
-
-
+        <el-table-column
+          prop="assessmentName"
+          label="评估名称"
+          min-width="200"
+          show-overflow-tooltip
+        >
           <template #default="scope">
+            <span
+              class="name-text"
+              @click="handleView(scope.row)"
+            >{{ scope.row.assessmentName }}</span>
+          </template>
+        </el-table-column>
 
 
-            <el-tag :type="getRiskLevelType(scope.row.riskLevel)" effect="dark">
-
-
-                {{ getRiskLevelText(scope.row.riskLevel) }}
-
-
+        <el-table-column
+          prop="riskLevel"
+          label="风险等级"
+          width="120"
+        >
+          <template #default="scope">
+            <el-tag
+              :type="getRiskLevelType(scope.row.riskLevel)"
+              effect="dark"
+            >
+              {{ getRiskLevelText(scope.row.riskLevel) }}
             </el-tag>
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="riskScore" label="风险评分" width="150">
-
-
-           <template #default="scope">
-
-
-              <span :class="['score-text', getRiskLevelType(scope.row.riskLevel)]">{{ scope.row.riskScore }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="feasibilityScore" label="可行性评�" width="150">
-
-
-            <template #default="scope">
-
-
-              <span class="score-text success">{{ scope.row.feasibilityScore }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="assessmentTime" label="评估时间" width="180" />
-
-
-        <el-table-column label="操作" width="150" fixed="right">
-
-
+        <el-table-column
+          prop="riskScore"
+          label="风险评分"
+          width="150"
+        >
           <template #default="scope">
-
-
-            <div class="action-buttons">
-
-
-              <el-tooltip content="查看详情" placement="top">
-
-
-                <el-button circle size="small" type="primary" plain @click="handleView(scope.row)">
-
-
-                  <el-icon><View /></el-icon>
-
-
-                </el-button>
-
-
-              </el-tooltip>
-
-
-            </div>
-
-
+            <span :class="['score-text', getRiskLevelType(scope.row.riskLevel)]">{{ scope.row.riskScore }}</span>
           </template>
-
-
         </el-table-column>
 
 
+        <el-table-column
+          prop="feasibilityScore"
+          label="可行性评�"
+          width="150"
+        >
+          <template #default="scope">
+            <span class="score-text success">{{ scope.row.feasibilityScore }}</span>
+          </template>
+        </el-table-column>
+
+
+        <el-table-column
+          prop="assessmentTime"
+          label="评估时间"
+          width="180"
+        />
+
+
+        <el-table-column
+          label="操作"
+          width="150"
+          fixed="right"
+        >
+          <template #default="scope">
+            <div class="action-buttons">
+              <el-tooltip
+                content="查看详情"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleView(scope.row)"
+                >
+                  <el-icon><View /></el-icon>
+                </el-button>
+              </el-tooltip>
+            </div>
+          </template>
+        </el-table-column>
       </el-table>
 
 
@@ -203,8 +170,6 @@
 
 
       <div class="pagination">
-
-
         <el-pagination
 
 
@@ -230,14 +195,8 @@
 
 
           @current-change="handlePageChange"
-
-
         />
-
-
       </div>
-
-
     </el-card>
 
 
@@ -260,11 +219,7 @@
 
 
       @close="handleDialogClose"
-
-
     >
-
-
       <el-form
 
 
@@ -278,77 +233,80 @@
 
 
         label-width="100px"
-
-
       >
-
-
-        <el-form-item label="评估名称" prop="assessmentName">
-
-
-          <el-input v-model="formData.assessmentName" placeholder="请输入评估名称" maxlength="100" show-word-limit />
-
-
+        <el-form-item
+          label="评估名称"
+          prop="assessmentName"
+        >
+          <el-input
+            v-model="formData.assessmentName"
+            placeholder="请输入评估名称"
+            maxlength="100"
+            show-word-limit
+          />
         </el-form-item>
 
 
-        <el-form-item label="关联对象" prop="targetType">
+        <el-form-item
+          label="关联对象"
+          prop="targetType"
+        >
+          <el-radio-group v-model="targetType">
+            <el-radio label="REQUIREMENT">
+              需求
+            </el-radio>
 
 
-           <el-radio-group v-model="targetType">
-
-
-              <el-radio label="REQUIREMENT">需求</el-radio>
-
-
-              <el-radio label="EXECUTION">执行任务</el-radio>
-
-
-           </el-radio-group>
-
-
+            <el-radio label="EXECUTION">
+              执行任务
+            </el-radio>
+          </el-radio-group>
         </el-form-item>
 
 
-        <el-form-item v-if="targetType === 'REQUIREMENT'" label="需求ID" prop="requirementId">
-
-
-           <el-input-number v-model="formData.requirementId" placeholder="请输入需求ID" style="width: 100%" :min="1" />
-
-
+        <el-form-item
+          v-if="targetType === 'REQUIREMENT'"
+          label="需求ID"
+          prop="requirementId"
+        >
+          <el-input-number
+            v-model="formData.requirementId"
+            placeholder="请输入需求ID"
+            style="width: 100%"
+            :min="1"
+          />
         </el-form-item>
 
 
-        <el-form-item v-if="targetType === 'EXECUTION'" label="执行任务ID" prop="executionTaskId">
-
-
-           <el-input-number v-model="formData.executionTaskId" placeholder="请输入执行任务ID" style="width: 100%" :min="1" />
-
-
+        <el-form-item
+          v-if="targetType === 'EXECUTION'"
+          label="执行任务ID"
+          prop="executionTaskId"
+        >
+          <el-input-number
+            v-model="formData.executionTaskId"
+            placeholder="请输入执行任务ID"
+            style="width: 100%"
+            :min="1"
+          />
         </el-form-item>
-
-
       </el-form>
 
 
       <template #footer>
-
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-          开始评估
-
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          开始评估
+        </el-button>
       </template>
-
-
     </el-dialog>
 
 
@@ -368,92 +326,75 @@
 
 
       width="900px"
-
-
     >
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="评估编码">
+          {{ viewData.assessmentCode }}
+        </el-descriptions-item>
 
 
-      <el-descriptions :column="2" border>
-
-
-        <el-descriptions-item label="评估编码">{{ viewData.assessmentCode }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="评估名称">{{ viewData.assessmentName }}</el-descriptions-item>
+        <el-descriptions-item label="评估名称">
+          {{ viewData.assessmentName }}
+        </el-descriptions-item>
 
 
         <el-descriptions-item label="风险等级">
-
-
-             <el-tag :type="getRiskLevelType(viewData.riskLevel)" effect="dark">
-
-
-                {{ getRiskLevelText(viewData.riskLevel) }}
-
-
-            </el-tag>
-
-
+          <el-tag
+            :type="getRiskLevelType(viewData.riskLevel)"
+            effect="dark"
+          >
+            {{ getRiskLevelText(viewData.riskLevel) }}
+          </el-tag>
         </el-descriptions-item>
 
 
-        <el-descriptions-item label="风险评分">{{ viewData.riskScore }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="可行性评估">{{ viewData.feasibilityScore }}</el-descriptions-item>
-
-
-         <el-descriptions-item label="评估时间">{{ viewData.assessmentTime }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="上线建议" :span="2">
-
-
-            {{ viewData.feasibilityRecommendation || '-'}}
-
-
+        <el-descriptions-item label="风险评分">
+          {{ viewData.riskScore }}
         </el-descriptions-item>
 
 
-        <el-descriptions-item label="风险项" :span="2">
-
-
-             <div class="json-content">
-
-
-                {{ viewData.riskItems || '-'}}
-
-
-             </div>
-
-
+        <el-descriptions-item label="可行性评估">
+          {{ viewData.feasibilityScore }}
         </el-descriptions-item>
 
 
-        <el-descriptions-item label="评估详情" :span="2">
-
-
-             <div class="json-content">
-
-
-                {{ viewData.assessmentDetails || '-'}}
-
-
-             </div>
-
-
+        <el-descriptions-item label="评估时间">
+          {{ viewData.assessmentTime }}
         </el-descriptions-item>
 
 
+        <el-descriptions-item
+          label="上线建议"
+          :span="2"
+        >
+          {{ viewData.feasibilityRecommendation || '-' }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item
+          label="风险项"
+          :span="2"
+        >
+          <div class="json-content">
+            {{ viewData.riskItems || '-' }}
+          </div>
+        </el-descriptions-item>
+
+
+        <el-descriptions-item
+          label="评估详情"
+          :span="2"
+        >
+          <div class="json-content">
+            {{ viewData.assessmentDetails || '-' }}
+          </div>
+        </el-descriptions-item>
       </el-descriptions>
-
-
     </el-dialog>
-
-
   </div>
-
-
 </template>
 
 

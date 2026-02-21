@@ -4,39 +4,82 @@
       <div class="editor-header">
         <span class="editor-title">提示词编辑器</span>
         <div class="editor-actions">
-          <el-button size="small" @click="handleFormat">格式化</el-button>
-          <el-button size="small" @click="handleValidate">验证</el-button>
+          <el-button
+            size="small"
+            @click="handleFormat"
+          >
+            格式化
+          </el-button>
+          <el-button
+            size="small"
+            @click="handleValidate"
+          >
+            验证
+          </el-button>
         </div>
       </div>
-      <div ref="editorContainer" class="monaco-editor"></div>
+      <div
+        ref="editorContainer"
+        class="monaco-editor"
+      />
     </div>
     
     <!-- 变量配置面板 -->
-    <div class="variables-panel" v-if="showVariables">
+    <div
+      v-if="showVariables"
+      class="variables-panel"
+    >
       <div class="panel-header">
         <span>变量配置</span>
-        <el-button size="small" text @click="showVariables = false">收起</el-button>
+        <el-button
+          size="small"
+          text
+          @click="showVariables = false"
+        >
+          收起
+        </el-button>
       </div>
       <div class="variables-list">
-        <div v-for="(value, key) in variables" :key="key" class="variable-item">
+        <div
+          v-for="key in Object.keys(variables)"
+          :key="key"
+          class="variable-item"
+        >
           <el-input
             v-model="variables[key]"
             :placeholder="`请输入${key}的值`"
             size="small"
             @input="handleVariableChange"
           >
-            <template #prepend>{{ key }}</template>
+            <template #prepend>
+              {{ key }}
+            </template>
           </el-input>
         </div>
-        <el-button size="small" type="primary" @click="handleAddVariable">添加变量</el-button>
+        <el-button
+          size="small"
+          type="primary"
+          @click="handleAddVariable"
+        >
+          添加变量
+        </el-button>
       </div>
     </div>
     
     <!-- 实时预览面板 -->
-    <div class="preview-panel" v-if="showPreview">
+    <div
+      v-if="showPreview"
+      class="preview-panel"
+    >
       <div class="panel-header">
         <span>实时预览</span>
-        <el-button size="small" text @click="showPreview = false">收起</el-button>
+        <el-button
+          size="small"
+          text
+          @click="showPreview = false"
+        >
+          收起
+        </el-button>
       </div>
       <div class="preview-content">
         <pre>{{ previewContent }}</pre>
@@ -47,7 +90,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { loader } from '@monaco-editor/loader'
+import loader from '@monaco-editor/loader'
 import * as monaco from 'monaco-editor'
 import { ElMessage } from 'element-plus'
 
@@ -88,13 +131,14 @@ const initEditor = async () => {
 
   try {
     // 加载Monaco Editor
-    monacoInstance = await loader.init()
+    const instance = await loader.init()
+    monacoInstance = instance
     
     // 注册自定义语言（用于变量高亮）
-    monacoInstance.languages.register({ id: 'prompt-template' })
+    instance.languages.register({ id: 'prompt-template' })
     
     // 定义变量高亮规则
-    monacoInstance.languages.setMonarchTokensProvider('prompt-template', {
+    instance.languages.setMonarchTokensProvider('prompt-template', {
       tokenizer: {
         root: [
           [/\{[^}]+\}/, 'variable'], // 变量占位符
@@ -104,7 +148,7 @@ const initEditor = async () => {
     })
     
     // 定义主题
-    monacoInstance.editor.defineTheme('prompt-theme', {
+    instance.editor.defineTheme('prompt-theme', {
       base: 'vs',
       inherit: true,
       rules: [
@@ -115,7 +159,7 @@ const initEditor = async () => {
     })
     
     // 创建编辑器实例
-    editor = monacoInstance.editor.create(editorContainer.value, {
+    editor = instance.editor.create(editorContainer.value, {
       value: props.modelValue,
       language: 'prompt-template',
       theme: 'prompt-theme',
@@ -133,9 +177,13 @@ const initEditor = async () => {
       formatOnType: true
     })
     
-    // 监听内容变化
-    editor.onDidChangeModelContent(() => {
-      const value = editor?.getValue() || ''
+    const currentEditor = editor
+    if (!currentEditor) {
+      return
+    }
+
+    currentEditor.onDidChangeModelContent(() => {
+      const value = currentEditor.getValue() || ''
       emit('update:modelValue', value)
       updatePreview()
       extractVariables(value)

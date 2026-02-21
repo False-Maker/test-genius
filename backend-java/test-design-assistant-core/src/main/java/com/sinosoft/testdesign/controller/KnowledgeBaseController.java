@@ -3,6 +3,7 @@ package com.sinosoft.testdesign.controller;
 import com.sinosoft.testdesign.common.Result;
 import com.sinosoft.testdesign.dto.*;
 import com.sinosoft.testdesign.service.KnowledgeBaseManageService;
+import com.sinosoft.testdesign.service.KnowledgeBaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,11 +25,12 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "知识库管理", description = "知识库管理相关接口")
 @RestController
-@RequestMapping("/api/v1/knowledge-base")
+@RequestMapping("/v1/knowledge-base")
 @RequiredArgsConstructor
 public class KnowledgeBaseController {
     
     private final KnowledgeBaseManageService knowledgeBaseManageService;
+    private final KnowledgeBaseService knowledgeBaseService;
     
     @Operation(summary = "创建知识库", description = "创建新的知识库")
     @PostMapping
@@ -145,12 +147,67 @@ public class KnowledgeBaseController {
         return Result.success(logs);
     }
     
+    @Operation(summary = "初始化知识库", description = "初始化 RAG/向量表结构（代理到 Python）")
+    @PostMapping("/init")
+    public Result<Boolean> initKnowledgeBase() {
+        boolean success = knowledgeBaseService.initKnowledgeBase();
+        return Result.success(success);
+    }
+
+    @Operation(summary = "添加文档", description = "添加知识库文档（代理到 Python）")
+    @PostMapping("/documents")
+    public Result<Long> addDocument(@Valid @RequestBody DocumentAddRequestDTO request) {
+        Long docId = knowledgeBaseService.addDocument(
+                request.getDocCode(),
+                request.getDocName(),
+                request.getDocType(),
+                request.getDocContent(),
+                request.getDocCategory(),
+                request.getDocUrl(),
+                request.getCreatorId()
+        );
+        return Result.success(docId);
+    }
+
+    @Operation(summary = "语义检索文档", description = "语义检索知识库文档（代理到 Python）")
+    @PostMapping("/documents/search")
+    public Result<List<Map<String, Object>>> searchDocuments(@Valid @RequestBody DocumentSearchRequestDTO request) {
+        int topK = request.getTopK() != null ? request.getTopK() : 10;
+        double threshold = request.getSimilarityThreshold() != null ? request.getSimilarityThreshold() : 0.7;
+        List<Map<String, Object>> list = knowledgeBaseService.searchDocuments(
+                request.getQueryText(),
+                request.getDocType(),
+                topK,
+                threshold
+        );
+        return Result.success(list);
+    }
+
+    @Operation(summary = "关键词检索文档", description = "关键词检索知识库文档（代理到 Python）")
+    @GetMapping("/documents/keyword/{keyword}")
+    public Result<List<Map<String, Object>>> searchDocumentsByKeyword(
+            @Parameter(description = "关键词") @PathVariable String keyword,
+            @Parameter(description = "文档类型") @RequestParam(required = false) String docType,
+            @Parameter(description = "返回条数") @RequestParam(defaultValue = "10") int topK) {
+        List<Map<String, Object>> list = knowledgeBaseService.searchDocumentsByKeyword(keyword, docType, topK);
+        return Result.success(list);
+    }
+
+    @Operation(summary = "获取知识库文档列表", description = "按知识库获取文档列表（代理到 Python）")
+    @GetMapping("/{kbId}/documents")
+    public Result<List<Map<String, Object>>> listDocumentsByKb(
+            @Parameter(description = "知识库ID") @PathVariable Long kbId,
+            @Parameter(description = "返回条数") @RequestParam(defaultValue = "20") int limit) {
+        List<Map<String, Object>> list = knowledgeBaseService.listDocumentsByKb(kbId, limit);
+        return Result.success(list);
+    }
+
     @Operation(summary = "上传文档", description = "上传文档到知识库")
     @PostMapping("/{kbId}/upload")
     public Result<String> uploadDocument(
             @Parameter(description = "知识库ID") @PathVariable Long kbId,
             @Parameter(description = "文件") @RequestParam("file") MultipartFile file,
-            @Parameter(description = "创建人ID") @RequestParam Long creatorId) {
+            @Parameter(description = "创建人ID") @RequestParam(required = false, defaultValue = "1") Long creatorId) {
         log.info("上传文档请求: kbId={}, fileName={}", kbId, file.getOriginalFilename());
         try {
             String docCode = knowledgeBaseManageService.uploadDocument(

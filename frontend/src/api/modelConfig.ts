@@ -1,5 +1,5 @@
 import request from './request'
-import type { PageResult } from './types'
+import type { ApiResult, PageResult } from './types'
 
 // 模型配置类型
 export interface ModelConfig {
@@ -8,9 +8,11 @@ export interface ModelConfig {
   modelName: string
   modelType?: string
   apiEndpoint?: string
+  apiKey?: string
   modelVersion?: string
   maxTokens?: number
   temperature?: number
+  provider?: string
   isActive?: string
   priority?: number
   dailyLimit?: number
@@ -35,7 +37,7 @@ export const modelConfigApi = {
 
   // 查询模型配置列表
   getModelConfigList(params: ModelConfigListParams = {}) {
-    return request.get<PageResult<ModelConfig>>('/v1/model-configs', { params })
+    return request.get<any, ApiResult<PageResult<ModelConfig>>>('/v1/model-configs', { params })
   },
 
   // 获取模型配置详情

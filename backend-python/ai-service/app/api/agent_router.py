@@ -4,7 +4,7 @@ Agent API路由
 import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.agent_service import AgentService

@@ -1,36 +1,26 @@
 <template>
-
-
   <div class="ui-script-generation">
-
-
     <el-card>
-
-
       <template #header>
-
-
         <div class="card-header">
-
-
           <h2>UI脚本生成管理</h2>
-
-
         </div>
-
-
       </template>
 
 
 
 
 
-      <el-form :model="form" :rules="formRules" ref="formRef" label-width="140px">
-
-
-        <el-form-item label="自然语言描述" prop="naturalLanguageDesc">
-
-
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="formRules"
+        label-width="140px"
+      >
+        <el-form-item
+          label="自然语言描述"
+          prop="naturalLanguageDesc"
+        >
           <el-input
 
 
@@ -50,11 +40,7 @@
 
 
             show-word-limit
-
-
           />
-
-
         </el-form-item>
 
 
@@ -62,32 +48,31 @@
 
 
         <el-form-item label="页面代码">
-
-
           <el-radio-group v-model="pageCodeInputType">
+            <el-radio label="upload">
+              上传文件
+            </el-radio>
 
 
-            <el-radio label="upload">上传文件</el-radio>
+            <el-radio label="url">
+              URL地址
+            </el-radio>
 
 
-            <el-radio label="url">URL地址</el-radio>
-
-
-            <el-radio label="input">直接输入</el-radio>
-
-
+            <el-radio label="input">
+              直接输入
+            </el-radio>
           </el-radio-group>
-
-
         </el-form-item>
 
 
 
 
 
-        <el-form-item v-if="pageCodeInputType === 'upload'" label="上传页面代码文件">
-
-
+        <el-form-item
+          v-if="pageCodeInputType === 'upload'"
+          label="上传页面代码文件"
+        >
           <FileUpload
 
 
@@ -104,20 +89,17 @@
 
 
             @success="handleFileUploadSuccess"
-
-
           />
-
-
         </el-form-item>
 
 
 
 
 
-        <el-form-item v-if="pageCodeInputType === 'url'" label="页面代码URL">
-
-
+        <el-form-item
+          v-if="pageCodeInputType === 'url'"
+          label="页面代码URL"
+        >
           <el-input
 
 
@@ -128,20 +110,17 @@
 
 
             clearable
-
-
           />
-
-
         </el-form-item>
 
 
 
 
 
-        <el-form-item v-if="pageCodeInputType === 'input'" label="页面代码内容">
-
-
+        <el-form-item
+          v-if="pageCodeInputType === 'input'"
+          label="页面代码内容"
+        >
           <el-input
 
 
@@ -155,11 +134,7 @@
 
 
             placeholder="请直接粘贴页面代码（HTML/JavaScript/Vue等）"
-
-
           />
-
-
         </el-form-item>
 
 
@@ -167,8 +142,6 @@
 
 
         <el-form-item label="页面URL">
-
-
           <el-input
 
 
@@ -179,20 +152,17 @@
 
 
             clearable
-
-
           />
-
-
         </el-form-item>
 
 
 
 
 
-        <el-form-item label="脚本类型" prop="scriptType">
-
-
+        <el-form-item
+          label="脚本类型"
+          prop="scriptType"
+        >
           <el-select
 
 
@@ -203,29 +173,28 @@
 
 
             style="width: 100%"
-
-
           >
+            <el-option
+              label="Selenium"
+              value="SELENIUM"
+            />
 
 
-            <el-option label="Selenium" value="SELENIUM" />
-
-
-            <el-option label="Playwright" value="PLAYWRIGHT" />
-
-
+            <el-option
+              label="Playwright"
+              value="PLAYWRIGHT"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
 
 
 
-        <el-form-item label="脚本语言" prop="scriptLanguage">
-
-
+        <el-form-item
+          label="脚本语言"
+          prop="scriptLanguage"
+        >
           <el-select
 
 
@@ -236,23 +205,24 @@
 
 
             style="width: 100%"
-
-
           >
+            <el-option
+              label="Python"
+              value="PYTHON"
+            />
 
 
-            <el-option label="Python" value="PYTHON" />
+            <el-option
+              label="Java"
+              value="JAVA"
+            />
 
 
-            <el-option label="Java" value="JAVA" />
-
-
-            <el-option label="JavaScript" value="JAVASCRIPT" />
-
-
+            <el-option
+              label="JavaScript"
+              value="JAVASCRIPT"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
@@ -260,8 +230,6 @@
 
 
         <el-form-item label="使用LLM优化">
-
-
           <el-switch v-model="form.useLlm" />
 
 
@@ -272,8 +240,6 @@
 
 
           </span>
-
-
         </el-form-item>
 
 
@@ -281,8 +247,6 @@
 
 
         <el-form-item label="关联需求ID（可选）">
-
-
           <el-select
 
 
@@ -302,11 +266,7 @@
 
 
             :loading="requirementLoading"
-
-
           >
-
-
             <el-option
 
 
@@ -320,14 +280,8 @@
 
 
               :value="req.id"
-
-
             />
-
-
           </el-select>
-
-
         </el-form-item>
 
 
@@ -335,23 +289,19 @@
 
 
         <el-form-item>
-
-
-          <el-button type="primary" @click="handleGenerate" :loading="generateLoading">
-
-
+          <el-button
+            type="primary"
+            :loading="generateLoading"
+            @click="handleGenerate"
+          >
             生成脚本
-
-
           </el-button>
 
 
-          <el-button @click="handleReset">重置</el-button>
-
-
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
-
-
       </el-form>
 
 
@@ -361,30 +311,20 @@
       <!-- 生成结果 -->
 
 
-      <el-card v-if="generationResult" class="result-card" style="margin-top: 20px">
-
-
+      <el-card
+        v-if="generationResult"
+        class="result-card"
+        style="margin-top: 20px"
+      >
         <template #header>
-
-
           <div class="card-header">
-
-
             <span>生成结果</span>
 
 
             <el-tag :type="getStatusType(generationResult.taskStatus)">
-
-
               {{ getStatusText(generationResult.taskStatus) }}
-
-
             </el-tag>
-
-
           </div>
-
-
         </template>
 
 
@@ -392,20 +332,12 @@
 
 
         <div v-if="generationResult.taskStatus === 'PROCESSING' || generationResult.taskStatus === 'PENDING'">
-
-
           <el-progress :percentage="generationResult.progress || 0" />
 
 
           <p style="margin-top: 10px; color: #909399">
-
-
             {{ generationResult.taskStatus === 'PENDING' ? '任务已提交，等待处理中...' : '正在生成脚本，请稍�?..' }}
-
-
           </p>
-
-
         </div>
 
 
@@ -413,8 +345,6 @@
 
 
         <div v-else-if="generationResult.taskStatus === 'SUCCESS'">
-
-
           <el-alert
 
 
@@ -428,14 +358,8 @@
 
 
             style="margin-bottom: 20px"
-
-
           >
-
-
             脚本生成成功
-
-
           </el-alert>
 
 
@@ -443,11 +367,10 @@
 
 
           <el-tabs v-model="activeTab">
-
-
-            <el-tab-pane label="生成的脚本�" name="script">
-
-
+            <el-tab-pane
+              label="生成的脚本�"
+              name="script"
+            >
               <el-input
 
 
@@ -464,62 +387,80 @@
 
 
                 style="font-family: 'Courier New', monospace"
-
-
               />
 
 
               <div style="margin-top: 10px">
+                <el-button
+                  type="primary"
+                  @click="handleCopyScript"
+                >
+                  复制脚本
+                </el-button>
 
 
-                <el-button type="primary" @click="handleCopyScript">复制脚本</el-button>
-
-
-                <el-button type="success" @click="handleDownloadScript">下载脚本</el-button>
-
-
+                <el-button
+                  type="success"
+                  @click="handleDownloadScript"
+                >
+                  下载脚本
+                </el-button>
               </div>
-
-
             </el-tab-pane>
 
 
 
 
 
-            <el-tab-pane v-if="generationResult.elementsUsed && generationResult.elementsUsed.length > 0" label="使用的元素�" name="elements">
+            <el-tab-pane
+              v-if="generationResult.elementsUsed && generationResult.elementsUsed.length > 0"
+              label="使用的元素�"
+              name="elements"
+            >
+              <el-table
+                :data="generationResult.elementsUsed"
+                border
+                stripe
+              >
+                <el-table-column
+                  prop="elementType"
+                  label="元素类型"
+                  width="120"
+                />
 
 
-              <el-table :data="generationResult.elementsUsed" border stripe>
+                <el-table-column
+                  prop="elementLocatorType"
+                  label="定位值方式"
+                  width="120"
+                />
 
 
-                <el-table-column prop="elementType" label="元素类型" width="120" />
+                <el-table-column
+                  prop="elementLocatorValue"
+                  label="定位值�"
+                  show-overflow-tooltip
+                />
 
 
-                <el-table-column prop="elementLocatorType" label="定位值方式" width="120" />
-
-
-                <el-table-column prop="elementLocatorValue" label="定位值�" show-overflow-tooltip />
-
-
-                <el-table-column prop="elementText" label="元素文本" width="150" />
-
-
+                <el-table-column
+                  prop="elementText"
+                  label="元素文本"
+                  width="150"
+                />
               </el-table>
-
-
             </el-tab-pane>
 
 
 
 
 
-            <el-tab-pane v-if="generationResult.steps && generationResult.steps.length > 0" label="操作步骤" name="steps">
-
-
+            <el-tab-pane
+              v-if="generationResult.steps && generationResult.steps.length > 0"
+              label="操作步骤"
+              name="steps"
+            >
               <el-timeline>
-
-
                 <el-timeline-item
 
 
@@ -533,38 +474,27 @@
 
 
                   placement="top"
-
-
                 >
-
-
                   <el-card>
-
-
                     <h4>{{ step.action || step.step }}</h4>
 
 
-                    <p v-if="step.description">{{ step.description }}</p>
+                    <p v-if="step.description">
+                      {{ step.description }}
+                    </p>
 
 
-                    <p v-if="step.target" style="color: #909399">目标: {{ step.target }}</p>
-
-
+                    <p
+                      v-if="step.target"
+                      style="color: #909399"
+                    >
+                      目标: {{ step.target }}
+                    </p>
                   </el-card>
-
-
                 </el-timeline-item>
-
-
               </el-timeline>
-
-
             </el-tab-pane>
-
-
           </el-tabs>
-
-
         </div>
 
 
@@ -572,8 +502,6 @@
 
 
         <div v-else-if="generationResult.taskStatus === 'FAILED'">
-
-
           <el-alert
 
 
@@ -584,44 +512,23 @@
 
 
             show-icon
-
-
           >
-
-
             <template #title>
-
-
               <div>脚本生成失败</div>
 
 
-              <div v-if="generationResult.errorMessage" style="margin-top: 10px; font-size: 12px">
-
-
+              <div
+                v-if="generationResult.errorMessage"
+                style="margin-top: 10px; font-size: 12px"
+              >
                 {{ generationResult.errorMessage }}
-
-
               </div>
-
-
             </template>
-
-
           </el-alert>
-
-
         </div>
-
-
       </el-card>
-
-
     </el-card>
-
-
   </div>
-
-
 </template>
 
 
@@ -632,9 +539,6 @@
 
 
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-
-
-import { useRouter } from 'vue-router'
 
 
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
@@ -707,12 +611,15 @@ const form = reactive<UIScriptGenerationRequest & { workflowId?: number }>({
 
 
 })
+const formRef = ref<FormInstance>()
+const generateLoading = ref(false)
+const pageCodeInputType = ref<'upload' | 'url' | 'input'>('upload')
+const pageCodeContent = ref('')
+const activeTab = ref('script')
 
 // 工作流相关
 const workflowList = ref<WorkflowDefinition[]>([])
 const workflowLoading = ref(false)
-const router = useRouter()
-
 
 
 
@@ -889,11 +796,6 @@ const loadWorkflows = async () => {
   } finally {
     workflowLoading.value = false
   }
-}
-
-// 打开工作流编辑器
-const handleOpenWorkflowEditor = () => {
-  router.push('/workflow')
 }
 
 // 使用工作流生成脚本

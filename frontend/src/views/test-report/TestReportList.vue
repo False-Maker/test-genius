@@ -1,42 +1,31 @@
 <template>
-
-
   <div class="test-report-list">
-
-
     <div class="page-header">
-
-
       <div class="header-left">
+        <h2 class="page-title">
+          测试报告管理
+        </h2>
 
 
-        <h2 class="page-title">测试报告管理</h2>
-
-
-        <p class="page-subtitle">管理和维护测试报告，支持生成、预览和导出</p>
-
-
+        <p class="page-subtitle">
+          管理和维护测试报告，支持生成、预览和导出
+        </p>
       </div>
 
 
       <div class="header-right">
-
-
-        <el-button type="primary" size="large" @click="handleCreate" class="create-btn">
-
-
+        <el-button
+          type="primary"
+          size="large"
+          class="create-btn"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
 
 
           新建报告
-
-
         </el-button>
-
-
       </div>
-
-
     </div>
 
 
@@ -46,15 +35,16 @@
     <!-- 搜索�?-->
 
 
-    <el-card class="search-card" shadow="never">
-
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="报告名称">
-
-
           <el-input
 
 
@@ -70,24 +60,18 @@
             prefix-icon="Search"
 
 
+            style="width: 240px"
+
+
             @clear="handleSearch"
 
 
             @keyup.enter="handleSearch"
-
-
-            style="width: 240px"
-
-
           />
-
-
         </el-form-item>
 
 
         <el-form-item label="报告类型">
-
-
           <el-select
 
 
@@ -104,44 +88,48 @@
 
 
             @change="handleSearch"
-
-
           >
+            <el-option
+              label="执行报告"
+              value="EXECUTION"
+            />
 
 
-            <el-option label="执行报告" value="EXECUTION" />
+            <el-option
+              label="覆盖率率率报告"
+              value="COVERAGE"
+            />
 
 
-            <el-option label="覆盖率率率报告" value="COVERAGE" />
+            <el-option
+              label="质量报告"
+              value="QUALITY"
+            />
 
 
-            <el-option label="质量报告" value="QUALITY" />
-
-
-            <el-option label="风险报告" value="RISK" />
-
-
+            <el-option
+              label="风险报告"
+              value="RISK"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
         <el-form-item>
+          <el-button
+            type="primary"
+            plain
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
 
 
-          <el-button type="primary" plain @click="handleSearch">查询</el-button>
-
-
-          <el-button @click="handleReset">重置</el-button>
-
-
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
-
-
       </el-form>
-
-
     </el-card>
 
 
@@ -151,15 +139,19 @@
     <!-- 报告列表 -->
 
 
-    <el-card class="table-card" shadow="never">
-
-
-      <div v-if="loading" class="skeleton-container" style="padding: 20px;">
-
-
-        <el-skeleton :rows="10" animated />
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <div
+        v-if="loading"
+        class="skeleton-container"
+        style="padding: 20px;"
+      >
+        <el-skeleton
+          :rows="10"
+          animated
+        />
       </div>
 
 
@@ -176,173 +168,164 @@
 
 
         style="width: 100%"
-
-
       >
-
-
-        <el-table-column prop="reportCode" label="报告编码" width="160">
-
-
-           <template #default="scope">
-
-
+        <el-table-column
+          prop="reportCode"
+          label="报告编码"
+          width="160"
+        >
+          <template #default="scope">
             <span class="code-text">{{ scope.row.reportCode }}</span>
-
-
-           </template>
-
-
-        </el-table-column>
-
-
-        <el-table-column prop="reportName" label="报告名称" min-width="200" show-overflow-tooltip>
-
-
-          <template #default="scope">
-
-
-            <span class="name-text" @click="handleView(scope.row)">{{ scope.row.reportName }}</span>
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="reportType" label="报告类型" width="120">
-
-
+        <el-table-column
+          prop="reportName"
+          label="报告名称"
+          min-width="200"
+          show-overflow-tooltip
+        >
           <template #default="scope">
-
-
-            <el-tag effect="light" round>{{ getReportTypeText(scope.row.reportType) }}</el-tag>
-
-
+            <span
+              class="name-text"
+              @click="handleView(scope.row)"
+            >{{ scope.row.reportName }}</span>
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="reportStatus" label="状�" width="100">
-
-
+        <el-table-column
+          prop="reportType"
+          label="报告类型"
+          width="120"
+        >
           <template #default="scope">
+            <el-tag
+              effect="light"
+              round
+            >
+              {{ getReportTypeText(scope.row.reportType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
 
 
+        <el-table-column
+          prop="reportStatus"
+          label="状�"
+          width="100"
+        >
+          <template #default="scope">
             <div class="status-indicator">
-
-
-              <span :class="['dot', getStatusType(scope.row.reportStatus)]"></span>
+              <span :class="['dot', getStatusType(scope.row.reportStatus)]" />
 
 
               <span>{{ getStatusText(scope.row.reportStatus) }}</span>
-
-
             </div>
-
-
           </template>
-
-
         </el-table-column>
 
 
-        <el-table-column prop="creatorName" label="创建人�" width="120" />
+        <el-table-column
+          prop="creatorName"
+          label="创建人�"
+          width="120"
+        />
 
 
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
 
 
-        <el-table-column label="操作" width="200" fixed="right">
-
-
+        <el-table-column
+          label="操作"
+          width="200"
+          fixed="right"
+        >
           <template #default="scope">
-
-
             <div class="action-buttons">
-
-
-              <el-tooltip content="编辑" placement="top" v-if="scope.row.reportStatus === 'DRAFT'">
-
-
-                <el-button circle size="small" type="primary" plain @click="handleEdit(scope.row)">
-
-
+              <el-tooltip
+                v-if="scope.row.reportStatus === 'DRAFT'"
+                content="编辑"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleEdit(scope.row)"
+                >
                   <el-icon><Edit /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
               
 
 
-              <el-tooltip content="发布" placement="top" v-if="scope.row.reportStatus === 'DRAFT'">
-
-
-                <el-button circle size="small" type="success" plain @click="handlePublish(scope.row)">
-
-
+              <el-tooltip
+                v-if="scope.row.reportStatus === 'DRAFT'"
+                content="发布"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="success"
+                  plain
+                  @click="handlePublish(scope.row)"
+                >
                   <el-icon><Promotion /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
 
 
 
-              <el-tooltip content="导出Word" placement="top" v-if="scope.row.reportStatus === 'PUBLISHED'">
-
-
-                 <el-button circle size="small" type="primary" plain @click="handleExport(scope.row, 'WORD')">
-
-
+              <el-tooltip
+                v-if="scope.row.reportStatus === 'PUBLISHED'"
+                content="导出Word"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="primary"
+                  plain
+                  @click="handleExport(scope.row, 'WORD')"
+                >
                   <el-icon><Document /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
 
 
 
 
 
-              <el-tooltip content="删除" placement="top" v-if="scope.row.reportStatus === 'DRAFT'">
-
-
-                <el-button circle size="small" type="danger" plain @click="handleDelete(scope.row)">
-
-
+              <el-tooltip
+                v-if="scope.row.reportStatus === 'DRAFT'"
+                content="删除"
+                placement="top"
+              >
+                <el-button
+                  circle
+                  size="small"
+                  type="danger"
+                  plain
+                  @click="handleDelete(scope.row)"
+                >
                   <el-icon><Delete /></el-icon>
-
-
                 </el-button>
-
-
               </el-tooltip>
-
-
             </div>
-
-
           </template>
-
-
         </el-table-column>
-
-
       </el-table>
 
 
@@ -353,8 +336,6 @@
 
 
       <div class="pagination">
-
-
         <el-pagination
 
 
@@ -380,14 +361,8 @@
 
 
           @current-change="handlePageChange"
-
-
         />
-
-
       </div>
-
-
     </el-card>
 
 
@@ -410,11 +385,7 @@
 
 
       @close="handleDialogClose"
-
-
     >
-
-
       <el-form
 
 
@@ -428,14 +399,11 @@
 
 
         label-width="100px"
-
-
       >
-
-
-        <el-form-item label="报告名称" prop="reportName">
-
-
+        <el-form-item
+          label="报告名称"
+          prop="reportName"
+        >
           <el-input
 
 
@@ -449,80 +417,90 @@
 
 
             show-word-limit
-
-
           />
-
-
         </el-form-item>
 
 
-        <el-form-item label="报告类型" prop="reportType">
+        <el-form-item
+          label="报告类型"
+          prop="reportType"
+        >
+          <el-select
+            v-model="formData.reportType"
+            placeholder="请选择报告类型"
+            style="width: 100%"
+            :disabled="isEdit"
+          >
+            <el-option
+              label="执行报告"
+              value="EXECUTION"
+            />
 
 
-          <el-select v-model="formData.reportType" placeholder="请选择报告类型" style="width: 100%" :disabled="isEdit">
+            <el-option
+              label="覆盖率率率报告"
+              value="COVERAGE"
+            />
 
 
-            <el-option label="执行报告" value="EXECUTION" />
+            <el-option
+              label="质量报告"
+              value="QUALITY"
+            />
 
 
-            <el-option label="覆盖率率率报告" value="COVERAGE" />
-
-
-            <el-option label="质量报告" value="QUALITY" />
-
-
-            <el-option label="风险报告" value="RISK" />
-
-
+            <el-option
+              label="风险报告"
+              value="RISK"
+            />
           </el-select>
-
-
         </el-form-item>
 
 
-        <el-form-item label="关联需�" prop="requirementId">
+        <el-form-item
+          label="关联需�"
+          prop="requirementId"
+        >
+          <!-- Ideally this should be a remote search select, simplified as input for now or could implement lookup -->
 
 
-           <!-- Ideally this should be a remote search select, simplified as input for now or could implement lookup -->
-
-
-           <el-input-number v-model="formData.requirementId" placeholder="需求ID" style="width: 100%" :min="1" />
-
-
+          <el-input-number
+            v-model="formData.requirementId"
+            placeholder="需求ID"
+            style="width: 100%"
+            :min="1"
+          />
         </el-form-item>
 
 
-        <el-form-item label="执行人中任务" prop="executionTaskId">
-
-
-           <el-input-number v-model="formData.executionTaskId" placeholder="执行人中任务ID" style="width: 100%" :min="1" />
-
-
+        <el-form-item
+          label="执行人中任务"
+          prop="executionTaskId"
+        >
+          <el-input-number
+            v-model="formData.executionTaskId"
+            placeholder="执行人中任务ID"
+            style="width: 100%"
+            :min="1"
+          />
         </el-form-item>
-
-
       </el-form>
 
 
       <template #footer>
-
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-          确定
-
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
-
-
     </el-dialog>
 
 
@@ -542,65 +520,60 @@
 
 
       width="800px"
-
-
     >
-
-
-      <el-descriptions :column="2" border>
-
-
-        <el-descriptions-item label="报告编码">{{ viewData.reportCode }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="报告名称">{{ viewData.reportName }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="报告类型">{{ getReportTypeText(viewData.reportType) }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="状�">{{ getStatusText(viewData.reportStatus) }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="创建人�">{{ viewData.creatorName }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="创建时间">{{ viewData.createTime }}</el-descriptions-item>
-
-
-        <el-descriptions-item label="报告摘要" :span="2">
-
-
-            {{ viewData.reportSummary || '暂无摘要' }}
-
-
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="报告编码">
+          {{ viewData.reportCode }}
         </el-descriptions-item>
 
 
-         <el-descriptions-item label="报告内容" :span="2">
-
-
-             <div class="json-content">
-
-
-                {{ viewData.reportContent || '暂无内容' }}
-
-
-             </div>
-
-
+        <el-descriptions-item label="报告名称">
+          {{ viewData.reportName }}
         </el-descriptions-item>
 
 
+        <el-descriptions-item label="报告类型">
+          {{ getReportTypeText(viewData.reportType) }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="状�">
+          {{ getStatusText(viewData.reportStatus) }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="创建人�">
+          {{ viewData.creatorName }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item label="创建时间">
+          {{ viewData.createTime }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item
+          label="报告摘要"
+          :span="2"
+        >
+          {{ viewData.reportSummary || '暂无摘要' }}
+        </el-descriptions-item>
+
+
+        <el-descriptions-item
+          label="报告内容"
+          :span="2"
+        >
+          <div class="json-content">
+            {{ viewData.reportContent || '暂无内容' }}
+          </div>
+        </el-descriptions-item>
       </el-descriptions>
-
-
     </el-dialog>
-
-
   </div>
-
-
 </template>
 
 
@@ -616,7 +589,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 
 
-import { Plus, Search, Edit, Delete, Promotion, Document } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Promotion, Document } from '@element-plus/icons-vue'
 
 
 import { testReportApi, type TestReportRequestDTO, type TestReportResponseDTO } from '@/api/testReport'

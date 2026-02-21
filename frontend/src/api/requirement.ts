@@ -1,5 +1,5 @@
 import request from './request'
-import type { PageResult } from './types'
+import type { ApiResult, PageResult } from './types'
 
 // 需求相关类型定义
 export interface TestRequirement {
@@ -34,7 +34,7 @@ export const requirementApi = {
 
   // 查询需求列表
   getRequirementList(params: RequirementListParams = {}) {
-    return request.get<PageResult<TestRequirement>>('/v1/requirements', { params })
+    return request.get<any, ApiResult<PageResult<TestRequirement>>>('/v1/requirements', { params })
   },
 
   // 获取需求详情

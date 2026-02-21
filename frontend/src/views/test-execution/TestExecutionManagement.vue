@@ -1,27 +1,6 @@
 <template>
-
-
-
-
-
-
-
   <div class="test-execution-management">
-
-
-
-
-
-
-
     <div class="header">
-
-
-
-
-
-
-
       <h2>测试执行管理</h2>
 
 
@@ -31,21 +10,10 @@
 
 
       <div class="header-actions">
-
-
-
-
-
-
-
-        <el-button type="primary" @click="handleCreateTask">
-
-
-
-
-
-
-
+        <el-button
+          type="primary"
+          @click="handleCreateTask"
+        >
           <el-icon><Plus /></el-icon>
 
 
@@ -55,29 +23,8 @@
 
 
           新建执行任务
-
-
-
-
-
-
-
         </el-button>
-
-
-
-
-
-
-
       </div>
-
-
-
-
-
-
-
     </div>
 
 
@@ -102,31 +49,16 @@
 
 
 
-    <el-row :gutter="20" style="margin-bottom: 20px">
-
-
-
-
-
-
-
+    <el-row
+      :gutter="20"
+      style="margin-bottom: 20px"
+    >
       <el-col :span="6">
-
-
-
-
-
-
-
         <el-card shadow="hover">
-
-
-
-
-
-
-
           <div class="stat-card">
+            <div class="stat-value">
+              {{ statistics.totalTasks || 0 }}
+            </div>
 
 
 
@@ -134,38 +66,11 @@
 
 
 
-            <div class="stat-value">{{ statistics.totalTasks || 0 }}</div>
-
-
-
-
-
-
-
-            <div class="stat-label">总任务数</div>
-
-
-
-
-
-
-
+            <div class="stat-label">
+              总任务数
+            </div>
           </div>
-
-
-
-
-
-
-
         </el-card>
-
-
-
-
-
-
-
       </el-col>
 
 
@@ -175,22 +80,11 @@
 
 
       <el-col :span="6">
-
-
-
-
-
-
-
         <el-card shadow="hover">
-
-
-
-
-
-
-
           <div class="stat-card">
+            <div class="stat-value success">
+              {{ statistics.successTasks || 0 }}
+            </div>
 
 
 
@@ -198,38 +92,11 @@
 
 
 
-            <div class="stat-value success">{{ statistics.successTasks || 0 }}</div>
-
-
-
-
-
-
-
-            <div class="stat-label">成功任务</div>
-
-
-
-
-
-
-
+            <div class="stat-label">
+              成功任务
+            </div>
           </div>
-
-
-
-
-
-
-
         </el-card>
-
-
-
-
-
-
-
       </el-col>
 
 
@@ -239,22 +106,11 @@
 
 
       <el-col :span="6">
-
-
-
-
-
-
-
         <el-card shadow="hover">
-
-
-
-
-
-
-
           <div class="stat-card">
+            <div class="stat-value warning">
+              {{ statistics.processingTasks || 0 }}
+            </div>
 
 
 
@@ -262,38 +118,11 @@
 
 
 
-            <div class="stat-value warning">{{ statistics.processingTasks || 0 }}</div>
-
-
-
-
-
-
-
-            <div class="stat-label">执行中</div>
-
-
-
-
-
-
-
+            <div class="stat-label">
+              执行中
+            </div>
           </div>
-
-
-
-
-
-
-
         </el-card>
-
-
-
-
-
-
-
       </el-col>
 
 
@@ -303,22 +132,11 @@
 
 
       <el-col :span="6">
-
-
-
-
-
-
-
         <el-card shadow="hover">
-
-
-
-
-
-
-
           <div class="stat-card">
+            <div class="stat-value danger">
+              {{ statistics.failedTasks || 0 }}
+            </div>
 
 
 
@@ -326,46 +144,12 @@
 
 
 
-            <div class="stat-value danger">{{ statistics.failedTasks || 0 }}</div>
-
-
-
-
-
-
-
-            <div class="stat-label">失败任务</div>
-
-
-
-
-
-
-
+            <div class="stat-label">
+              失败任务
+            </div>
           </div>
-
-
-
-
-
-
-
         </el-card>
-
-
-
-
-
-
-
       </el-col>
-
-
-
-
-
-
-
     </el-row>
 
 
@@ -390,30 +174,16 @@
 
 
 
-    <el-card class="search-card" shadow="never">
-
-
-
-
-
-
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
-
-
-
-
-
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="任务名称">
-
-
-
-
-
-
-
           <el-input
 
 
@@ -455,21 +225,7 @@
 
 
             @keyup.enter="handleSearch"
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -479,13 +235,6 @@
 
 
         <el-form-item label="任务状态">
-
-
-
-
-
-
-
           <el-select
 
 
@@ -519,14 +268,11 @@
 
 
             @change="handleSearch"
-
-
-
-
-
-
-
           >
+            <el-option
+              label="等待中"
+              value="PENDING"
+            />
 
 
 
@@ -534,7 +280,10 @@
 
 
 
-            <el-option label="等待中" value="PENDING" />
+            <el-option
+              label="处理中"
+              value="PROCESSING"
+            />
 
 
 
@@ -542,7 +291,10 @@
 
 
 
-            <el-option label="处理中" value="PROCESSING" />
+            <el-option
+              label="成功"
+              value="SUCCESS"
+            />
 
 
 
@@ -550,30 +302,11 @@
 
 
 
-            <el-option label="成功" value="SUCCESS" />
-
-
-
-
-
-
-
-            <el-option label="失败" value="FAILED" />
-
-
-
-
-
-
-
+            <el-option
+              label="失败"
+              value="FAILED"
+            />
           </el-select>
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -583,13 +316,6 @@
 
 
         <el-form-item label="任务类型">
-
-
-
-
-
-
-
           <el-select
 
 
@@ -623,14 +349,11 @@
 
 
             @change="handleSearch"
-
-
-
-
-
-
-
           >
+            <el-option
+              label="脚本生成"
+              value="AUTO_SCRIPT_GENERATION"
+            />
 
 
 
@@ -638,7 +361,10 @@
 
 
 
-            <el-option label="脚本生成" value="AUTO_SCRIPT_GENERATION" />
+            <el-option
+              label="脚本修复"
+              value="AUTO_SCRIPT_REPAIR"
+            />
 
 
 
@@ -646,30 +372,11 @@
 
 
 
-            <el-option label="脚本修复" value="AUTO_SCRIPT_REPAIR" />
-
-
-
-
-
-
-
-            <el-option label="手动执行中" value="MANUAL_EXECUTION" />
-
-
-
-
-
-
-
+            <el-option
+              label="手动执行中"
+              value="MANUAL_EXECUTION"
+            />
           </el-select>
-
-
-
-
-
-
-
         </el-form-item>
 
 
@@ -679,6 +386,12 @@
 
 
         <el-form-item>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
 
 
 
@@ -686,38 +399,11 @@
 
 
 
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-
-
-
-
-
-
-
-          <el-button @click="handleReset">重置</el-button>
-
-
-
-
-
-
-
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
-
-
-
-
-
-
-
       </el-form>
-
-
-
-
-
-
-
     </el-card>
 
 
@@ -742,30 +428,18 @@
 
 
 
-    <el-card class="table-card" shadow="never">
-
-
-
-
-
-
-
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-
-
-
-
-
-
-
-        <el-tab-pane label="执行中任务" name="tasks">
-
-
-
-
-
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
+      <el-tabs
+        v-model="activeTab"
+        @tab-change="handleTabChange"
+      >
+        <el-tab-pane
+          label="执行中任务"
+          name="tasks"
+        >
           <el-table
 
 
@@ -799,14 +473,12 @@
 
 
             style="width: 100%"
-
-
-
-
-
-
-
           >
+            <el-table-column
+              prop="taskCode"
+              label="任务编码"
+              width="180"
+            />
 
 
 
@@ -814,7 +486,12 @@
 
 
 
-            <el-table-column prop="taskCode" label="任务编码" width="180" />
+            <el-table-column
+              prop="taskName"
+              label="任务名称"
+              min-width="200"
+              show-overflow-tooltip
+            />
 
 
 
@@ -822,46 +499,14 @@
 
 
 
-            <el-table-column prop="taskName" label="任务名称" min-width="200" show-overflow-tooltip />
-
-
-
-
-
-
-
-            <el-table-column prop="taskType" label="任务类型" width="120">
-
-
-
-
-
-
-
+            <el-table-column
+              prop="taskType"
+              label="任务类型"
+              width="120"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
                 <el-tag>{{ getTaskTypeText(scope.row.taskType) }}</el-tag>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
 
 
@@ -870,54 +515,16 @@
 
 
 
-            <el-table-column prop="taskStatus" label="状态" width="100">
-
-
-
-
-
-
-
+            <el-table-column
+              prop="taskStatus"
+              label="状态"
+              width="100"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
                 <el-tag :type="getStatusType(scope.row.taskStatus)">
-
-
-
-
-
-
-
                   {{ getStatusText(scope.row.taskStatus) }}
-
-
-
-
-
-
-
                 </el-tag>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
 
 
@@ -926,22 +533,12 @@
 
 
 
-            <el-table-column prop="progress" label="进度" width="120">
-
-
-
-
-
-
-
+            <el-table-column
+              prop="progress"
+              label="进度"
+              width="120"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
                 <el-progress
 
 
@@ -967,13 +564,6 @@
 
 
                   :status="scope.row.taskStatus === 'SUCCESS' ? 'success' : scope.row.taskStatus === 'FAILED' ? 'exception' : undefined"
-
-
-
-
-
-
-
                 />
 
 
@@ -983,21 +573,7 @@
 
 
                 <span v-else>-</span>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
 
 
@@ -1006,7 +582,11 @@
 
 
 
-            <el-table-column prop="successCount" label="成功" width="80" />
+            <el-table-column
+              prop="successCount"
+              label="成功"
+              width="80"
+            />
 
 
 
@@ -1014,7 +594,11 @@
 
 
 
-            <el-table-column prop="failCount" label="失败" width="80" />
+            <el-table-column
+              prop="failCount"
+              label="失败"
+              width="80"
+            />
 
 
 
@@ -1022,7 +606,11 @@
 
 
 
-            <el-table-column prop="creatorName" label="创建人" width="120" />
+            <el-table-column
+              prop="creatorName"
+              label="创建人"
+              width="120"
+            />
 
 
 
@@ -1030,7 +618,11 @@
 
 
 
-            <el-table-column prop="createTime" label="创建时间" width="180" />
+            <el-table-column
+              prop="createTime"
+              label="创建时间"
+              width="180"
+            />
 
 
 
@@ -1038,38 +630,19 @@
 
 
 
-            <el-table-column label="操作" width="250" fixed="right">
-
-
-
-
-
-
-
+            <el-table-column
+              label="操作"
+              width="250"
+              fixed="right"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
-                <el-button size="small" link type="primary" @click="handleViewTask(scope.row)">
-
-
-
-
-
-
-
+                <el-button
+                  size="small"
+                  link
+                  type="primary"
+                  @click="handleViewTask(scope.row)"
+                >
                   查看
-
-
-
-
-
-
-
                 </el-button>
 
 
@@ -1078,22 +651,13 @@
 
 
 
-                <el-button size="small" link type="info" @click="handleViewRecords(scope.row)">
-
-
-
-
-
-
-
+                <el-button
+                  size="small"
+                  link
+                  type="info"
+                  @click="handleViewRecords(scope.row)"
+                >
                   执行中记录
-
-
-
-
-
-
-
                 </el-button>
 
 
@@ -1143,53 +707,11 @@
 
 
                   @click="handleDeleteTask(scope.row)"
-
-
-
-
-
-
-
                 >
-
-
-
-
-
-
-
                   删除
-
-
-
-
-
-
-
                 </el-button>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
-
-
-
-
-
-
-
           </el-table>
 
 
@@ -1215,13 +737,6 @@
 
 
           <div class="pagination">
-
-
-
-
-
-
-
             <el-pagination
 
 
@@ -1279,29 +794,8 @@
 
 
               @current-change="handlePageChange"
-
-
-
-
-
-
-
             />
-
-
-
-
-
-
-
           </div>
-
-
-
-
-
-
-
         </el-tab-pane>
 
 
@@ -1318,14 +812,10 @@
 
 
 
-        <el-tab-pane label="执行中记录" name="records">
-
-
-
-
-
-
-
+        <el-tab-pane
+          label="执行中记录"
+          name="records"
+        >
           <el-table
 
 
@@ -1359,14 +849,12 @@
 
 
             style="width: 100%"
-
-
-
-
-
-
-
           >
+            <el-table-column
+              prop="recordCode"
+              label="记录编码"
+              width="180"
+            />
 
 
 
@@ -1374,7 +862,11 @@
 
 
 
-            <el-table-column prop="recordCode" label="记录编码" width="180" />
+            <el-table-column
+              prop="taskId"
+              label="任务ID"
+              width="100"
+            />
 
 
 
@@ -1382,62 +874,16 @@
 
 
 
-            <el-table-column prop="taskId" label="任务ID" width="100" />
-
-
-
-
-
-
-
-            <el-table-column prop="executionType" label="执行中类型" width="100">
-
-
-
-
-
-
-
+            <el-table-column
+              prop="executionType"
+              label="执行中类型"
+              width="100"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
                 <el-tag :type="scope.row.executionType === 'AUTOMATED' ? 'success' : 'info'">
-
-
-
-
-
-
-
                   {{ scope.row.executionType === 'AUTOMATED' ? '自动' : '手动' }}
-
-
-
-
-
-
-
                 </el-tag>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
 
 
@@ -1446,54 +892,16 @@
 
 
 
-            <el-table-column prop="executionStatus" label="执行状态" width="100">
-
-
-
-
-
-
-
+            <el-table-column
+              prop="executionStatus"
+              label="执行状态"
+              width="100"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
                 <el-tag :type="getExecutionStatusType(scope.row.executionStatus)">
-
-
-
-
-
-
-
                   {{ getExecutionStatusText(scope.row.executionStatus) }}
-
-
-
-
-
-
-
                 </el-tag>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
 
 
@@ -1502,7 +910,11 @@
 
 
 
-            <el-table-column prop="executionDuration" label="耗时(ms)" width="120" />
+            <el-table-column
+              prop="executionDuration"
+              label="耗时(ms)"
+              width="120"
+            />
 
 
 
@@ -1510,7 +922,11 @@
 
 
 
-            <el-table-column prop="executedByName" label="执行人" width="120" />
+            <el-table-column
+              prop="executedByName"
+              label="执行人"
+              width="120"
+            />
 
 
 
@@ -1518,7 +934,11 @@
 
 
 
-            <el-table-column prop="executionTime" label="执行时间" width="180" />
+            <el-table-column
+              prop="executionTime"
+              label="执行时间"
+              width="180"
+            />
 
 
 
@@ -1526,62 +946,22 @@
 
 
 
-            <el-table-column label="操作" width="150" fixed="right">
-
-
-
-
-
-
-
+            <el-table-column
+              label="操作"
+              width="150"
+              fixed="right"
+            >
               <template #default="scope">
-
-
-
-
-
-
-
-                <el-button size="small" link type="primary" @click="handleViewRecord(scope.row)">
-
-
-
-
-
-
-
+                <el-button
+                  size="small"
+                  link
+                  type="primary"
+                  @click="handleViewRecord(scope.row)"
+                >
                   查看详情
-
-
-
-
-
-
-
                 </el-button>
-
-
-
-
-
-
-
               </template>
-
-
-
-
-
-
-
             </el-table-column>
-
-
-
-
-
-
-
           </el-table>
 
 
@@ -1607,13 +987,6 @@
 
 
           <div class="pagination">
-
-
-
-
-
-
-
             <el-pagination
 
 
@@ -1671,45 +1044,10 @@
 
 
               @current-change="handleRecordPageChange"
-
-
-
-
-
-
-
             />
-
-
-
-
-
-
-
           </div>
-
-
-
-
-
-
-
         </el-tab-pane>
-
-
-
-
-
-
-
       </el-tabs>
-
-
-
-
-
-
-
     </el-card>
 
 
@@ -1759,85 +1097,14 @@
 
 
       width="900px"
-
-
-
-
-
-
-
     >
-
-
-
-
-
-
-
-      <el-descriptions :column="2" border v-if="currentTask">
-
-
-
-
-
-
-
-        <el-descriptions-item label="任务编码">{{ currentTask.taskCode }}</el-descriptions-item>
-
-
-
-
-
-
-
-        <el-descriptions-item label="任务名称">{{ currentTask.taskName }}</el-descriptions-item>
-
-
-
-
-
-
-
-        <el-descriptions-item label="任务类型">{{ getTaskTypeText(currentTask.taskType) }}</el-descriptions-item>
-
-
-
-
-
-
-
-        <el-descriptions-item label="任务状'">
-
-
-
-
-
-
-
-          <el-tag :type="getStatusType(currentTask.taskStatus)">
-
-
-
-
-
-
-
-            {{ getStatusText(currentTask.taskStatus) }}
-
-
-
-
-
-
-
-          </el-tag>
-
-
-
-
-
-
-
+      <el-descriptions
+        v-if="currentTask"
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="任务编码">
+          {{ currentTask.taskCode }}
         </el-descriptions-item>
 
 
@@ -1846,7 +1113,9 @@
 
 
 
-        <el-descriptions-item label="进度" :span="2">
+        <el-descriptions-item label="任务名称">
+          {{ currentTask.taskName }}
+        </el-descriptions-item>
 
 
 
@@ -1854,6 +1123,32 @@
 
 
 
+        <el-descriptions-item label="任务类型">
+          {{ getTaskTypeText(currentTask.taskType) }}
+        </el-descriptions-item>
+
+
+
+
+
+
+
+        <el-descriptions-item label="任务状'">
+          <el-tag :type="getStatusType(currentTask.taskStatus)">
+            {{ getStatusText(currentTask.taskStatus) }}
+          </el-tag>
+        </el-descriptions-item>
+
+
+
+
+
+
+
+        <el-descriptions-item
+          label="进度"
+          :span="2"
+        >
           <el-progress
 
 
@@ -1871,13 +1166,6 @@
 
 
             :percentage="currentTask.progress"
-
-
-
-
-
-
-
           />
 
 
@@ -1887,13 +1175,6 @@
 
 
           <span v-else>-</span>
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1902,7 +1183,9 @@
 
 
 
-        <el-descriptions-item label="成功数量">{{ currentTask.successCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="成功数量">
+          {{ currentTask.successCount || 0 }}
+        </el-descriptions-item>
 
 
 
@@ -1910,7 +1193,9 @@
 
 
 
-        <el-descriptions-item label="失败数量">{{ currentTask.failCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="失败数量">
+          {{ currentTask.failCount || 0 }}
+        </el-descriptions-item>
 
 
 
@@ -1918,7 +1203,9 @@
 
 
 
-        <el-descriptions-item label="脚本类型">{{ currentTask.scriptType || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="脚本类型">
+          {{ currentTask.scriptType || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -1926,7 +1213,9 @@
 
 
 
-        <el-descriptions-item label="脚本语言">{{ currentTask.scriptLanguage || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="脚本语言">
+          {{ currentTask.scriptLanguage || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -1934,7 +1223,9 @@
 
 
 
-        <el-descriptions-item label="创建人">{{ currentTask.creatorName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="创建人">
+          {{ currentTask.creatorName || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -1942,7 +1233,9 @@
 
 
 
-        <el-descriptions-item label="创建时间">{{ currentTask.createTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ currentTask.createTime || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -1950,7 +1243,12 @@
 
 
 
-        <el-descriptions-item label="完成时间" :span="2">{{ currentTask.finishTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item
+          label="完成时间"
+          :span="2"
+        >
+          {{ currentTask.finishTime || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -1958,38 +1256,17 @@
 
 
 
-        <el-descriptions-item label="错误信息" :span="2" v-if="currentTask.errorMessage">
-
-
-
-
-
-
-
-          <el-alert type="error" :closable="false">
-
-
-
-
-
-
-
+        <el-descriptions-item
+          v-if="currentTask.errorMessage"
+          label="错误信息"
+          :span="2"
+        >
+          <el-alert
+            type="error"
+            :closable="false"
+          >
             {{ currentTask.errorMessage }}
-
-
-
-
-
-
-
           </el-alert>
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1998,14 +1275,11 @@
 
 
 
-        <el-descriptions-item label="脚本内容" :span="2" v-if="currentTask.scriptContent">
-
-
-
-
-
-
-
+        <el-descriptions-item
+          v-if="currentTask.scriptContent"
+          label="脚本内容"
+          :span="2"
+        >
           <el-input
 
 
@@ -2047,37 +1321,9 @@
 
 
             style="font-family: 'Courier New', monospace"
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
         </el-descriptions-item>
-
-
-
-
-
-
-
       </el-descriptions>
-
-
-
-
-
-
-
     </el-dialog>
 
 
@@ -2127,14 +1373,15 @@
 
 
       width="900px"
-
-
-
-
-
-
-
     >
+      <el-descriptions
+        v-if="currentRecord"
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="记录编码">
+          {{ currentRecord.recordCode }}
+        </el-descriptions-item>
 
 
 
@@ -2142,23 +1389,9 @@
 
 
 
-      <el-descriptions :column="2" border v-if="currentRecord">
-
-
-
-
-
-
-
-        <el-descriptions-item label="记录编码">{{ currentRecord.recordCode }}</el-descriptions-item>
-
-
-
-
-
-
-
-        <el-descriptions-item label="任务ID">{{ currentRecord.taskId }}</el-descriptions-item>
+        <el-descriptions-item label="任务ID">
+          {{ currentRecord.taskId }}
+        </el-descriptions-item>
 
 
 
@@ -2167,37 +1400,9 @@
 
 
         <el-descriptions-item label="执行中类型">
-
-
-
-
-
-
-
           <el-tag :type="currentRecord.executionType === 'AUTOMATED' ? 'success' : 'info'">
-
-
-
-
-
-
-
             {{ currentRecord.executionType === 'AUTOMATED' ? '自动' : '手动' }}
-
-
-
-
-
-
-
           </el-tag>
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -2207,37 +1412,9 @@
 
 
         <el-descriptions-item label="执行状态">
-
-
-
-
-
-
-
           <el-tag :type="getExecutionStatusType(currentRecord.executionStatus)">
-
-
-
-
-
-
-
             {{ getExecutionStatusText(currentRecord.executionStatus) }}
-
-
-
-
-
-
-
           </el-tag>
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -2246,7 +1423,9 @@
 
 
 
-        <el-descriptions-item label="执行耗时">{{ currentRecord.executionDuration || '-' }} ms</el-descriptions-item>
+        <el-descriptions-item label="执行耗时">
+          {{ currentRecord.executionDuration || '-' }} ms
+        </el-descriptions-item>
 
 
 
@@ -2254,7 +1433,9 @@
 
 
 
-        <el-descriptions-item label="执行人">{{ currentRecord.executedByName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="执行人">
+          {{ currentRecord.executedByName || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -2262,7 +1443,9 @@
 
 
 
-        <el-descriptions-item label="执行时间">{{ currentRecord.executionTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="执行时间">
+          {{ currentRecord.executionTime || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -2270,7 +1453,9 @@
 
 
 
-        <el-descriptions-item label="完成时间">{{ currentRecord.finishTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="完成时间">
+          {{ currentRecord.finishTime || '-' }}
+        </el-descriptions-item>
 
 
 
@@ -2278,14 +1463,11 @@
 
 
 
-        <el-descriptions-item label="执行结果" :span="2" v-if="currentRecord.executionResult">
-
-
-
-
-
-
-
+        <el-descriptions-item
+          v-if="currentRecord.executionResult"
+          label="执行结果"
+          :span="2"
+        >
           <el-input
 
 
@@ -2319,21 +1501,7 @@
 
 
             readonly
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -2342,14 +1510,11 @@
 
 
 
-        <el-descriptions-item label="执行日志" :span="2" v-if="currentRecord.executionLog">
-
-
-
-
-
-
-
+        <el-descriptions-item
+          v-if="currentRecord.executionLog"
+          label="执行日志"
+          :span="2"
+        >
           <el-input
 
 
@@ -2391,21 +1556,7 @@
 
 
             style="font-family: 'Courier New', monospace"
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -2414,38 +1565,17 @@
 
 
 
-        <el-descriptions-item label="错误信息" :span="2" v-if="currentRecord.errorMessage">
-
-
-
-
-
-
-
-          <el-alert type="error" :closable="false">
-
-
-
-
-
-
-
+        <el-descriptions-item
+          v-if="currentRecord.errorMessage"
+          label="错误信息"
+          :span="2"
+        >
+          <el-alert
+            type="error"
+            :closable="false"
+          >
             {{ currentRecord.errorMessage }}
-
-
-
-
-
-
-
           </el-alert>
-
-
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -2454,14 +1584,11 @@
 
 
 
-        <el-descriptions-item label="截图" :span="2" v-if="currentRecord.screenshotUrl">
-
-
-
-
-
-
-
+        <el-descriptions-item
+          v-if="currentRecord.screenshotUrl"
+          label="截图"
+          :span="2"
+        >
           <el-image
 
 
@@ -2487,53 +1614,11 @@
 
 
             style="max-width: 500px; max-height: 300px"
-
-
-
-
-
-
-
           />
-
-
-
-
-
-
-
         </el-descriptions-item>
-
-
-
-
-
-
-
       </el-descriptions>
-
-
-
-
-
-
-
     </el-dialog>
-
-
-
-
-
-
-
   </div>
-
-
-
-
-
-
-
 </template>
 
 
@@ -3806,7 +2891,7 @@ const handleReset = () => {
 
 
 
-  searchForm.taskName = 
+  searchForm.taskName = ''
 
 
 
@@ -3814,7 +2899,7 @@ const handleReset = () => {
 
 
 
-  searchForm.taskStatus = 
+  searchForm.taskStatus = ''
 
 
 
@@ -3822,7 +2907,7 @@ const handleReset = () => {
 
 
 
-  searchForm.taskType = 
+  searchForm.taskType = ''
 
 
 
@@ -4310,7 +3395,7 @@ const handleViewRecords = async (task: TestExecutionTaskResponse) => {
 
 
 
-    searchForm.taskName = task.taskName
+    searchForm.taskName = task.taskName || ''
 
 
 

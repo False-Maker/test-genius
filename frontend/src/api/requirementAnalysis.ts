@@ -42,5 +42,8 @@ export const requirementAnalysisApi = {
     return request.get<TestPoint[]>(`/v1/requirements/${requirementId}/test-points`)
   },
 
-  // 提取业务规则
+// 提取业务规则
   getBusinessRules(requirementId: number) {
+    return request.get<BusinessRule[]>(`/v1/requirements/${requirementId}/business-rules`)
+  }
+}

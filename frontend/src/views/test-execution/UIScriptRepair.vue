@@ -1,39 +1,38 @@
 <template>
-
   <div class="ui-script-repair">
-
     <el-card>
-
       <template #header>
-
         <div class="card-header">
-
           <h2>UI脚本修复管理</h2>
-
         </div>
-
       </template>
 
 
 
-      <el-form :model="form" :rules="formRules" ref="formRef" label-width="140px">
-
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="formRules"
+        label-width="140px"
+      >
         <el-form-item label="脚本输入方式">
-
           <el-radio-group v-model="scriptInputType">
+            <el-radio label="input">
+              直接输入
+            </el-radio>
 
-            <el-radio label="input">直接输入</el-radio>
-
-            <el-radio label="upload">上传文件</el-radio>
-
+            <el-radio label="upload">
+              上传文件
+            </el-radio>
           </el-radio-group>
-
         </el-form-item>
 
 
 
-        <el-form-item label="UI脚本" prop="scriptContent">
-
+        <el-form-item
+          label="UI脚本"
+          prop="scriptContent"
+        >
           <el-input
 
             v-if="scriptInputType === 'input'"
@@ -47,7 +46,6 @@
             placeholder="请粘贴需要修复的UI自动化脚本"
 
             style="font-family: 'Courier New', monospace"
-
           />
 
           <FileUpload
@@ -63,35 +61,41 @@
             tip-text="支持上传Python、Java、JavaScript脚本文件"
 
             @success="handleScriptFileUpload"
-
           />
 
-          <div v-if="scriptInputType === 'upload' && scriptFileUrl" style="margin-top: 10px">
-
-            <el-button size="small" @click="loadScriptFromUrl">加载脚本内容</el-button>
-
+          <div
+            v-if="scriptInputType === 'upload' && scriptFileUrl"
+            style="margin-top: 10px"
+          >
+            <el-button
+              size="small"
+              @click="loadScriptFromUrl"
+            >
+              加载脚本内容
+            </el-button>
           </div>
-
         </el-form-item>
 
 
 
         <el-form-item label="错误日志输入方式">
-
           <el-radio-group v-model="errorLogInputType">
+            <el-radio label="input">
+              直接输入
+            </el-radio>
 
-            <el-radio label="input">直接输入</el-radio>
-
-            <el-radio label="upload">上传文件</el-radio>
-
+            <el-radio label="upload">
+              上传文件
+            </el-radio>
           </el-radio-group>
-
         </el-form-item>
 
 
 
-        <el-form-item label="错误日志" prop="errorLog">
-
+        <el-form-item
+          label="错误日志"
+          prop="errorLog"
+        >
           <el-input
 
             v-if="errorLogInputType === 'input'"
@@ -103,7 +107,6 @@
             :rows="10"
 
             placeholder="请粘贴执行过程中的错误日志"
-
           />
 
           <FileUpload
@@ -119,21 +122,24 @@
             tip-text="支持上传TXT、LOG文件"
 
             @success="handleErrorLogFileUpload"
-
           />
 
-          <div v-if="errorLogInputType === 'upload' && errorLogFileUrl" style="margin-top: 10px">
-
-            <el-button size="small" @click="loadErrorLogFromUrl">加载错误日志</el-button>
-
+          <div
+            v-if="errorLogInputType === 'upload' && errorLogFileUrl"
+            style="margin-top: 10px"
+          >
+            <el-button
+              size="small"
+              @click="loadErrorLogFromUrl"
+            >
+              加载错误日志
+            </el-button>
           </div>
-
         </el-form-item>
 
 
 
         <el-form-item label="页面代码URL（可选）">
-
           <el-input
 
             v-model="form.newPageCodeUrl"
@@ -141,45 +147,57 @@
             placeholder="可选：提供新值的页面代码URL，用于检测页面变更更更更"
 
             clearable
-
           />
-
         </el-form-item>
 
 
 
         <el-form-item label="脚本类型">
+          <el-select
+            v-model="form.scriptType"
+            placeholder="请选择脚本类型"
+            style="width: 100%"
+          >
+            <el-option
+              label="Selenium"
+              value="SELENIUM"
+            />
 
-          <el-select v-model="form.scriptType" placeholder="请选择脚本类型" style="width: 100%">
-
-            <el-option label="Selenium" value="SELENIUM" />
-
-            <el-option label="Playwright" value="PLAYWRIGHT" />
-
+            <el-option
+              label="Playwright"
+              value="PLAYWRIGHT"
+            />
           </el-select>
-
         </el-form-item>
 
 
 
         <el-form-item label="脚本语言">
+          <el-select
+            v-model="form.scriptLanguage"
+            placeholder="请选择脚本语言"
+            style="width: 100%"
+          >
+            <el-option
+              label="Python"
+              value="PYTHON"
+            />
 
-          <el-select v-model="form.scriptLanguage" placeholder="请选择脚本语言" style="width: 100%">
+            <el-option
+              label="Java"
+              value="JAVA"
+            />
 
-            <el-option label="Python" value="PYTHON" />
-
-            <el-option label="Java" value="JAVA" />
-
-            <el-option label="JavaScript" value="JAVASCRIPT" />
-
+            <el-option
+              label="JavaScript"
+              value="JAVASCRIPT"
+            />
           </el-select>
-
         </el-form-item>
 
 
 
         <el-form-item label="使用LLM优化">
-
           <el-switch v-model="form.useLlm" />
 
           <span style="margin-left: 10px; color: #909399; font-size: 12px">
@@ -187,101 +205,107 @@
             启用后使用大语言模型优化脚本修复
 
           </span>
-
         </el-form-item>
 
 
 
         <el-form-item>
-
-          <el-button type="primary" @click="handleRepair" :loading="repairLoading">
-
+          <el-button
+            type="primary"
+            :loading="repairLoading"
+            @click="handleRepair"
+          >
             分析并修复
-
           </el-button>
 
-          <el-button @click="handleReset">重置</el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
 
-          <el-button @click="handleAnalyzeError" :loading="analyzeLoading">仅分析错误</el-button>
-
+          <el-button
+            :loading="analyzeLoading"
+            @click="handleAnalyzeError"
+          >
+            仅分析错误
+          </el-button>
         </el-form-item>
-
       </el-form>
 
 
 
       <!-- 错误分析结果 -->
 
-      <el-card v-if="errorAnalysisResult" class="result-card" style="margin-top: 20px">
-
+      <el-card
+        v-if="errorAnalysisResult"
+        class="result-card"
+        style="margin-top: 20px"
+      >
         <template #header>
-
           <div class="card-header">
-
             <span>错误分析结果</span>
-
           </div>
-
         </template>
 
 
 
-        <el-descriptions :column="2" border>
-
-          <el-descriptions-item label="错误类型" :span="2">
-
+        <el-descriptions
+          :column="2"
+          border
+        >
+          <el-descriptions-item
+            label="错误类型"
+            :span="2"
+          >
             <el-tag :type="errorAnalysisResult.errorType === 'ELEMENT_NOT_FOUND' ? 'danger' : 'warning'">
-
               {{ errorAnalysisResult.errorType }}
-
             </el-tag>
-
           </el-descriptions-item>
 
-          <el-descriptions-item label="错误信息" :span="2">
-
+          <el-descriptions-item
+            label="错误信息"
+            :span="2"
+          >
             {{ errorAnalysisResult.errorMessage }}
-
           </el-descriptions-item>
 
-          <el-descriptions-item label="错误位置" :span="2" v-if="errorAnalysisResult.errorLocation">
-
+          <el-descriptions-item
+            v-if="errorAnalysisResult.errorLocation"
+            label="错误位置"
+            :span="2"
+          >
             {{ errorAnalysisResult.errorLocation }}
-
           </el-descriptions-item>
 
-          <el-descriptions-item label="修复建议" :span="2" v-if="errorAnalysisResult.suggestions">
-
+          <el-descriptions-item
+            v-if="errorAnalysisResult.suggestions"
+            label="修复建议"
+            :span="2"
+          >
             <ul style="margin: 0; padding-left: 20px">
-
-              <li v-for="(suggestion, index) in errorAnalysisResult.suggestions" :key="index">
-
+              <li
+                v-for="(suggestion, index) in errorAnalysisResult.suggestions"
+                :key="index"
+              >
                 {{ suggestion }}
-
               </li>
-
             </ul>
-
           </el-descriptions-item>
-
         </el-descriptions>
-
       </el-card>
 
 
 
       <!-- 修复结果 -->
 
-      <el-card v-if="repairResult" class="result-card" style="margin-top: 20px">
-
+      <el-card
+        v-if="repairResult"
+        class="result-card"
+        style="margin-top: 20px"
+      >
         <template #header>
-
           <div class="card-header">
-
             <span>修复结果</span>
-
           </div>
-
         </template>
 
 
@@ -297,11 +321,8 @@
           show-icon
 
           style="margin-bottom: 20px"
-
         >
-
           {{ repairResult.errorMessage }}
-
         </el-alert>
 
 
@@ -317,19 +338,17 @@
           show-icon
 
           style="margin-bottom: 20px"
-
         >
-
           脚本修复成功
-
         </el-alert>
 
 
 
         <el-tabs v-model="repairActiveTab">
-
-          <el-tab-pane label="修复后的脚本" name="repaired">
-
+          <el-tab-pane
+            label="修复后的脚本"
+            name="repaired"
+          >
             <el-input
 
               v-model="repairResult.repairedScript"
@@ -341,70 +360,97 @@
               readonly
 
               style="font-family: 'Courier New', monospace"
-
             />
 
             <div style="margin-top: 10px">
+              <el-button
+                type="primary"
+                @click="handleCopyRepairedScript"
+              >
+                复制脚本
+              </el-button>
 
-              <el-button type="primary" @click="handleCopyRepairedScript">复制脚本</el-button>
-
-              <el-button type="success" @click="handleDownloadRepairedScript">下载脚本</el-button>
-
+              <el-button
+                type="success"
+                @click="handleDownloadRepairedScript"
+              >
+                下载脚本
+              </el-button>
             </div>
-
           </el-tab-pane>
 
 
 
-          <el-tab-pane label="修复变更" name="changes" v-if="repairResult.changes && repairResult.changes.length > 0">
+          <el-tab-pane
+            v-if="repairResult.changes && repairResult.changes.length > 0"
+            label="修复变更"
+            name="changes"
+          >
+            <el-table
+              :data="repairResult.changes"
+              border
+              stripe
+            >
+              <el-table-column
+                prop="type"
+                label="变更类型"
+                width="120"
+              />
 
-            <el-table :data="repairResult.changes" border stripe>
+              <el-table-column
+                prop="location"
+                label="位置"
+                width="150"
+              />
 
-              <el-table-column prop="type" label="变更类型" width="120" />
+              <el-table-column
+                prop="oldValue"
+                label="原值"
+                show-overflow-tooltip
+              />
 
-              <el-table-column prop="location" label="位置" width="150" />
+              <el-table-column
+                prop="newValue"
+                label="新值"
+                show-overflow-tooltip
+              />
 
-              <el-table-column prop="oldValue" label="原值" show-overflow-tooltip />
-
-              <el-table-column prop="newValue" label="新值" show-overflow-tooltip />
-
-              <el-table-column prop="reason" label="原因" show-overflow-tooltip />
-
+              <el-table-column
+                prop="reason"
+                label="原因"
+                show-overflow-tooltip
+              />
             </el-table>
-
           </el-tab-pane>
 
 
 
-          <el-tab-pane label="修复建议" name="suggestions" v-if="repairResult.suggestions && repairResult.suggestions.length > 0">
-
+          <el-tab-pane
+            v-if="repairResult.suggestions && repairResult.suggestions.length > 0"
+            label="修复建议"
+            name="suggestions"
+          >
             <ul style="margin: 0; padding-left: 20px">
-
-              <li v-for="(suggestion, index) in repairResult.suggestions" :key="index" style="margin-bottom: 10px">
-
+              <li
+                v-for="(suggestion, index) in repairResult.suggestions"
+                :key="index"
+                style="margin-bottom: 10px"
+              >
                 {{ suggestion }}
-
               </li>
-
             </ul>
-
           </el-tab-pane>
-
         </el-tabs>
-
       </el-card>
-
     </el-card>
-
   </div>
-
 </template>
 
 
 
 <script setup lang="ts">
 
-import { ref, reactive, onUnmounted } from 'vue'
+import { ref, reactive } from 'vue'
 
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 

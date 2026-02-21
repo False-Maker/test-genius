@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 
 // 知识库文档类型
 export interface KnowledgeDocument {
@@ -20,6 +21,8 @@ export interface KnowledgeBase {
   kbName: string
   kbDescription?: string
   kbType?: string
+  creatorId?: number
+  isActive?: string
   documentCount?: number
   chunkCount?: number
   lastSyncTime?: string
@@ -50,14 +53,14 @@ export interface KBPermissionParams {
   permissionType: 'read' | 'write' | 'admin'
 }
 
-// 知识库API
+// 知识库API（统一走 Java 后端 /api/v1/knowledge-base）
 export const knowledgeBaseApi = {
-  // 初始化知识库
+  // 初始化知识库（代理到 Python）
   initKnowledgeBase() {
-    return request.post<boolean>('/v1/knowledge/init')
+    return request.post<any, ApiResult<boolean>>('/v1/knowledge-base/init')
   },
 
-  // 添加知识库文档
+  // 添加知识库文档（代理到 Python）
   addDocument(params: {
     docCode: string
     docName: string
@@ -67,96 +70,121 @@ export const knowledgeBaseApi = {
     docUrl?: string
     creatorId?: number
   }) {
-    return request.post<number>('/v1/knowledge/documents', null, { params })
+    return request.post<any, ApiResult<number>>('/v1/knowledge-base/documents', params)
   },
 
-  // 上传文档到知识库
+  // 上传文档到知识库（Java 再代理到 Python）
   uploadDocument(kbId: number, file: File, creatorId?: number) {
     const formData = new FormData()
-    formData.append('kb_id', kbId.toString())
-    formData.append('file_name', file.name)
-    
-    return new Promise<{ success: boolean; docId?: number; docCode?: string; chunks?: number; message?: string }>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = async () => {
-        try {
-          const base64Content = (reader.result as string).split(',')[1] || reader.result as string
-          formData.append('file_content', base64Content)
-          if (creatorId) {
-            formData.append('creator_id', creatorId.toString())
-          }
-          
-          const response = await request.post('/v1/knowledge/upload', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          })
-          resolve(response.data || response)
-        } catch (error) {
-          reject(error)
-        }
+    formData.append('file', file)
+    formData.append('creatorId', String(creatorId ?? 1))
+    return request.post<any, ApiResult<string>>(`/v1/knowledge-base/${kbId}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
+    }).then((res: ApiResult<string>) => ({
+      success: res.code === 200 || res.code === 0,
+      docCode: res.data,
+      message: res.message
+    }))
+  },
+
+  // 语义检索知识库文档（代理到 Python）
+  searchDocuments(params: SearchDocumentsParams) {
+    return request.post<any, ApiResult<KnowledgeDocument[]>>('/v1/knowledge-base/documents/search', {
+      queryText: params.queryText,
+      docType: params.docType,
+      topK: params.topK ?? 10,
+      similarityThreshold: params.similarityThreshold ?? 0.7
     })
   },
 
-  // 语义检索知识库文档
-  searchDocuments(params: SearchDocumentsParams) {
-    return request.post<KnowledgeDocument[]>('/v1/knowledge/documents/search', null, { params })
-  },
-
-  // 关键词检索知识库文档
+  // 关键词检索知识库文档（代理到 Python）
   searchDocumentsByKeyword(keyword: string, params?: { docType?: string; topK?: number }) {
-    return request.get<KnowledgeDocument[]>(`/v1/knowledge/documents/keyword/${keyword}`, { params })
+    return request.get<any, ApiResult<KnowledgeDocument[]>>(
+      `/v1/knowledge-base/documents/keyword/${encodeURIComponent(keyword)}`,
+      { params: { docType: params?.docType, topK: params?.topK ?? 10 } }
+    )
   },
 
-  // 获取知识库统计信息
+  listDocuments(kbId: number, limit = 20) {
+    return request.get<any, ApiResult<KnowledgeDocument[]>>(`/v1/knowledge-base/${kbId}/documents`, {
+      params: { limit }
+    })
+  },
+
+  // 获取知识库统计信息（通过详情接口，已包含 documentCount/chunkCount/lastSyncTime）
   getStatistics(kbId: number) {
-    return request.post<{ documentCount: number; chunkCount: number; lastSyncTime?: string }>('/v1/knowledge/statistics', null, {
-      params: { kb_id: kbId }
+    return request.get<any, ApiResult<KnowledgeBase>>(`/v1/knowledge-base/${kbId}`).then((res) => {
+      const dto = res.data
+      return {
+        ...res,
+        data: dto ? {
+          documentCount: dto.documentCount ?? 0,
+          chunkCount: dto.chunkCount ?? 0,
+          lastSyncTime: dto.lastSyncTime != null ? String(dto.lastSyncTime) : undefined
+        } : undefined
+      }
     })
   },
 
   // 同步知识库
   syncKnowledgeBase(params: KBSyncParams) {
-    return request.post('/v1/knowledge/sync', null, { params })
+    return request.post<any, ApiResult<Record<string, unknown>>>(
+      `/v1/knowledge-base/${params.kbId}/sync`,
+      null,
+      { params: { syncType: params.syncType, sourcePath: params.sourcePath } }
+    )
   },
 
   // 获取同步日志
   getSyncLogs(kbId: number) {
-    return request.get(`/v1/knowledge/knowledge-base/${kbId}/sync-logs`)
+    return request.get<any, ApiResult<any>>(`/v1/knowledge-base/${kbId}/sync-logs`)
   },
 
   // 授予权限
   grantPermission(params: KBPermissionParams) {
-    return request.post('/v1/knowledge/permission/grant', null, { params })
+    return request.post<any, ApiResult<boolean>>('/v1/knowledge-base/permission/grant', params)
   },
 
   // 撤销权限
   revokePermission(kbId: number, userId: number, permissionType: string) {
-    return request.delete('/v1/knowledge/permission/revoke', {
-      params: { kb_id: kbId, user_id: userId, permission_type: permissionType }
+    return request.delete<any, ApiResult<boolean>>('/v1/knowledge-base/permission/revoke', {
+      params: { kbId, userId, permissionType }
     })
   },
 
   // 检查权限
   checkPermission(kbId: number, userId: number, permissionType: string) {
-    return request.get<{ hasPermission: boolean }>('/v1/knowledge/permission/check', {
-      params: { kb_id: kbId, user_id: userId, permission_type: permissionType }
+    return request.get<any, ApiResult<boolean>>('/v1/knowledge-base/permission/check', {
+      params: { kbId, userId, permissionType }
     })
   },
 
   // 获取用户的知识库列表
   getUserKnowledgeBases(userId: number, permissionType?: string) {
-    return request.get<KnowledgeBase[]>(`/v1/knowledge/user/${userId}/knowledge-bases`, {
-      params: permissionType ? { permission_type: permissionType } : {}
+    return request.get<any, ApiResult<KnowledgeBase[]>>(`/v1/knowledge-base/user/${userId}`, {
+      params: permissionType ? { permissionType } : {}
     })
   },
 
   // 获取知识库的权限列表
   getKBPermissions(kbId: number) {
-    return request.get(`/v1/knowledge/knowledge-base/${kbId}/permissions`)
+    return request.get<any, ApiResult<any>>(`/v1/knowledge-base/${kbId}/permissions`)
+  },
+
+  // 创建知识库
+  createKnowledgeBase(data: KnowledgeBase & { creatorId?: number; isActive?: string }) {
+    return request.post<any, ApiResult<number>>('/v1/knowledge-base', data)
+  },
+
+  // 更新知识库
+  updateKnowledgeBase(id: number, data: KnowledgeBase) {
+    return request.put<any, ApiResult<KnowledgeBase>>(`/v1/knowledge-base/${id}`, data)
+  },
+
+  // 删除知识库
+  deleteKnowledgeBase(id: number) {
+    return request.delete<any, ApiResult<boolean>>(`/v1/knowledge-base/${id}`)
   }
 }
-

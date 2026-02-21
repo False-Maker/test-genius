@@ -65,3 +65,4 @@ docker-compose.override.yml
 # Cursor
 .cursor/
 
+.aider*

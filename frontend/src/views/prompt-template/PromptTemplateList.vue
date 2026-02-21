@@ -1,33 +1,16 @@
 <template>
-
-
-
-
-
   <div class="prompt-template-list">
-
-
-
-
-
     <div class="header">
-
-
-
-
-
       <h2>提示词模板管理</h2>
 
 
 
 
 
-      <el-button type="primary" @click="handleCreate">
-
-
-
-
-
+      <el-button
+        type="primary"
+        @click="handleCreate"
+      >
         <el-icon><Plus /></el-icon>
 
 
@@ -35,17 +18,7 @@
 
 
         新建模板
-
-
-
-
-
       </el-button>
-
-
-
-
-
     </div>
 
 
@@ -64,24 +37,16 @@
 
 
 
-    <el-card class="search-card" shadow="never">
-
-
-
-
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
-
-
-
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="模板名称">
-
-
-
-
-
           <el-input
 
 
@@ -113,17 +78,7 @@
 
 
             @keyup.enter="handleSearch"
-
-
-
-
-
           />
-
-
-
-
-
         </el-form-item>
 
 
@@ -131,11 +86,6 @@
 
 
         <el-form-item label="模板分类">
-
-
-
-
-
           <el-input
 
 
@@ -167,17 +117,7 @@
 
 
             @keyup.enter="handleSearch"
-
-
-
-
-
           />
-
-
-
-
-
         </el-form-item>
 
 
@@ -185,35 +125,22 @@
 
 
         <el-form-item>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
 
 
 
 
 
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-
-
-
-
-
-          <el-button @click="handleReset">重置</el-button>
-
-
-
-
-
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
-
-
-
-
-
       </el-form>
-
-
-
-
-
     </el-card>
 
 
@@ -232,12 +159,10 @@
 
 
 
-    <el-card class="table-card" shadow="never">
-
-
-
-
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
 
 
@@ -263,185 +188,118 @@
 
 
         style="width: 100%"
-
-
-
-
-
       >
+        <el-table-column
+          prop="templateCode"
+          label="模板编码"
+          width="180"
+        />
 
 
 
 
 
-        <el-table-column prop="templateCode" label="模板编码" width="180" />
+        <el-table-column
+          prop="templateName"
+          label="模板名称"
+          min-width="200"
+          show-overflow-tooltip
+        />
 
 
 
 
 
-        <el-table-column prop="templateName" label="模板名称" min-width="200" show-overflow-tooltip />
-
-
-
-
-
-        <el-table-column prop="templateCategory" label="模板分类" width="150">
-
-
-
-
-
+        <el-table-column
+          prop="templateCategory"
+          label="模板分类"
+          width="150"
+        >
           <template #default="scope">
-
-
-
-
-
             {{ scope.row.templateCategory || '-' }}
-
-
-
-
-
           </template>
-
-
-
-
-
         </el-table-column>
 
 
 
 
 
-        <el-table-column prop="templateType" label="模板类型" width="120">
-
-
-
-
-
+        <el-table-column
+          prop="templateType"
+          label="模板类型"
+          width="120"
+        >
           <template #default="scope">
-
-
-
-
-
             {{ scope.row.templateType || '-' }}
-
-
-
-
-
           </template>
-
-
-
-
-
         </el-table-column>
 
 
 
 
 
-        <el-table-column prop="isActive" label="状态" width="100">
-
-
-
-
-
+        <el-table-column
+          prop="isActive"
+          label="状态"
+          width="100"
+        >
           <template #default="scope">
-
-
-
-
-
             <el-tag :type="scope.row.isActive === '1' ? 'success' : 'info'">
-
-
-
-
-
               {{ scope.row.isActive === '1' ? '启用' : '禁用' }}
-
-
-
-
-
             </el-tag>
-
-
-
-
-
           </template>
-
-
-
-
-
         </el-table-column>
 
 
 
 
 
-        <el-table-column prop="version" label="版本" width="80" />
+        <el-table-column
+          prop="version"
+          label="版本"
+          width="80"
+        />
 
 
 
 
 
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
 
 
 
 
 
-        <el-table-column label="操作" width="280" fixed="right">
-
-
-
-
-
+        <el-table-column
+          label="操作"
+          width="280"
+          fixed="right"
+        >
           <template #default="scope">
-
-
-
-
-
-            <el-button size="small" link type="primary" @click="handleView(scope.row)">
-
-
-
-
-
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleView(scope.row)"
+            >
               鏌ョ湅
-
-
-
-
-
             </el-button>
 
 
 
 
 
-            <el-button size="small" link type="primary" @click="handleEdit(scope.row)">
-
-
-
-
-
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleEdit(scope.row)"
+            >
               缂栬緫
-
-
-
-
-
             </el-button>
 
 
@@ -473,23 +331,8 @@
 
 
               @click="handleToggleStatus(scope.row)"
-
-
-
-
-
             >
-
-
-
-
-
               {{ scope.row.isActive === '1' ? '禁用' : '启用' }}
-
-
-
-
-
             </el-button>
 
 
@@ -521,23 +364,8 @@
 
 
               @click="handleTestGenerate(scope.row)"
-
-
-
-
-
             >
-
-
-
-
-
               娴嬭瘯鐢熸垚
-
-
-
-
-
             </el-button>
 
 
@@ -569,41 +397,11 @@
 
 
               @click="handleDelete(scope.row)"
-
-
-
-
-
             >
-
-
-
-
-
               鍒犻櫎
-
-
-
-
-
             </el-button>
-
-
-
-
-
           </template>
-
-
-
-
-
         </el-table-column>
-
-
-
-
-
       </el-table>
 
 
@@ -623,11 +421,6 @@
 
 
       <div class="pagination">
-
-
-
-
-
         <el-pagination
 
 
@@ -671,23 +464,8 @@
 
 
           @current-change="handlePageChange"
-
-
-
-
-
         />
-
-
-
-
-
       </div>
-
-
-
-
-
     </el-card>
 
 
@@ -731,17 +509,7 @@
 
 
       @close="handleDialogClose"
-
-
-
-
-
     >
-
-
-
-
-
       <el-form
 
 
@@ -767,29 +535,10 @@
 
 
         label-width="120px"
-
-
-
-
-
       >
-
-
-
-
-
         <el-row :gutter="20">
-
-
-
-
-
           <el-col :span="12">
-
-
             <el-form-item label="模板名称">
-
-
               <el-input
 
 
@@ -803,17 +552,8 @@
 
 
                 show-word-limit
-
-
               />
-
-
             </el-form-item>
-
-
-
-
-
           </el-col>
 
 
@@ -821,11 +561,7 @@
 
 
           <el-col :span="12">
-
-
             <el-form-item label="模板分类">
-
-
               <el-input
 
 
@@ -836,23 +572,9 @@
 
 
                 maxlength="100"
-
-
               />
-
-
             </el-form-item>
-
-
-
-
-
           </el-col>
-
-
-
-
-
         </el-row>
 
 
@@ -860,17 +582,8 @@
 
 
         <el-row :gutter="20">
-
-
-
-
-
           <el-col :span="12">
-
-
             <el-form-item label="模板类型">
-
-
               <el-input
 
 
@@ -881,17 +594,8 @@
 
 
                 maxlength="50"
-
-
               />
-
-
             </el-form-item>
-
-
-
-
-
           </el-col>
 
 
@@ -899,35 +603,19 @@
 
 
           <el-col :span="12">
-
-
             <el-form-item label="是否启用">
-
-
               <el-radio-group v-model="formData.isActive">
+                <el-radio label="1">
+                  启用
+                </el-radio>
 
 
-                <el-radio label="1">启用</el-radio>
-
-
-                <el-radio label="0">禁用</el-radio>
-
-
+                <el-radio label="0">
+                  禁用
+                </el-radio>
               </el-radio-group>
-
-
             </el-form-item>
-
-
-
-
-
           </el-col>
-
-
-
-
-
         </el-row>
 
 
@@ -935,8 +623,6 @@
 
 
         <el-form-item label="模板内容">
-
-
           <el-input
 
 
@@ -950,20 +636,12 @@
 
 
             placeholder="请输入模板内容，使用 {变量名} 格式定义变量，例如：{requirement_name}"
-
-
           />
 
 
           <div class="form-tip">
-
-
             提示：使用 {变量名} 格式定义变量，例如：{requirement_name}、{business_module}
-
-
           </div>
-
-
         </el-form-item>
 
 
@@ -971,8 +649,6 @@
 
 
         <el-form-item label="模板变量">
-
-
           <el-input
 
 
@@ -985,21 +661,13 @@
             :rows="4"
 
 
-            placeholder='请输入JSON格式的变量定义，例如：{"requirement_name": "需求ID名称", "business_module": "业务模块"}'
-
-
+            placeholder="请输入JSON格式的变量定义，例如：{&quot;requirement_name&quot;: &quot;需求ID名称&quot;, &quot;business_module&quot;: &quot;业务模块&quot;}"
           />
 
 
           <div class="form-tip">
-
-
             提示：JSON格式定义变量说明，例如：{"变量名": "变量说明"}
-
-
           </div>
-
-
         </el-form-item>
 
 
@@ -1007,8 +675,6 @@
 
 
         <el-form-item label="适用测试分层">
-
-
           <el-input
 
 
@@ -1019,11 +685,7 @@
 
 
             maxlength="500"
-
-
           />
-
-
         </el-form-item>
 
 
@@ -1031,8 +693,6 @@
 
 
         <el-form-item label="适用测试方法">
-
-
           <el-input
 
 
@@ -1043,11 +703,7 @@
 
 
             maxlength="500"
-
-
           />
-
-
         </el-form-item>
 
 
@@ -1055,8 +711,6 @@
 
 
         <el-form-item label="适用业务模块">
-
-
           <el-input
 
 
@@ -1067,11 +721,7 @@
 
 
             maxlength="500"
-
-
           />
-
-
         </el-form-item>
 
 
@@ -1079,8 +729,6 @@
 
 
         <el-form-item label="模板描述">
-
-
           <el-input
 
 
@@ -1094,17 +742,8 @@
 
 
             placeholder="请输入模板描述"
-
-
           />
-
-
         </el-form-item>
-
-
-
-
-
       </el-form>
 
 
@@ -1112,41 +751,22 @@
 
 
       <template #footer>
-
-
-
-
-
-        <el-button @click="dialogVisible = false">鍙栨秷</el-button>
-
-
-
-
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-
-
-
-
-          纭瀹
-
-
-
-
-
+        <el-button @click="dialogVisible = false">
+          鍙栨秷
         </el-button>
 
 
 
 
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          纭瀹
+        </el-button>
       </template>
-
-
-
-
-
     </el-dialog>
 
 
@@ -1184,35 +804,13 @@
 
 
       width="1000px"
-
-
-
-
-
     >
-
-
-
-
-
-      <el-descriptions :column="2" border>
-
-
-
-
-
+      <el-descriptions
+        :column="2"
+        border
+      >
         <el-descriptions-item label="模板编码">
-
-
-
-
-
           {{ viewData.templateCode }}
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1220,17 +818,7 @@
 
 
         <el-descriptions-item label="模板名称">
-
-
-
-
-
           {{ viewData.templateName }}
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1238,17 +826,7 @@
 
 
         <el-descriptions-item label="模板分类">
-
-
-
-
-
           {{ viewData.templateCategory || '-' }}
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1256,17 +834,7 @@
 
 
         <el-descriptions-item label="模板类型">
-
-
-
-
-
           {{ viewData.templateType || '-' }}
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1274,29 +842,9 @@
 
 
         <el-descriptions-item label="启用ㄧ姸鎬">
-
-
-
-
-
           <el-tag :type="viewData.isActive === '1' ? 'success' : 'info'">
-
-
-
-
-
             {{ viewData.isActive === '1' ? '启用' : '禁用' }}
-
-
-
-
-
           </el-tag>
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1304,17 +852,7 @@
 
 
         <el-descriptions-item label="版本鍙">
-
-
-
-
-
           {{ viewData.version }}
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1322,17 +860,7 @@
 
 
         <el-descriptions-item label="创建时间">
-
-
-
-
-
           {{ viewData.createTime }}
-
-
-
-
-
         </el-descriptions-item>
 
 
@@ -1340,137 +868,81 @@
 
 
         <el-descriptions-item label="鏇存柊鏃堕棿">
-
-
-
-
-
           {{ viewData.updateTime }}
-
-
-
-
-
         </el-descriptions-item>
 
 
 
 
 
-        <el-descriptions-item label="妯℃澘鍐呭" :span="2">
-
-
-
-
-
-          <div style="white-space: pre-wrap; max-height: 300px; overflow-y: auto">{{ viewData.templateContent }}</div>
-
-
-
-
-
+        <el-descriptions-item
+          label="妯℃澘鍐呭"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap; max-height: 300px; overflow-y: auto">
+            {{ viewData.templateContent }}
+          </div>
         </el-descriptions-item>
 
 
 
 
 
-        <el-descriptions-item label="妯℃澘鍙橀噺瀹氫箟" :span="2">
-
-
-
-
-
-          <div style="white-space: pre-wrap">{{ viewData.templateVariables || '-' }}</div>
-
-
-
-
-
+        <el-descriptions-item
+          label="妯℃澘鍙橀噺瀹氫箟"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap">
+            {{ viewData.templateVariables || '-' }}
+          </div>
         </el-descriptions-item>
 
 
 
 
 
-        <el-descriptions-item label="閫傜敤娴嬭瘯鍒嗗眰" :span="2">
-
-
-
-
-
+        <el-descriptions-item
+          label="閫傜敤娴嬭瘯鍒嗗眰"
+          :span="2"
+        >
           {{ viewData.applicableLayers || '-' }}
-
-
-
-
-
         </el-descriptions-item>
 
 
 
 
 
-        <el-descriptions-item label="閫傜敤娴嬭瘯鏂规硶" :span="2">
-
-
-
-
-
+        <el-descriptions-item
+          label="閫傜敤娴嬭瘯鏂规硶"
+          :span="2"
+        >
           {{ viewData.applicableMethods || '-' }}
-
-
-
-
-
         </el-descriptions-item>
 
 
 
 
 
-        <el-descriptions-item label="閫傜敤涓氬姟妯″潡" :span="2">
-
-
-
-
-
+        <el-descriptions-item
+          label="閫傜敤涓氬姟妯″潡"
+          :span="2"
+        >
           {{ viewData.applicableModules || '-' }}
-
-
-
-
-
         </el-descriptions-item>
 
 
 
 
 
-        <el-descriptions-item label="妯℃澘鎻忚堪" :span="2">
-
-
-
-
-
-          <div style="white-space: pre-wrap">{{ viewData.templateDescription || '-' }}</div>
-
-
-
-
-
+        <el-descriptions-item
+          label="妯℃澘鎻忚堪"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap">
+            {{ viewData.templateDescription || '-' }}
+          </div>
         </el-descriptions-item>
-
-
-
-
-
       </el-descriptions>
-
-
-
-
-
     </el-dialog>
 
 
@@ -1508,17 +980,7 @@
 
 
       width="800px"
-
-
-
-
-
     >
-
-
-
-
-
       <el-form
 
 
@@ -1538,120 +1000,39 @@
 
 
         label-width="120px"
-
-
-
-
-
       >
+        <div class="variable-inputs">
+          <div
 
 
 
 
 
-                  <div class="variable-inputs">
+            v-for="key in Object.keys(testForm.variables)"
 
 
 
 
 
-            <div
+            :key="key"
 
 
 
 
 
-              v-for="(value, key) in testForm.variables"
+            class="variable-item"
+          >
+            <el-input
 
 
+              v-model="testForm.variables[key]"
 
 
+              :placeholder="`请输入${key}的值`"
 
-              :key="key"
 
-
-
-
-
-              class="variable-item"
-
-
-
-
-
-            >
-
-
-
-
-
-              <el-input
-
-
-                v-model="testForm.variables[key]"
-
-
-                :placeholder="`请输入${key}的值`"
-
-
-                style="width: 200px"
-
-
-              />
-
-
-
-
-
-              <el-button
-
-
-
-
-
-                size="small"
-
-
-
-
-
-                type="danger"
-
-
-
-
-
-                link
-
-
-
-
-
-                @click="removeVariable(key)"
-
-
-
-
-
-              >
-
-
-
-
-
-                鍒犻櫎
-
-
-
-
-
-              </el-button>
-
-
-
-
-
-            </div>
+              style="width: 200px"
+            />
 
 
 
@@ -1669,46 +1050,58 @@
 
 
 
-              type="primary"
+              type="danger"
 
 
 
 
 
-              @click="addVariable"
+              link
 
 
 
 
 
+              @click="removeVariable(key)"
             >
-
-
-
-
-
-              添加变量
-
-
-
-
-
+              鍒犻櫎
             </el-button>
-
-
-
-
-
           </div>
 
 
 
 
 
+          <el-button
+
+
+
+
+
+            size="small"
+
+
+
+
+
+            type="primary"
+
+
+
+
+
+            @click="addVariable"
+          >
+            添加变量
+          </el-button>
+        </div>
+
+
+
+
+
         <el-form-item label="生成的提示词">
-
-
-                  <el-input
+          <el-input
 
 
 
@@ -1733,20 +1126,8 @@
 
 
             readonly
-
-
-
-
-
           />
-
-
         </el-form-item>
-
-
-
-
-
       </el-form>
 
 
@@ -1754,59 +1135,35 @@
 
 
       <template #footer>
-
-
-
-
-
-        <el-button @click="testDialogVisible = false">鍏抽棴</el-button>
-
-
-
-
-
-        <el-button type="primary" :loading="generateLoading" @click="handleGenerate">
-
-
-
-
-
-          鐢熸垚
-
-
-
-
-
+        <el-button @click="testDialogVisible = false">
+          鍏抽棴
         </el-button>
 
 
 
 
 
-        <el-button type="success" @click="handleCopyPrompt">复制</el-button>
+        <el-button
+          type="primary"
+          :loading="generateLoading"
+          @click="handleGenerate"
+        >
+          鐢熸垚
+        </el-button>
 
 
 
 
 
+        <el-button
+          type="success"
+          @click="handleCopyPrompt"
+        >
+          复制
+        </el-button>
       </template>
-
-
-
-
-
     </el-dialog>
-
-
-
-
-
   </div>
-
-
-
-
-
 </template>
 
 
@@ -1849,27 +1206,7 @@ import { promptTemplateApi, type PromptTemplate } from '@/api/promptTemplate'
 
 
 
-import type { PageResult } from '@/api/types'
 
-import PromptEditor from '@/components/PromptEditor.vue'
-
-import ModelComparison from '@/components/ModelComparison.vue'
-
-import BatchTest from '@/components/BatchTest.vue'
-
-import VersionHistory from '@/components/VersionHistory.vue'
-
-
-
-
-
-
-
-
-
-
-
-// 响应式数据琛ㄥ崟楠岃瘉瑙勫垯
 
 
 
@@ -1899,13 +1236,10 @@ const searchForm = reactive({
 
 })
 
-const formData = reactive<Partial<PromptTemplate>>({
+const formData = reactive<PromptTemplate>({
 
   templateName: '',
 
-  templateCategory: '',
-
-  templateType: '',
 
   templateContent: '',
 
@@ -1923,22 +1257,12 @@ const formData = reactive<Partial<PromptTemplate>>({
 
 })
 
-// 编辑器变量（从模板内容中提取）
-const templateVariables = ref<Record<string, string>>({})
-
 const dialogVisible = ref(false)
 
 const viewDialogVisible = ref(false)
 
 const testDialogVisible = ref(false)
 
-const compareDialogVisible = ref(false)
-
-const batchTestDialogVisible = ref(false)
-
-const versionHistoryDialogVisible = ref(false)
-
-const currentVersionTemplate = ref<PromptTemplate | null>(null)
 
 const isEdit = ref(false)
 
@@ -1952,7 +1276,6 @@ const generateLoading = ref(false)
 
 const currentTestTemplate = ref<PromptTemplate | null>(null)
 
-const currentCompareTemplate = ref<PromptTemplate | null>(null)
 
 const testForm = reactive({
 

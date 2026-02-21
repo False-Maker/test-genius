@@ -1,29 +1,30 @@
 <template>
-
   <div class="model-config-list">
-
     <div class="header">
-
       <h2>模型配置管理</h2>
 
-      <el-button type="primary" @click="handleCreate">
-
+      <el-button
+        type="primary"
+        @click="handleCreate"
+      >
         <el-icon><Plus /></el-icon>
 
         新建模型配置
-
       </el-button>
-
     </div>
 
     <!-- 搜索�?-->
 
-    <el-card class="search-card" shadow="never">
-
-      <el-form :inline="true" :model="searchForm" class="search-form">
-
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="模型名称称">
-
           <el-input
 
             v-model="searchForm.modelName"
@@ -35,13 +36,10 @@
             @clear="handleSearch"
 
             @keyup.enter="handleSearch"
-
           />
-
         </el-form-item>
 
         <el-form-item label="模型类型">
-
           <el-select
 
             v-model="searchForm.modelType"
@@ -51,27 +49,40 @@
             clearable
 
             @change="handleSearch"
-
           >
+            <el-option
+              label="DeepSeek"
+              value="DeepSeek"
+            />
 
-            <el-option label="DeepSeek" value="DeepSeek" />
+            <el-option
+              label="豆包"
+              value="豆包"
+            />
 
-            <el-option label="豆包" value="豆包" />
+            <el-option
+              label="Kimi"
+              value="Kimi"
+            />
 
-            <el-option label="Kimi" value="Kimi" />
+            <el-option
+              label="千问"
+              value="千问"
+            />
 
-            <el-option label="千问" value="千问" />
+            <el-option
+              label="智谱"
+              value="智谱"
+            />
 
-            <el-option label="智谱" value="智谱" />
-
-            <el-option label="智谱" value="智谱" />
-
+            <el-option
+              label="智谱"
+              value="智谱"
+            />
           </el-select>
-
         </el-form-item>
 
         <el-form-item label="启用状态�">
-
           <el-select
 
             v-model="searchForm.isActive"
@@ -81,33 +92,40 @@
             clearable
 
             @change="handleSearch"
-
           >
+            <el-option
+              label="启用"
+              value="1"
+            />
 
-            <el-option label="启用" value="1" />
-
-            <el-option label="禁用" value="0" />
-
+            <el-option
+              label="禁用"
+              value="0"
+            />
           </el-select>
-
         </el-form-item>
 
         <el-form-item>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
 
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-
-          <el-button @click="handleReset">重置</el-button>
-
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
-
       </el-form>
-
     </el-card>
 
     <!-- 模型配置列表 -->
 
-    <el-card class="table-card" shadow="never">
-
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
 
         v-loading="loading"
@@ -117,67 +135,92 @@
         stripe
 
         style="width: 100%"
-
       >
+        <el-table-column
+          prop="modelCode"
+          label="模型编码"
+          width="180"
+        />
 
-        <el-table-column prop="modelCode" label="模型编码" width="180" />
+        <el-table-column
+          prop="modelName"
+          label="模型名称称"
+          min-width="150"
+        />
 
-        <el-table-column prop="modelName" label="模型名称称" min-width="150" />
+        <el-table-column
+          prop="modelType"
+          label="模型类型"
+          width="120"
+        />
 
-        <el-table-column prop="modelType" label="模型类型" width="120" />
+        <el-table-column
+          prop="modelVersion"
+          label="版本"
+          width="100"
+        />
 
-        <el-table-column prop="modelVersion" label="版本" width="100" />
-
-        <el-table-column prop="priority" label="优先级�" width="100" sortable>
-
+        <el-table-column
+          prop="priority"
+          label="优先级�"
+          width="100"
+          sortable
+        >
           <template #default="scope">
-
             {{ scope.row.priority || '-' }}
-
           </template>
-
         </el-table-column>
 
-        <el-table-column prop="isActive" label="状态�" width="100">
-
+        <el-table-column
+          prop="isActive"
+          label="状态�"
+          width="100"
+        >
           <template #default="scope">
-
             <el-tag :type="scope.row.isActive === '1' ? 'success' : 'danger'">
-
               {{ scope.row.isActive === '1' ? '启用' : '禁用' }}
-
             </el-tag>
-
           </template>
-
         </el-table-column>
 
-        <el-table-column prop="dailyLimit" label="每日限制" width="120">
-
+        <el-table-column
+          prop="dailyLimit"
+          label="每日限制"
+          width="120"
+        >
           <template #default="scope">
-
             {{ scope.row.dailyLimit || '-' }}
-
           </template>
-
         </el-table-column>
 
-        <el-table-column prop="createTime" label="创建时间" width="180" />
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
 
-        <el-table-column label="操作" width="280" fixed="right">
-
+        <el-table-column
+          label="操作"
+          width="280"
+          fixed="right"
+        >
           <template #default="scope">
-
-            <el-button size="small" link type="primary" @click="handleView(scope.row)">
-
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleView(scope.row)"
+            >
               查看
-
             </el-button>
 
-            <el-button size="small" link type="primary" @click="handleEdit(scope.row)">
-
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleEdit(scope.row)"
+            >
               编辑
-
             </el-button>
 
             <el-button
@@ -189,29 +232,25 @@
               :type="scope.row.isActive === '1' ? 'warning' : 'success'"
 
               @click="handleToggleStatus(scope.row)"
-
             >
-
               {{ scope.row.isActive === '1' ? '禁用' : '启用' }}
-
             </el-button>
 
-            <el-button size="small" link type="danger" @click="handleDelete(scope.row)">
-
+            <el-button
+              size="small"
+              link
+              type="danger"
+              @click="handleDelete(scope.row)"
+            >
               删除
-
             </el-button>
-
           </template>
-
         </el-table-column>
-
       </el-table>
 
       <!-- 分页 -->
 
       <div class="pagination">
-
         <el-pagination
 
           v-model:current-page="pagination.page"
@@ -227,11 +266,8 @@
           @size-change="handleSizeChange"
 
           @current-change="handlePageChange"
-
         />
-
       </div>
-
     </el-card>
 
     <!-- 创建人/编辑对话�?-->
@@ -245,9 +281,7 @@
       width="800px"
 
       @close="handleDialogClose"
-
     >
-
       <el-form
 
         ref="formRef"
@@ -257,11 +291,11 @@
         :rules="formRules"
 
         label-width="120px"
-
       >
-
-        <el-form-item label="模型名称称" prop="modelName">
-
+        <el-form-item
+          label="模型名称称"
+          prop="modelName"
+        >
           <el-input
 
             v-model="formData.modelName"
@@ -271,33 +305,53 @@
             maxlength="200"
 
             show-word-limit
-
           />
-
         </el-form-item>
 
-        <el-form-item label="模型类型" prop="modelType">
+        <el-form-item
+          label="模型类型"
+          prop="modelType"
+        >
+          <el-select
+            v-model="formData.modelType"
+            placeholder="请选择模型类型"
+          >
+            <el-option
+              label="DeepSeek"
+              value="DeepSeek"
+            />
 
-          <el-select v-model="formData.modelType" placeholder="请选择模型类型">
+            <el-option
+              label="豆包"
+              value="豆包"
+            />
 
-            <el-option label="DeepSeek" value="DeepSeek" />
+            <el-option
+              label="Kimi"
+              value="Kimi"
+            />
 
-            <el-option label="豆包" value="豆包" />
+            <el-option
+              label="千问"
+              value="千问"
+            />
 
-            <el-option label="Kimi" value="Kimi" />
+            <el-option
+              label="智谱"
+              value="智谱"
+            />
 
-            <el-option label="千问" value="千问" />
-
-            <el-option label="智谱" value="智谱" />
-
-            <el-option label="智谱" value="智谱" />
-
+            <el-option
+              label="智谱"
+              value="智谱"
+            />
           </el-select>
-
         </el-form-item>
 
-        <el-form-item label="API端点" prop="apiEndpoint">
-
+        <el-form-item
+          label="API端点"
+          prop="apiEndpoint"
+        >
           <el-input
 
             v-model="formData.apiEndpoint"
@@ -305,13 +359,13 @@
             placeholder="请输入API端点地址"
 
             maxlength="500"
-
           />
-
         </el-form-item>
 
-        <el-form-item label="API密钥" prop="apiKey">
-
+        <el-form-item
+          label="API密钥"
+          prop="apiKey"
+        >
           <el-input
 
             v-model="formData.apiKey"
@@ -323,13 +377,13 @@
             maxlength="500"
 
             show-password
-
           />
-
         </el-form-item>
 
-        <el-form-item label="模型版本" prop="modelVersion">
-
+        <el-form-item
+          label="模型版本"
+          prop="modelVersion"
+        >
           <el-input
 
             v-model="formData.modelVersion"
@@ -337,13 +391,13 @@
             placeholder="请输入模型版�"
 
             maxlength="50"
-
           />
-
         </el-form-item>
 
-        <el-form-item label="最大Token�" prop="maxTokens">
-
+        <el-form-item
+          label="最大Token�"
+          prop="maxTokens"
+        >
           <el-input-number
 
             v-model="formData.maxTokens"
@@ -355,13 +409,13 @@
             placeholder="请输入最大Token�"
 
             style="width: 100%"
-
           />
-
         </el-form-item>
 
-        <el-form-item label="温度参数" prop="temperature">
-
+        <el-form-item
+          label="温度参数"
+          prop="temperature"
+        >
           <el-input-number
 
             v-model="formData.temperature"
@@ -377,13 +431,13 @@
             placeholder="请输入温度参数（0-2))�"
 
             style="width: 100%"
-
           />
-
         </el-form-item>
 
-        <el-form-item label="优先级�" prop="priority">
-
+        <el-form-item
+          label="优先级�"
+          prop="priority"
+        >
           <el-input-number
 
             v-model="formData.priority"
@@ -395,13 +449,13 @@
             placeholder="请输入优先级级（数字越小优先级级越高�"
 
             style="width: 100%"
-
           />
-
         </el-form-item>
 
-        <el-form-item label="每日限制" prop="dailyLimit">
-
+        <el-form-item
+          label="每日限制"
+          prop="dailyLimit"
+        >
           <el-input-number
 
             v-model="formData.dailyLimit"
@@ -411,37 +465,38 @@
             placeholder="请输入每日调用限制（0表示无限制）"
 
             style="width: 100%"
-
           />
-
         </el-form-item>
 
-        <el-form-item label="启用状态�" prop="isActive">
-
+        <el-form-item
+          label="启用状态�"
+          prop="isActive"
+        >
           <el-radio-group v-model="formData.isActive">
+            <el-radio label="1">
+              启用
+            </el-radio>
 
-            <el-radio label="1">启用</el-radio>
-
-            <el-radio label="0">禁用</el-radio>
-
+            <el-radio label="0">
+              禁用
+            </el-radio>
           </el-radio-group>
-
         </el-form-item>
-
       </el-form>
 
       <template #footer>
-
-        <el-button @click="dialogVisible = false">取消</el-button>
-
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
-
-          确定
-
+        <el-button @click="dialogVisible = false">
+          取消
         </el-button>
 
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          确定
+        </el-button>
       </template>
-
     </el-dialog>
 
     <!-- 查看详情对话�?-->
@@ -453,53 +508,66 @@
       title="模型配置详情"
 
       width="800px"
-
     >
-
-      <el-descriptions :column="2" border>
-
-        <el-descriptions-item label="模型编码">{{ viewData.modelCode || '-' }}</el-descriptions-item>
-
-        <el-descriptions-item label="模型名称称">{{ viewData.modelName || '-' }}</el-descriptions-item>
-
-        <el-descriptions-item label="模型类型">{{ viewData.modelType || '-' }}</el-descriptions-item>
-
-        <el-descriptions-item label="模型版本">{{ viewData.modelVersion || '-' }}</el-descriptions-item>
-
-        <el-descriptions-item label="API端点" :span="2">
-
-          {{ viewData.apiEndpoint || '-' }}
-
+      <el-descriptions
+        :column="2"
+        border
+      >
+        <el-descriptions-item label="模型编码">
+          {{ viewData.modelCode || '-' }}
         </el-descriptions-item>
 
-        <el-descriptions-item label="最大Token�">{{ viewData.maxTokens || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="模型名称称">
+          {{ viewData.modelName || '-' }}
+        </el-descriptions-item>
 
-        <el-descriptions-item label="温度参数">{{ viewData.temperature || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="模型类型">
+          {{ viewData.modelType || '-' }}
+        </el-descriptions-item>
 
-        <el-descriptions-item label="优先级�">{{ viewData.priority || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="模型版本">
+          {{ viewData.modelVersion || '-' }}
+        </el-descriptions-item>
 
-        <el-descriptions-item label="每日限制">{{ viewData.dailyLimit || '-' }}</el-descriptions-item>
+        <el-descriptions-item
+          label="API端点"
+          :span="2"
+        >
+          {{ viewData.apiEndpoint || '-' }}
+        </el-descriptions-item>
+
+        <el-descriptions-item label="最大Token�">
+          {{ viewData.maxTokens || '-' }}
+        </el-descriptions-item>
+
+        <el-descriptions-item label="温度参数">
+          {{ viewData.temperature || '-' }}
+        </el-descriptions-item>
+
+        <el-descriptions-item label="优先级�">
+          {{ viewData.priority || '-' }}
+        </el-descriptions-item>
+
+        <el-descriptions-item label="每日限制">
+          {{ viewData.dailyLimit || '-' }}
+        </el-descriptions-item>
 
         <el-descriptions-item label="启用状态�">
-
           <el-tag :type="viewData.isActive === '1' ? 'success' : 'danger'">
-
             {{ viewData.isActive === '1' ? '启用' : '禁用' }}
-
           </el-tag>
-
         </el-descriptions-item>
 
-        <el-descriptions-item label="创建时间">{{ viewData.createTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ viewData.createTime || '-' }}
+        </el-descriptions-item>
 
-        <el-descriptions-item label="更新时间">{{ viewData.updateTime || '-' }}</el-descriptions-item>
-
+        <el-descriptions-item label="更新时间">
+          {{ viewData.updateTime || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
-
     </el-dialog>
-
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -512,7 +580,6 @@ import { Plus } from '@element-plus/icons-vue'
 
 import { modelConfigApi, type ModelConfig } from '@/api/modelConfig'
 
-import type { PageResult } from '@/api/types'
 
 import { useCacheStore } from '@/store/cache'
 
@@ -532,7 +599,7 @@ const searchForm = reactive({
   modelType: '',
   isActive: ''
 })
-const formData = reactive<Partial<ModelConfig>>({
+const formData = reactive<ModelConfig>({
   modelName: '',
   modelType: '',
   apiEndpoint: '',

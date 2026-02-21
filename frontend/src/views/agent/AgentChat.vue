@@ -7,7 +7,13 @@
           <template #header>
             <div class="card-header">
               <span>会话列表</span>
-              <el-button type="primary" size="small" @click="handleCreateSession">新建会话</el-button>
+              <el-button
+                type="primary"
+                size="small"
+                @click="handleCreateSession"
+              >
+                新建会话
+              </el-button>
             </div>
           </template>
           <div class="session-list">
@@ -21,7 +27,10 @@
                 {{ session.sessionTitle || `会话 ${session.id}` }}
               </div>
               <div class="session-meta">
-                <el-tag :type="getStatusType(session.status!)" size="small">
+                <el-tag
+                  :type="getStatusType(session.status!)"
+                  size="small"
+                >
                   {{ getStatusText(session.status!) }}
                 </el-tag>
                 <span class="session-time">{{ formatTime(session.lastActiveTime!) }}</span>
@@ -35,48 +44,86 @@
       <el-col :span="18">
         <el-card class="chat-card">
           <!-- 会话信息 -->
-          <div class="chat-header" v-if="currentSession">
+          <div
+            v-if="currentSession"
+            class="chat-header"
+          >
             <div class="agent-info">
               <el-icon><User /></el-icon>
               <span>{{ agentInfo?.agentName || 'Agent' }}</span>
             </div>
             <div class="session-actions">
-              <el-button size="small" @click="handleViewHistory">会话历史</el-button>
-              <el-button size="small" @click="handleCloseSession">关闭会话</el-button>
+              <el-button
+                size="small"
+                @click="handleViewHistory"
+              >
+                会话历史
+              </el-button>
+              <el-button
+                size="small"
+                @click="handleCloseSession"
+              >
+                关闭会话
+              </el-button>
             </div>
           </div>
 
           <!-- 消息列表 -->
-          <div class="message-list" ref="messageListRef">
+          <div
+            ref="messageListRef"
+            class="message-list"
+          >
             <div
               v-for="message in messageList"
               :key="message.id"
               :class="['message-item', message.role]"
             >
               <div class="message-header">
-                <el-icon v-if="message.role === 'user'"><User /></el-icon>
-                <el-icon v-else><Service /></el-icon>
+                <el-icon v-if="message.role === 'user'">
+                  <User />
+                </el-icon>
+                <el-icon v-else>
+                  <Service />
+                </el-icon>
                 <span class="message-role">
                   {{ message.role === 'user' ? '用户' : message.role === 'assistant' ? 'Agent' : '工具' }}
                 </span>
                 <span class="message-time">{{ formatTime(message.createTime!) }}</span>
               </div>
               <div class="message-content">
-                <div v-if="message.role === 'user'" class="user-message">
+                <div
+                  v-if="message.role === 'user'"
+                  class="user-message"
+                >
                   {{ message.content }}
                 </div>
-                <div v-else-if="message.role === 'assistant'" class="assistant-message">
-                  <div v-html="formatContent(message.content)"></div>
+                <div
+                  v-else-if="message.role === 'assistant'"
+                  class="assistant-message"
+                >
+                  <div v-html="formatContent(message.content)" />
                   <!-- 工具调用信息 -->
-                  <div v-if="message.toolCalls && message.toolCalls.length > 0" class="tool-calls">
-                    <div v-for="(call, index) in message.toolCalls" :key="index" class="tool-call">
+                  <div
+                    v-if="message.toolCalls && message.toolCalls.length > 0"
+                    class="tool-calls"
+                  >
+                    <div
+                      v-for="(call, index) in message.toolCalls"
+                      :key="index"
+                      class="tool-call"
+                    >
                       <el-icon><Tools /></el-icon>
                       <span>调用工具: {{ call.function?.name }}</span>
                     </div>
                   </div>
                 </div>
-                <div v-else class="tool-message">
-                  <div class="tool-content">{{ message.content }}</div>
+                <div
+                  v-else
+                  class="tool-message"
+                >
+                  <div class="tool-content">
+                    {{ message.content }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -89,11 +136,14 @@
               type="textarea"
               :rows="3"
               placeholder="请输入消息..."
-              @keydown.enter.prevent="handleEnterKey"
               :disabled="!currentSession || sending"
+              @keydown.enter.prevent="handleEnterKey"
             />
             <div class="input-actions">
-              <div class="input-stats" v-if="currentSession">
+              <div
+                v-if="currentSession"
+                class="input-stats"
+              >
                 <span>Tokens: {{ currentSession.totalTokens }}</span>
                 <span>迭代: {{ currentSession.totalIterations }}</span>
               </div>
@@ -127,7 +177,9 @@
           <el-tag :type="message.role === 'user' ? 'primary' : 'success'">
             {{ message.role === 'user' ? '用户' : message.role === 'assistant' ? 'Agent' : '工具' }}
           </el-tag>
-          <div class="history-content">{{ message.content }}</div>
+          <div class="history-content">
+            {{ message.content }}
+          </div>
         </el-timeline-item>
       </el-timeline>
     </el-dialog>
@@ -135,10 +187,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Robot, Tools } from '@element-plus/icons-vue'
+import { User, Tools, Service } from '@element-plus/icons-vue'
 import { agentApi, type Agent, type AgentSession, type AgentMessage } from '@/api/agent'
 import { useUserStore } from '@/store/user'
 
@@ -500,4 +552,3 @@ onMounted(async () => {
   border-radius: 4px;
 }
 </style>
-

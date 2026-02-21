@@ -8,18 +8,37 @@
         </div>
       </template>
 
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+      <el-tabs
+        v-model="activeTab"
+        @tab-change="handleTabChange"
+      >
         <!-- 场景图生成 -->
-        <el-tab-pane label="场景图生成" name="scene">
-          <el-form :model="sceneForm" :rules="sceneFormRules" ref="sceneFormRef" label-width="120px">
+        <el-tab-pane
+          label="场景图生成"
+          name="scene"
+        >
+          <el-form
+            ref="sceneFormRef"
+            :model="sceneForm"
+            :rules="sceneFormRules"
+            label-width="120px"
+          >
             <el-form-item label="数据来源">
               <el-radio-group v-model="sceneForm.sourceType">
-                <el-radio label="requirement">按需求检索内容方式/用例复用</el-radio>
-                <el-radio label="cases">按用例检索内容方式/用例复用</el-radio>
+                <el-radio label="requirement">
+                  按需求检索内容方式/用例复用
+                </el-radio>
+                <el-radio label="cases">
+                  按用例检索内容方式/用例复用
+                </el-radio>
               </el-radio-group>
             </el-form-item>
 
-            <el-form-item label="需求" prop="requirementId" v-if="sceneForm.sourceType === 'requirement'">
+            <el-form-item
+              v-if="sceneForm.sourceType === 'requirement'"
+              label="需求"
+              prop="requirementId"
+            >
               <el-select
                 v-model="sceneForm.requirementId"
                 placeholder="请选择需求"
@@ -37,7 +56,11 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="用例列表" prop="caseIds" v-if="sceneForm.sourceType === 'cases'">
+            <el-form-item
+              v-if="sceneForm.sourceType === 'cases'"
+              label="用例列表"
+              prop="caseIds"
+            >
               <el-select
                 v-model="sceneForm.caseIds"
                 placeholder="请选择用例（可多选）"
@@ -57,15 +80,33 @@
             </el-form-item>
 
             <el-form-item label="图表标题">
-              <el-input v-model="sceneForm.title" placeholder="请输入图表标题（可选）" />
+              <el-input
+                v-model="sceneForm.title"
+                placeholder="请输入图表标题（可选）"
+              />
             </el-form-item>
 
             <el-form-item label="图表方向">
-              <el-select v-model="sceneForm.direction" style="width: 100%">
-                <el-option label="从左到右 (LR)" value="LR" />
-                <el-option label="从上到下 (TB)" value="TB" />
-                <el-option label="从右到左 (RL)" value="RL" />
-                <el-option label="从下到上 (BT)" value="BT" />
+              <el-select
+                v-model="sceneForm.direction"
+                style="width: 100%"
+              >
+                <el-option
+                  label="从左到右 (LR)"
+                  value="LR"
+                />
+                <el-option
+                  label="从上到下 (TB)"
+                  value="TB"
+                />
+                <el-option
+                  label="从右到左 (RL)"
+                  value="RL"
+                />
+                <el-option
+                  label="从下到上 (BT)"
+                  value="BT"
+                />
               </el-select>
             </el-form-item>
 
@@ -74,39 +115,65 @@
             </el-form-item>
 
             <el-form-item>
-              <el-button type="primary" @click="handleGenerateScene" :loading="sceneLoading">
+              <el-button
+                type="primary"
+                :loading="sceneLoading"
+                @click="handleGenerateScene"
+              >
                 生成场景图
               </el-button>
-              <el-button @click="resetSceneForm">重置</el-button>
+              <el-button @click="resetSceneForm">
+                重置
+              </el-button>
             </el-form-item>
           </el-form>
 
           <!-- 场景图结果展示 -->
-          <div v-if="sceneResult" class="result-section">
+          <div
+            v-if="sceneResult"
+            class="result-section"
+          >
             <el-divider>生成结果</el-divider>
             <div class="result-header">
               <h3>{{ sceneResult.title }}</h3>
               <div class="result-actions">
-                <el-button size="small" @click="copySceneMermaid">复制Mermaid代码</el-button>
+                <el-button
+                  size="small"
+                  @click="copySceneMermaid"
+                >
+                  复制Mermaid代码
+                </el-button>
                 <el-dropdown @command="handleSceneExport">
                   <el-button size="small">
                     导出图<el-icon><ArrowDown /></el-icon>
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="PNG">PNG图片</el-dropdown-item>
-                      <el-dropdown-item command="SVG">SVG图片</el-dropdown-item>
-                      <el-dropdown-item command="PDF">PDF文档</el-dropdown-item>
+                      <el-dropdown-item command="PNG">
+                        PNG图片
+                      </el-dropdown-item>
+                      <el-dropdown-item command="SVG">
+                        SVG图片
+                      </el-dropdown-item>
+                      <el-dropdown-item command="PDF">
+                        PDF文档
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
               </div>
             </div>
             <div class="mermaid-container">
-              <div ref="sceneMermaidRef" class="mermaid-diagram"></div>
+              <div
+                ref="sceneMermaidRef"
+                class="mermaid-diagram"
+              />
             </div>
             <el-collapse>
-              <el-collapse-item title="查看Mermaid代码" name="code">
+              <el-collapse-item
+                title="查看Mermaid代码"
+                name="code"
+              >
                 <pre class="mermaid-code">{{ sceneResult.mermaidCode }}</pre>
               </el-collapse-item>
             </el-collapse>
@@ -114,17 +181,35 @@
         </el-tab-pane>
 
         <!-- 路径图生成 -->
-        <el-tab-pane label="路径图生成" name="path">
-          <el-form :model="pathForm" :rules="pathFormRules" ref="pathFormRef" label-width="120px">
+        <el-tab-pane
+          label="路径图生成"
+          name="path"
+        >
+          <el-form
+            ref="pathFormRef"
+            :model="pathForm"
+            :rules="pathFormRules"
+            label-width="120px"
+          >
             <el-form-item label="数据来源">
               <el-radio-group v-model="pathForm.sourceType">
-                <el-radio label="case">单个用例</el-radio>
-                <el-radio label="cases">多个用例</el-radio>
-                <el-radio label="requirement">按需求检索内容方式</el-radio>
+                <el-radio label="case">
+                  单个用例
+                </el-radio>
+                <el-radio label="cases">
+                  多个用例
+                </el-radio>
+                <el-radio label="requirement">
+                  按需求检索内容方式
+                </el-radio>
               </el-radio-group>
             </el-form-item>
 
-            <el-form-item label="用例" prop="caseId" v-if="pathForm.sourceType === 'case'">
+            <el-form-item
+              v-if="pathForm.sourceType === 'case'"
+              label="用例"
+              prop="caseId"
+            >
               <el-select
                 v-model="pathForm.caseId"
                 placeholder="请选择用例"
@@ -142,7 +227,11 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="用例列表" prop="caseIds" v-if="pathForm.sourceType === 'cases'">
+            <el-form-item
+              v-if="pathForm.sourceType === 'cases'"
+              label="用例列表"
+              prop="caseIds"
+            >
               <el-select
                 v-model="pathForm.caseIds"
                 placeholder="请选择用例（可多选）"
@@ -161,7 +250,11 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="需求" prop="requirementId" v-if="pathForm.sourceType === 'requirement'">
+            <el-form-item
+              v-if="pathForm.sourceType === 'requirement'"
+              label="需求"
+              prop="requirementId"
+            >
               <el-select
                 v-model="pathForm.requirementId"
                 placeholder="请选择需求"
@@ -180,52 +273,96 @@
             </el-form-item>
 
             <el-form-item label="图表标题">
-              <el-input v-model="pathForm.title" placeholder="请输入图表标题（可选）" />
+              <el-input
+                v-model="pathForm.title"
+                placeholder="请输入图表标题（可选）"
+              />
             </el-form-item>
 
             <el-form-item label="图表方向">
-              <el-select v-model="pathForm.direction" style="width: 100%">
-                <el-option label="从左到右 (LR)" value="LR" />
-                <el-option label="从上到下 (TB)" value="TB" />
-                <el-option label="从右到左 (RL)" value="RL" />
-                <el-option label="从下到上 (BT)" value="BT" />
+              <el-select
+                v-model="pathForm.direction"
+                style="width: 100%"
+              >
+                <el-option
+                  label="从左到右 (LR)"
+                  value="LR"
+                />
+                <el-option
+                  label="从上到下 (TB)"
+                  value="TB"
+                />
+                <el-option
+                  label="从右到左 (RL)"
+                  value="RL"
+                />
+                <el-option
+                  label="从下到上 (BT)"
+                  value="BT"
+                />
               </el-select>
             </el-form-item>
 
             <el-form-item>
-              <el-button type="primary" @click="handleGeneratePath" :loading="pathLoading">
+              <el-button
+                type="primary"
+                :loading="pathLoading"
+                @click="handleGeneratePath"
+              >
                 生成路径图
               </el-button>
-              <el-button @click="resetPathForm">重置</el-button>
+              <el-button @click="resetPathForm">
+                重置
+              </el-button>
             </el-form-item>
           </el-form>
 
           <!-- 路径图结果展示 -->
-          <div v-if="pathResult" class="result-section">
+          <div
+            v-if="pathResult"
+            class="result-section"
+          >
             <el-divider>生成结果</el-divider>
             <div class="result-header">
               <h3>{{ pathResult.title }}</h3>
               <div class="result-actions">
-                <el-button size="small" @click="copyPathMermaid">复制Mermaid代码</el-button>
+                <el-button
+                  size="small"
+                  @click="copyPathMermaid"
+                >
+                  复制Mermaid代码
+                </el-button>
                 <el-dropdown @command="handlePathExport">
                   <el-button size="small">
                     导出图<el-icon><ArrowDown /></el-icon>
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="PNG">PNG图片</el-dropdown-item>
-                      <el-dropdown-item command="SVG">SVG图片</el-dropdown-item>
-                      <el-dropdown-item command="PDF">PDF文档</el-dropdown-item>
+                      <el-dropdown-item command="PNG">
+                        PNG图片
+                      </el-dropdown-item>
+                      <el-dropdown-item command="SVG">
+                        SVG图片
+                      </el-dropdown-item>
+                      <el-dropdown-item command="PDF">
+                        PDF文档
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
               </div>
             </div>
             <div class="mermaid-container">
-              <div ref="pathMermaidRef" class="mermaid-diagram"></div>
+              <div
+                ref="pathMermaidRef"
+                class="mermaid-diagram"
+              />
             </div>
             <el-collapse>
-              <el-collapse-item title="查看Mermaid代码" name="code">
+              <el-collapse-item
+                title="查看Mermaid代码"
+                name="code"
+              >
                 <pre class="mermaid-code">{{ pathResult.mermaidCode }}</pre>
               </el-collapse-item>
             </el-collapse>

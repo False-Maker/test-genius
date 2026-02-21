@@ -15,7 +15,10 @@
           <el-icon><Upload /></el-icon>
           导入用例
         </el-button>
-        <el-button type="primary" @click="handleCreate">
+        <el-button
+          type="primary"
+          @click="handleCreate"
+        >
           <el-icon><Plus /></el-icon>
           新建用例
         </el-button>
@@ -23,8 +26,15 @@
     </div>
 
     <!-- 搜索栏 -->
-    <el-card class="search-card" shadow="never">
-      <el-form :inline="true" :model="searchForm" class="search-form">
+    <el-card
+      class="search-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        :model="searchForm"
+        class="search-form"
+      >
         <el-form-item label="用例名称">
           <el-input
             v-model="searchForm.caseName"
@@ -41,69 +51,153 @@
             clearable
             @change="handleSearch"
           >
-            <el-option label="草稿" value="DRAFT" />
-            <el-option label="待审核" value="PENDING_REVIEW" />
-            <el-option label="已审核" value="REVIEWED" />
-            <el-option label="已废弃" value="OBSOLETE" />
+            <el-option
+              label="草稿"
+              value="DRAFT"
+            />
+            <el-option
+              label="待审核"
+              value="PENDING_REVIEW"
+            />
+            <el-option
+              label="已审核"
+              value="REVIEWED"
+            />
+            <el-option
+              label="已废弃"
+              value="OBSOLETE"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button
+            type="primary"
+            @click="handleSearch"
+          >
+            查询
+          </el-button>
+          <el-button @click="handleReset">
+            重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 用例列表 -->
-    <el-card class="table-card" shadow="never">
+    <el-card
+      class="table-card"
+      shadow="never"
+    >
       <el-table
         v-loading="loading"
         :data="testCaseList"
         stripe
         style="width: 100%"
       >
-        <el-table-column prop="caseCode" label="用例编码" width="180" />
-        <el-table-column prop="caseName" label="用例名称" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="caseType" label="用例类型" width="100">
+        <el-table-column
+          prop="caseCode"
+          label="用例编码"
+          width="180"
+        />
+        <el-table-column
+          prop="caseName"
+          label="用例名称"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="caseType"
+          label="用例类型"
+          width="100"
+        >
           <template #default="scope">
             {{ scope.row.caseType || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="casePriority" label="优先级" width="100">
+        <el-table-column
+          prop="casePriority"
+          label="优先级"
+          width="100"
+        >
           <template #default="scope">
-            <el-tag v-if="scope.row.casePriority" :type="getPriorityType(scope.row.casePriority)">
+            <el-tag
+              v-if="scope.row.casePriority"
+              :type="getPriorityType(scope.row.casePriority)"
+            >
               {{ scope.row.casePriority }}
             </el-tag>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="caseStatus" label="状态" width="100">
+        <el-table-column
+          prop="caseStatus"
+          label="状态"
+          width="100"
+        >
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.caseStatus)">
               {{ getStatusText(scope.row.caseStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="version" label="版本" width="80" />
-        <el-table-column prop="creatorName" label="创建人" width="120">
+        <el-table-column
+          prop="version"
+          label="版本"
+          width="80"
+        />
+        <el-table-column
+          prop="creatorName"
+          label="创建人"
+          width="120"
+        >
           <template #default="scope">
             {{ scope.row.creatorName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="320" fixed="right">
+        <el-table-column
+          prop="createTime"
+          label="创建时间"
+          width="180"
+        />
+        <el-table-column
+          label="操作"
+          width="320"
+          fixed="right"
+        >
           <template #default="scope">
-            <el-button size="small" link type="primary" @click="handleView(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleView(scope.row)"
+            >
               查看
             </el-button>
-            <el-button size="small" link type="primary" @click="handleEdit(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="primary"
+              @click="handleEdit(scope.row)"
+            >
               编辑
             </el-button>
-            <el-button size="small" link type="success" @click="handleQualityAssess(scope.row)">
+            <el-button
+              size="small"
+              link
+              type="success"
+              @click="handleQualityAssess(scope.row)"
+            >
               质量评估
             </el-button>
-            <el-dropdown v-if="getAvailableStatuses(scope.row.caseStatus).length > 0" @command="(cmd) => handleStatusChange(scope.row, cmd)">
-              <el-button size="small" link type="primary">
+            <el-dropdown
+              v-if="getAvailableStatuses(scope.row.caseStatus).length > 0"
+              @command="(cmd: string) => handleStatusChange(scope.row, cmd)"
+            >
+              <el-button
+                size="small"
+                link
+                type="primary"
+              >
                 状态流转 <el-icon><ArrowDown /></el-icon>
               </el-button>
               <template #dropdown>
@@ -169,7 +263,10 @@
       >
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="用例名称" prop="caseName">
+            <el-form-item
+              label="用例名称"
+              prop="caseName"
+            >
               <el-input
                 v-model="formData.caseName"
                 placeholder="请输入用例名称"
@@ -179,27 +276,60 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="用例类型" prop="caseType">
-              <el-select v-model="formData.caseType" placeholder="请选择用例类型">
-                <el-option label="正常" value="正常" />
-                <el-option label="异常" value="异常" />
-                <el-option label="边界" value="边界" />
+            <el-form-item
+              label="用例类型"
+              prop="caseType"
+            >
+              <el-select
+                v-model="formData.caseType"
+                placeholder="请选择用例类型"
+              >
+                <el-option
+                  label="正常"
+                  value="正常"
+                />
+                <el-option
+                  label="异常"
+                  value="异常"
+                />
+                <el-option
+                  label="边界"
+                  value="边界"
+                />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="用例优先级" prop="casePriority">
-              <el-select v-model="formData.casePriority" placeholder="请选择优先级">
-                <el-option label="高" value="高" />
-                <el-option label="中" value="中" />
-                <el-option label="低" value="低" />
+            <el-form-item
+              label="用例优先级"
+              prop="casePriority"
+            >
+              <el-select
+                v-model="formData.casePriority"
+                placeholder="请选择优先级"
+              >
+                <el-option
+                  label="高"
+                  value="高"
+                />
+                <el-option
+                  label="中"
+                  value="中"
+                />
+                <el-option
+                  label="低"
+                  value="低"
+                />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="需求ID" prop="requirementId">
+            <el-form-item
+              label="需求ID"
+              prop="requirementId"
+            >
               <el-input-number
                 v-model="formData.requirementId"
                 :min="1"
@@ -209,7 +339,10 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="前置条件" prop="preCondition">
+        <el-form-item
+          label="前置条件"
+          prop="preCondition"
+        >
           <el-input
             v-model="formData.preCondition"
             type="textarea"
@@ -217,7 +350,10 @@
             placeholder="请输入前置条件"
           />
         </el-form-item>
-        <el-form-item label="测试步骤" prop="testStep">
+        <el-form-item
+          label="测试步骤"
+          prop="testStep"
+        >
           <el-input
             v-model="formData.testStep"
             type="textarea"
@@ -225,7 +361,10 @@
             placeholder="请输入测试步骤"
           />
         </el-form-item>
-        <el-form-item label="预期结果" prop="expectedResult">
+        <el-form-item
+          label="预期结果"
+          prop="expectedResult"
+        >
           <el-input
             v-model="formData.expectedResult"
             type="textarea"
@@ -233,18 +372,43 @@
             placeholder="请输入预期结果"
           />
         </el-form-item>
-        <el-form-item v-if="isEdit" label="用例状态" prop="caseStatus">
-          <el-select v-model="formData.caseStatus" placeholder="请选择状态">
-            <el-option label="草稿" value="DRAFT" />
-            <el-option label="待审核" value="PENDING_REVIEW" />
-            <el-option label="已审核" value="REVIEWED" />
-            <el-option label="已废弃" value="OBSOLETE" />
+        <el-form-item
+          v-if="isEdit"
+          label="用例状态"
+          prop="caseStatus"
+        >
+          <el-select
+            v-model="formData.caseStatus"
+            placeholder="请选择状态"
+          >
+            <el-option
+              label="草稿"
+              value="DRAFT"
+            />
+            <el-option
+              label="待审核"
+              value="PENDING_REVIEW"
+            />
+            <el-option
+              label="已审核"
+              value="REVIEWED"
+            />
+            <el-option
+              label="已废弃"
+              value="OBSOLETE"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+        <el-button @click="dialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
           确定
         </el-button>
       </template>
@@ -256,7 +420,10 @@
       title="用例详情"
       width="900px"
     >
-      <el-descriptions :column="2" border>
+      <el-descriptions
+        :column="2"
+        border
+      >
         <el-descriptions-item label="用例编码">
           {{ viewData.caseCode }}
         </el-descriptions-item>
@@ -267,7 +434,10 @@
           {{ viewData.caseType || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="用例优先级">
-          <el-tag v-if="viewData.casePriority" :type="getPriorityType(viewData.casePriority)">
+          <el-tag
+            v-if="viewData.casePriority"
+            :type="getPriorityType(viewData.casePriority)"
+          >
             {{ viewData.casePriority }}
           </el-tag>
           <span v-else>-</span>
@@ -292,14 +462,29 @@
         <el-descriptions-item label="更新时间">
           {{ viewData.updateTime }}
         </el-descriptions-item>
-        <el-descriptions-item label="前置条件" :span="2">
-          <div style="white-space: pre-wrap">{{ viewData.preCondition || '-' }}</div>
+        <el-descriptions-item
+          label="前置条件"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap">
+            {{ viewData.preCondition || '-' }}
+          </div>
         </el-descriptions-item>
-        <el-descriptions-item label="测试步骤" :span="2">
-          <div style="white-space: pre-wrap">{{ viewData.testStep || '-' }}</div>
+        <el-descriptions-item
+          label="测试步骤"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap">
+            {{ viewData.testStep || '-' }}
+          </div>
         </el-descriptions-item>
-        <el-descriptions-item label="预期结果" :span="2">
-          <div style="white-space: pre-wrap">{{ viewData.expectedResult || '-' }}</div>
+        <el-descriptions-item
+          label="预期结果"
+          :span="2"
+        >
+          <div style="white-space: pre-wrap">
+            {{ viewData.expectedResult || '-' }}
+          </div>
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
@@ -316,13 +501,23 @@
         :rules="reviewFormRules"
         label-width="120px"
       >
-        <el-form-item label="审核结果" prop="reviewResult">
+        <el-form-item
+          label="审核结果"
+          prop="reviewResult"
+        >
           <el-radio-group v-model="reviewForm.reviewResult">
-            <el-radio label="PASS">通过</el-radio>
-            <el-radio label="REJECT">不通过</el-radio>
+            <el-radio label="PASS">
+              通过
+            </el-radio>
+            <el-radio label="REJECT">
+              不通过
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="审核意见" prop="reviewComment">
+        <el-form-item
+          label="审核意见"
+          prop="reviewComment"
+        >
           <el-input
             v-model="reviewForm.reviewComment"
             type="textarea"
@@ -332,8 +527,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="reviewDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="reviewLoading" @click="handleReviewSubmit">
+        <el-button @click="reviewDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="reviewLoading"
+          @click="handleReviewSubmit"
+        >
           确定
         </el-button>
       </template>
@@ -357,7 +558,9 @@
         :auto-upload="false"
         drag
       >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+        <el-icon class="el-icon--upload">
+          <upload-filled />
+        </el-icon>
         <div class="el-upload__text">
           将Excel文件拖到此处，或<em>点击上传</em>
         </div>
@@ -369,19 +572,29 @@
       </el-upload>
 
       <!-- 导入结果 -->
-      <div v-if="importResult" class="import-result" style="margin-top: 20px">
+      <div
+        v-if="importResult"
+        class="import-result"
+        style="margin-top: 20px"
+      >
         <el-alert
-          :type="importResult.failCount > 0 ? warning : success"
+          :type="importResult.failCount > 0 ? 'warning' : 'success'"
           :closable="false"
           show-icon
         >
           <template #title>
             <div>
               <p>导入完成！成功：{{ importResult.successCount }} 个，失败：{{ importResult.failCount }} 个</p>
-              <div v-if="importResult.errors && importResult.errors.length > 0" style="margin-top: 10px">
+              <div
+                v-if="importResult.errors && importResult.errors.length > 0"
+                style="margin-top: 10px"
+              >
                 <p><strong>错误详情：</strong></p>
                 <ul style="margin: 5px 0; padding-left: 20px">
-                  <li v-for="(error, index) in importResult.errors" :key="index">
+                  <li
+                    v-for="(error, index) in importResult.errors"
+                    :key="index"
+                  >
                     第{{ error.row }}行：{{ error.message }}
                   </li>
                 </ul>
@@ -392,8 +605,14 @@
       </div>
 
       <template #footer>
-        <el-button @click="importDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="importLoading" @click="submitImport">
+        <el-button @click="importDialogVisible = false">
+          取消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="importLoading"
+          @click="submitImport"
+        >
           开始导入
         </el-button>
       </template>
@@ -405,14 +624,33 @@
       title="用例质量评估"
       width="800px"
     >
-      <div v-if="qualityLoading" style="text-align: center; padding: 40px">
-        <el-icon class="is-loading" style="font-size: 32px"><Loading /></el-icon>
-        <p style="margin-top: 10px">正在评估用例质量...</p>
+      <div
+        v-if="qualityLoading"
+        style="text-align: center; padding: 40px"
+      >
+        <el-icon
+          class="is-loading"
+          style="font-size: 32px"
+        >
+          <Loading />
+        </el-icon>
+        <p style="margin-top: 10px">
+          正在评估用例质量...
+        </p>
       </div>
       <div v-else-if="qualityResult">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="综合评分" :span="2">
-            <el-tag :type="getQualityLevelType(qualityResult.qualityLevel)" size="large">
+        <el-descriptions
+          :column="2"
+          border
+        >
+          <el-descriptions-item
+            label="综合评分"
+            :span="2"
+          >
+            <el-tag
+              :type="getQualityLevelType(qualityResult.qualityLevel)"
+              size="large"
+            >
               {{ qualityResult.totalScore }} 分 - {{ qualityResult.qualityLevel }}
             </el-tag>
           </el-descriptions-item>
@@ -430,8 +668,14 @@
         <el-divider>详细评分</el-divider>
 
         <el-collapse v-model="activeCollapse">
-          <el-collapse-item title="完整性评分详情" name="completeness">
-            <el-descriptions :column="2" border>
+          <el-collapse-item
+            title="完整性评分详情"
+            name="completeness"
+          >
+            <el-descriptions
+              :column="2"
+              border
+            >
               <el-descriptions-item label="前置条件">
                 {{ qualityResult.details.completeness.preConditionScore }} 分
               </el-descriptions-item>
@@ -446,8 +690,14 @@
               </el-descriptions-item>
             </el-descriptions>
           </el-collapse-item>
-          <el-collapse-item title="规范性评分详情" name="standardization">
-            <el-descriptions :column="2" border>
+          <el-collapse-item
+            title="规范性评分详情"
+            name="standardization"
+          >
+            <el-descriptions
+              :column="2"
+              border
+            >
               <el-descriptions-item label="命名规范性">
                 {{ qualityResult.details.standardization.namingScore }} 分
               </el-descriptions-item>
@@ -459,8 +709,14 @@
               </el-descriptions-item>
             </el-descriptions>
           </el-collapse-item>
-          <el-collapse-item title="可执行性评分详情" name="executability">
-            <el-descriptions :column="2" border>
+          <el-collapse-item
+            title="可执行性评分详情"
+            name="executability"
+          >
+            <el-descriptions
+              :column="2"
+              border
+            >
               <el-descriptions-item label="步骤清晰度">
                 {{ qualityResult.details.executability.stepClarityScore }} 分
               </el-descriptions-item>
@@ -472,18 +728,34 @@
               </el-descriptions-item>
             </el-descriptions>
           </el-collapse-item>
-          <el-collapse-item title="优化建议" name="suggestions">
-            <ul v-if="qualityResult.suggestions && qualityResult.suggestions.length > 0" style="margin: 0; padding-left: 20px">
-              <li v-for="(suggestion, index) in qualityResult.suggestions" :key="index">
+          <el-collapse-item
+            title="优化建议"
+            name="suggestions"
+          >
+            <ul
+              v-if="qualityResult.suggestions && qualityResult.suggestions.length > 0"
+              style="margin: 0; padding-left: 20px"
+            >
+              <li
+                v-for="(suggestion, index) in qualityResult.suggestions"
+                :key="index"
+              >
                 {{ suggestion }}
               </li>
             </ul>
-            <p v-else style="color: #909399">暂无优化建议</p>
+            <p
+              v-else
+              style="color: #909399"
+            >
+              暂无优化建议
+            </p>
           </el-collapse-item>
         </el-collapse>
       </div>
       <template #footer>
-        <el-button @click="qualityDialogVisible = false">关闭</el-button>
+        <el-button @click="qualityDialogVisible = false">
+          关闭
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -494,8 +766,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import { Plus, ArrowDown, Download, Upload, Document, UploadFilled, Loading } from '@element-plus/icons-vue'
 import { testCaseApi, type TestCase } from '@/api/testCase'
-  import type { PageResult } from '@/api/types'
-  import { testCaseQualityApi, type QualityScore } from '@/api/testCaseQuality'
+import { testCaseQualityApi, type QualityScore, type QualityScoreDetails } from '@/api/testCaseQuality'
 
 // 响应式数据
 const loading = ref(false)
@@ -508,14 +779,44 @@ const importDialogVisible = ref(false)
 const importLoading = ref(false)
 const importUploadRef = ref()
 const importFileList = ref<any[]>([])
+type QualityResult = QualityScore & { suggestions: string[] }
+
+const createEmptyQualityDetails = (): QualityScoreDetails => ({
+  completeness: {
+    totalScore: 0,
+    preConditionScore: 0,
+    testStepScore: 0,
+    expectedResultScore: 0,
+    basicInfoScore: 0
+  },
+  standardization: {
+    totalScore: 0,
+    namingScore: 0,
+    formatScore: 0,
+    contentScore: 0
+  },
+  executability: {
+    totalScore: 0,
+    stepClarityScore: 0,
+    dataPreparationScore: 0,
+    environmentDependencyScore: 0
+  }
+})
+
+const normalizeQualityResult = (data: QualityScore): QualityResult => ({
+  ...data,
+  details: data.details ?? createEmptyQualityDetails(),
+  suggestions: data.suggestions ?? []
+})
+
 const importResult = ref<{
   successCount: number
   failCount: number
-  errors: Array<{ row: number; message: 'string '}>
+  errors: Array<{ row: number; message: string }>
 } | null>(null)
 const qualityDialogVisible = ref(false)
 const qualityLoading = ref(false)
-const qualityResult = ref<QualityScore | null>(null)
+const qualityResult = ref<QualityResult | null>(null)
 const activeCollapse = ref<string[]>([])
 const isEdit = ref(false)
 const formRef = ref<FormInstance>()
@@ -532,7 +833,7 @@ const formData = reactive<TestCase>({
   expectedResult: '',
   caseStatus: 'DRAFT'
 })
-const viewData = ref<TestCase>({})
+const viewData = ref<TestCase>({ caseName: '' })
 const currentReviewCase = ref<TestCase | null>(null)
 
 const searchForm = reactive({
@@ -752,8 +1053,8 @@ const handleStatusChange = async (row: TestCase, status: string) => {
 // 审核用例
 const handleReview = (row: TestCase) => {
   currentReviewCase.value = row
-  reviewForm.reviewResult = 
-  reviewForm.reviewComment = 
+  reviewForm.reviewResult = ''
+  reviewForm.reviewComment = ''
   reviewDialogVisible.value = true
 }
 
@@ -943,7 +1244,7 @@ const handleQualityAssess = async (row: TestCase) => {
   try {
     const response = await testCaseQualityApi.assessQuality(row.id!)
     if (response.data) {
-      qualityResult.value = response.data
+      qualityResult.value = normalizeQualityResult(response.data)
       activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']
     }
   } catch (error) {

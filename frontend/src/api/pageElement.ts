@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 import type { PageResult } from './testReport'
 
 export interface PageElementInfoRequestDTO {
@@ -35,7 +36,7 @@ export const pageElementApi = {
 
     // Get page element list
     getPageElementList(page: number = 0, size: number = 10, pageUrl?: string, elementType?: string) {
-        return request.get<any, PageResult<PageElementInfoResponseDTO>>('/v1/page-elements', {
+        return request.get<any, ApiResult<PageResult<PageElementInfoResponseDTO>>>('/v1/page-elements', {
             params: { page, size, pageUrl, elementType }
         })
     },

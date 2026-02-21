@@ -10,7 +10,7 @@
               <h2>知识库</h2>
             </div>
             <div class="search-bar">
-               <el-input
+              <el-input
                 v-model="searchForm.queryText"
                 placeholder="Search knowledge base..."
                 prefix-icon="Search"
@@ -19,10 +19,19 @@
                 @keyup.enter="handleSearch"
               >
                 <template #prepend>
-                   <el-select v-model="searchType" style="width: 110px">
-                    <el-option label="Semantic" value="semantic" />
-                    <el-option label="Keyword" value="keyword" />
-                   </el-select>
+                  <el-select
+                    v-model="searchType"
+                    style="width: 110px"
+                  >
+                    <el-option
+                      label="Semantic"
+                      value="semantic"
+                    />
+                    <el-option
+                      label="Keyword"
+                      value="keyword"
+                    />
+                  </el-select>
                 </template>
               </el-input>
               <el-select
@@ -31,78 +40,157 @@
                 clearable
                 style="width: 120px"
               >
-                <el-option label="测试规范" value="测试规范" />
-                <el-option label="业务知识" value="业务知识" />
-                <el-option label="用例模板" value="用例模板" />
+                <el-option
+                  label="测试规范"
+                  value="测试规范"
+                />
+                <el-option
+                  label="业务知识"
+                  value="业务知识"
+                />
+                <el-option
+                  label="用例模板"
+                  value="用例模板"
+                />
               </el-select>
-              <el-button type="primary" @click="handleSearch" :loading="loading">
+              <el-button
+                type="primary"
+                :loading="loading"
+                @click="handleSearch"
+              >
                 <el-icon><Search /></el-icon>
               </el-button>
             </div>
           </div>
           
           <div class="header-actions">
-             <el-button @click="handleInit" text>Init DB</el-button>
-             <el-divider direction="vertical" />
-             <el-button @click="handleUpload">
-              <el-icon class="mr-1"><Upload /></el-icon> Upload
+            <el-button
+              text
+              @click="handleInit"
+            >
+              Init DB
             </el-button>
-            <el-button type="primary" @click="handleAdd">
-              <el-icon class="mr-1"><Plus /></el-icon> Add New
+            <el-divider direction="vertical" />
+            <el-button @click="handleUpload">
+              <el-icon class="mr-1">
+                <Upload />
+              </el-icon> Upload
+            </el-button>
+            <el-button
+              type="primary"
+              @click="handleAdd"
+            >
+              <el-icon class="mr-1">
+                <Plus />
+              </el-icon> Add New
             </el-button>
           </div>
         </div>
       </el-card>
 
       <!-- Document Grid -->
-      <div class="content-area" v-loading="loading">
-         <div v-if="documentList.length === 0 && !loading" class="empty-state">
-            <el-empty description="Knowledge base is empty" />
-         </div>
+      <div
+        v-loading="loading"
+        class="content-area"
+      >
+        <div
+          v-if="documentList.length === 0 && !loading"
+          class="empty-state"
+        >
+          <el-empty description="Knowledge base is empty" />
+        </div>
          
-         <div v-else class="document-grid">
-            <el-card 
-              v-for="doc in documentList" 
-              :key="doc.id" 
-              class="doc-card"
-              shadow="hover"
-            >
-              <div class="doc-card-header">
-                 <div class="doc-icon">
-                    <el-icon v-if="doc.docType === '测试规范'"><Notebook /></el-icon>
-                    <el-icon v-else-if="doc.docType === '用例模板'"><DocumentCopy /></el-icon>
-                    <el-icon v-else><Document /></el-icon>
-                 </div>
-                 <div class="doc-meta">
-                    <div class="doc-code mono-text">{{ doc.docCode }}</div>
-                    <div class="doc-date">
-                        <el-tag size="small" type="info" effect="plain">{{ doc.docType }}</el-tag>
-                    </div>
-                 </div>
+        <div
+          v-else
+          class="document-grid"
+        >
+          <el-card 
+            v-for="doc in documentList" 
+            :key="doc.id" 
+            class="doc-card"
+            shadow="hover"
+          >
+            <div class="doc-card-header">
+              <div class="doc-icon">
+                <el-icon v-if="doc.docType === '测试规范'">
+                  <Notebook />
+                </el-icon>
+                <el-icon v-else-if="doc.docType === '用例模板'">
+                  <DocumentCopy />
+                </el-icon>
+                <el-icon v-else>
+                  <Document />
+                </el-icon>
               </div>
+              <div class="doc-meta">
+                <div class="doc-code mono-text">
+                  {{ doc.docCode }}
+                </div>
+                <div class="doc-date">
+                  <el-tag
+                    size="small"
+                    type="info"
+                    effect="plain"
+                  >
+                    {{ doc.docType }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
               
-              <div class="doc-body">
-                 <h3 class="doc-title" :title="doc.docName">{{ doc.docName }}</h3>
-                 <p class="doc-preview">{{ doc.docContent ? doc.docContent.substring(0, 80) + '...' : 'No preview available' }}</p>
+            <div class="doc-body">
+              <h3
+                class="doc-title"
+                :title="doc.docName"
+              >
+                {{ doc.docName }}
+              </h3>
+              <p class="doc-preview">
+                {{ doc.docContent ? doc.docContent.substring(0, 80) + '...' : 'No preview available' }}
+              </p>
                  
-                 <div class="doc-tags" v-if="doc.docCategory">
-                    <el-tag size="small" type="primary" class="cat-tag">{{ doc.docCategory }}</el-tag>
-                 </div>
-                 
-                 <div class="doc-similarity" v-if="searchType === 'semantic' && doc.similarity !== undefined">
-                    <span class="label">Match:</span>
-                    <span class="value">{{ (doc.similarity * 100).toFixed(1) }}%</span>
-                 </div>
+              <div
+                v-if="doc.docCategory"
+                class="doc-tags"
+              >
+                <el-tag
+                  size="small"
+                  type="primary"
+                  class="cat-tag"
+                >
+                  {{ doc.docCategory }}
+                </el-tag>
               </div>
+                 
+              <div
+                v-if="searchType === 'semantic' && doc.similarity !== undefined"
+                class="doc-similarity"
+              >
+                <span class="label">Match:</span>
+                <span class="value">{{ (doc.similarity * 100).toFixed(1) }}%</span>
+              </div>
+            </div>
               
-              <div class="doc-footer">
-                 <el-button text bg size="small" @click="handleView(doc)">View Details</el-button>
-                 <el-link v-if="doc.docUrl" :href="doc.docUrl" target="_blank" :underline="false">
-                    <el-icon><Link /></el-icon>
-                 </el-link>
-              </div>
-            </el-card>
-         </div>
+            <div class="doc-footer">
+              <el-button
+                text
+                bg
+                size="small"
+                @click="handleView(doc)"
+              >
+                View Details
+              </el-button>
+              <el-link
+                v-if="doc.docUrl"
+                :href="doc.docUrl"
+                target="_blank"
+                :underline="false"
+              >
+                <el-icon><Link /></el-icon>
+              </el-link>
+            </div>
+          </el-card>
+        </div>
       </div>
     </div>
 
@@ -111,8 +199,8 @@
       v-model="addDialogVisible"
       title="Add Document"
       width="800px"
-      @close="handleDialogClose"
       class="bento-dialog"
+      @close="handleDialogClose"
     >
       <el-form
         ref="formRef"
@@ -121,36 +209,76 @@
         label-position="top"
       >
         <el-row :gutter="20">
-           <el-col :span="12">
-            <el-form-item label="Code" prop="docCode">
-              <el-input v-model="formData.docCode" placeholder="DOC-001" maxlength="100" />
+          <el-col :span="12">
+            <el-form-item
+              label="Code"
+              prop="docCode"
+            >
+              <el-input
+                v-model="formData.docCode"
+                placeholder="DOC-001"
+                maxlength="100"
+              />
             </el-form-item>
-           </el-col>
-           <el-col :span="12">
-            <el-form-item label="Type" prop="docType">
-              <el-select v-model="formData.docType" placeholder="Select type" style="width: 100%">
-                <el-option label="测试规范" value="测试规范" />
-                <el-option label="业务知识" value="业务知识" />
-                <el-option label="用例模板" value="用例模板" />
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="Type"
+              prop="docType"
+            >
+              <el-select
+                v-model="formData.docType"
+                placeholder="Select type"
+                style="width: 100%"
+              >
+                <el-option
+                  label="测试规范"
+                  value="测试规范"
+                />
+                <el-option
+                  label="业务知识"
+                  value="业务知识"
+                />
+                <el-option
+                  label="用例模板"
+                  value="用例模板"
+                />
               </el-select>
             </el-form-item>
-           </el-col>
+          </el-col>
         </el-row>
         
         <el-row :gutter="20">
-           <el-col :span="12">
-             <el-form-item label="Name" prop="docName">
-              <el-input v-model="formData.docName" placeholder="Document Name" maxlength="500" />
+          <el-col :span="12">
+            <el-form-item
+              label="Name"
+              prop="docName"
+            >
+              <el-input
+                v-model="formData.docName"
+                placeholder="Document Name"
+                maxlength="500"
+              />
             </el-form-item>
-           </el-col>
-           <el-col :span="12">
-             <el-form-item label="Category" prop="docCategory">
-              <el-input v-model="formData.docCategory" placeholder="Category (Optional)" maxlength="100" />
+          </el-col>
+          <el-col :span="12">
+            <el-form-item
+              label="Category"
+              prop="docCategory"
+            >
+              <el-input
+                v-model="formData.docCategory"
+                placeholder="Category (Optional)"
+                maxlength="100"
+              />
             </el-form-item>
-           </el-col>
+          </el-col>
         </el-row>
 
-        <el-form-item label="Content" prop="docContent">
+        <el-form-item
+          label="Content"
+          prop="docContent"
+        >
           <el-input
             v-model="formData.docContent"
             type="textarea"
@@ -158,13 +286,26 @@
             placeholder="Document content..."
           />
         </el-form-item>
-        <el-form-item label="URL" prop="docUrl">
-          <el-input v-model="formData.docUrl" placeholder="External URL (Optional)" maxlength="1000" />
+        <el-form-item
+          label="URL"
+          prop="docUrl"
+        >
+          <el-input
+            v-model="formData.docUrl"
+            placeholder="External URL (Optional)"
+            maxlength="1000"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="addDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+        <el-button @click="addDialogVisible = false">
+          Cancel
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
           Confirm
         </el-button>
       </template>
@@ -175,8 +316,8 @@
       v-model="uploadDialogVisible"
       title="Upload Document"
       width="600px"
-      @close="resetUploadForm"
       class="bento-dialog"
+      @close="resetUploadForm"
     >
       <el-form label-position="top">
         <el-form-item label="File Selection">
@@ -189,7 +330,9 @@
             drag
             class="bento-upload"
           >
-            <el-icon class="el-icon--upload"><Upload /></el-icon>
+            <el-icon class="el-icon--upload">
+              <Upload />
+            </el-icon>
             <div class="el-upload__text">
               Drop file here or <em>click to upload</em>
             </div>
@@ -202,8 +345,14 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="uploadDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" :loading="uploadLoading" @click="handleUploadSubmit">
+        <el-button @click="uploadDialogVisible = false">
+          Cancel
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="uploadLoading"
+          @click="handleUploadSubmit"
+        >
           Upload
         </el-button>
       </template>
@@ -216,21 +365,50 @@
       width="800px"
       class="bento-dialog"
     >
-      <el-descriptions :column="2" border class="bento-descriptions">
-        <el-descriptions-item label="ID (Code)"><span class="mono-text">{{ viewData.docCode || '-' }}</span></el-descriptions-item>
-        <el-descriptions-item label="Type">{{ viewData.docType || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="Name" :span="2">{{ viewData.docName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="Category">{{ viewData.docCategory || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="Similarity" v-if="viewData.similarity !== undefined">
-           <span class="text-success">{{ (viewData.similarity * 100).toFixed(1) }}%</span>
+      <el-descriptions
+        :column="2"
+        border
+        class="bento-descriptions"
+      >
+        <el-descriptions-item label="ID (Code)">
+          <span class="mono-text">{{ viewData.docCode || '-' }}</span>
         </el-descriptions-item>
-        <el-descriptions-item label="Content" :span="2">
+        <el-descriptions-item label="Type">
+          {{ viewData.docType || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="Name"
+          :span="2"
+        >
+          {{ viewData.docName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="Category">
+          {{ viewData.docCategory || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item
+          v-if="viewData.similarity !== undefined"
+          label="Similarity"
+        >
+          <span class="text-success">{{ (viewData.similarity * 100).toFixed(1) }}%</span>
+        </el-descriptions-item>
+        <el-descriptions-item
+          label="Content"
+          :span="2"
+        >
           <div class="doc-content-view">
             {{ viewData.docContent || '-' }}
           </div>
         </el-descriptions-item>
-        <el-descriptions-item label="URL" :span="2">
-          <el-link v-if="viewData.docUrl" :href="viewData.docUrl" target="_blank" type="primary">
+        <el-descriptions-item
+          label="URL"
+          :span="2"
+        >
+          <el-link
+            v-if="viewData.docUrl"
+            :href="viewData.docUrl"
+            target="_blank"
+            type="primary"
+          >
             {{ viewData.docUrl }}
           </el-link>
           <span v-else>-</span>
@@ -273,7 +451,28 @@ const formData = reactive<Partial<KnowledgeDocument>>({
   docContent: '',
   docUrl: ''
 })
-const viewData = ref<KnowledgeDocument>({})
+const viewData = ref<KnowledgeDocument>({
+  docCode: '',
+  docName: '',
+  docType: '',
+  docContent: ''
+})
+
+const loadDocuments = async () => {
+  loading.value = true
+  try {
+    const response = await knowledgeBaseApi.listDocuments(currentKBId.value, 20)
+    if (response.data) {
+      documentList.value = response.data
+    } else {
+      documentList.value = []
+    }
+  } catch (error) {
+    console.error('加载文档失败', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 // 表单验证规则
 const formRules: FormRules = {
@@ -350,6 +549,7 @@ const handleUploadSubmit = async () => {
       ElMessage.success('文档上传成功')
       uploadDialogVisible.value = false
       handleReset()
+      await loadDocuments()
     } else {
       ElMessage.error(response.message || '上传失败')
     }
@@ -463,6 +663,10 @@ const resetForm = () => {
 const handleDialogClose = () => {
   resetForm()
 }
+
+onMounted(() => {
+  loadDocuments()
+})
 </script>
 
 <style scoped lang="scss">

@@ -12,6 +12,7 @@ export interface ModelConfig {
   modelVersion?: string
   maxTokens?: number
   temperature?: number
+  provider?: string
   isActive?: string
   priority?: number
   dailyLimit?: number

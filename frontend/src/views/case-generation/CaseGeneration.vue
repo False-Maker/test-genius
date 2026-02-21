@@ -14,10 +14,19 @@
             </div>
           </template>
 
-          <el-form :model="form" :rules="formRules" ref="formRef" label-position="top" class="bento-form">
+          <el-form
+            ref="formRef"
+            :model="form"
+            :rules="formRules"
+            label-position="top"
+            class="bento-form"
+          >
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="需求ID (Requirement)" prop="requirementId">
+                <el-form-item
+                  label="需求ID (Requirement)"
+                  prop="requirementId"
+                >
                   <el-select
                     v-model="form.requirementId"
                     placeholder="选择需求"
@@ -36,7 +45,10 @@
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="模型配置 (Model)" prop="modelCode">
+                <el-form-item
+                  label="模型配置 (Model)"
+                  prop="modelCode"
+                >
                   <el-select
                     v-model="form.modelCode"
                     placeholder="默认模型"
@@ -58,7 +70,10 @@
 
             <el-row :gutter="20">
               <el-col :span="8">
-                <el-form-item label="测试分层 (Layer)" prop="layerCode">
+                <el-form-item
+                  label="测试分层 (Layer)"
+                  prop="layerCode"
+                >
                   <el-select
                     v-model="form.layerCode"
                     placeholder="全部"
@@ -76,7 +91,10 @@
                 </el-form-item>
               </el-col>
               <el-col :span="8">
-                <el-form-item label="测试方法 (Method)" prop="methodCode">
+                <el-form-item
+                  label="测试方法 (Method)"
+                  prop="methodCode"
+                >
                   <el-select
                     v-model="form.methodCode"
                     placeholder="全部"
@@ -94,7 +112,7 @@
                 </el-form-item>
               </el-col>
               <el-col :span="8">
-                 <el-form-item label="提示词模板 (Prompt)">
+                <el-form-item label="提示词模板 (Prompt)">
                   <el-select
                     v-model="form.templateId"
                     placeholder="默认模板"
@@ -131,21 +149,47 @@
                 />
               </el-select>
               <div class="form-helper">
-                <el-link type="primary" :underline="false" @click="handleOpenWorkflowEditor">
-                  <el-icon class="mr-1"><Edit /></el-icon> 创建新工作流
+                <el-link
+                  type="primary"
+                  :underline="false"
+                  @click="handleOpenWorkflowEditor"
+                >
+                  <el-icon class="mr-1">
+                    <Edit />
+                  </el-icon> 创建新工作流
                 </el-link>
                 <el-divider direction="vertical" />
-                <el-link type="info" :underline="false" @click="loadWorkflows">
-                  <el-icon class="mr-1"><Refresh /></el-icon> 刷新
+                <el-link
+                  type="info"
+                  :underline="false"
+                  @click="loadWorkflows"
+                >
+                  <el-icon class="mr-1">
+                    <Refresh />
+                  </el-icon> 刷新
                 </el-link>
               </div>
             </el-form-item>
 
             <div class="form-actions">
-              <el-button class="action-btn" type="primary" @click="handleGenerate" :loading="generateLoading" size="large">
-                <el-icon class="mr-2"><VideoPlay /></el-icon> 开始执行 (Generate)
+              <el-button
+                class="action-btn"
+                type="primary"
+                :loading="generateLoading"
+                size="large"
+                @click="handleGenerate"
+              >
+                <el-icon class="mr-2">
+                  <VideoPlay />
+                </el-icon> 开始执行 (Generate)
               </el-button>
-              <el-button class="action-btn" @click="handleReset" size="large">重置</el-button>
+              <el-button
+                class="action-btn"
+                size="large"
+                @click="handleReset"
+              >
+                重置
+              </el-button>
             </div>
           </el-form>
         </el-card>
@@ -164,11 +208,20 @@
           </template>
           
           <div class="status-content">
-            <div v-if="!generationResult" class="empty-status">
-              <el-empty description="等待任务开始..." :image-size="80" />
+            <div
+              v-if="!generationResult"
+              class="empty-status"
+            >
+              <el-empty
+                description="等待任务开始..."
+                :image-size="80"
+              />
             </div>
 
-            <div v-else class="active-status">
+            <div
+              v-else
+              class="active-status"
+            >
               <div class="status-indicator">
                 <el-progress 
                   type="dashboard" 
@@ -176,25 +229,35 @@
                   :status="generationResult.status === 'SUCCESS' ? 'success' : (generationResult.status === 'FAILED' ? 'exception' : '')"
                   :width="120"
                 />
-                <div class="status-text">{{ getStatusText(generationResult.status) }}</div>
+                <div class="status-text">
+                  {{ getStatusText(generationResult.status) }}
+                </div>
               </div>
               
               <div class="status-details">
-                <p class="status-message">{{ generationResult.message }}</p>
+                <p class="status-message">
+                  {{ generationResult.message }}
+                </p>
                 
-                <div v-if="generationResult.status === 'SUCCESS'" class="result-stats">
-                   <div class="stat-item success">
+                <div
+                  v-if="generationResult.status === 'SUCCESS'"
+                  class="result-stats"
+                >
+                  <div class="stat-item success">
                     <span class="label">Success</span>
                     <span class="value">{{ generationResult.successCases || 0 }}</span>
-                   </div>
-                   <div class="stat-item fail" v-if="generationResult.failCases">
+                  </div>
+                  <div
+                    v-if="generationResult.failCases"
+                    class="stat-item fail"
+                  >
                     <span class="label">Failed</span>
                     <span class="value">{{ generationResult.failCases }}</span>
-                   </div>
+                  </div>
                 </div>
 
                 <div class="status-actions">
-                   <el-button 
+                  <el-button 
                     v-if="generationResult.status === 'SUCCESS'" 
                     type="success" 
                     plain 
@@ -219,7 +282,11 @@
                 <el-icon><List /></el-icon>
                 <h2>任务历史</h2>
               </div>
-              <el-button link type="primary" @click="handleRefreshTaskList">
+              <el-button
+                link
+                type="primary"
+                @click="handleRefreshTaskList"
+              >
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </div>
@@ -231,41 +298,93 @@
             style="width: 100%"
             class="bento-table"
           >
-            <el-table-column prop="taskCode" label="TASK ID" width="160">
-                <template #default="scope">
-                    <span class="mono-text">{{ scope.row.taskCode }}</span>
-                </template>
+            <el-table-column
+              prop="taskCode"
+              label="TASK ID"
+              width="160"
+            >
+              <template #default="scope">
+                <span class="mono-text">{{ scope.row.taskCode }}</span>
+              </template>
             </el-table-column>
-            <el-table-column prop="requirementName" label="REQUIREMENT" min-width="200" show-overflow-tooltip />
-            <el-table-column label="CONFIG" min-width="200">
+            <el-table-column
+              prop="requirementName"
+              label="REQUIREMENT"
+              min-width="200"
+              show-overflow-tooltip
+            />
+            <el-table-column
+              label="CONFIG"
+              min-width="200"
+            >
               <template #default="scope">
                 <div class="config-tags">
-                    <el-tag size="small" type="info" v-if="scope.row.layerName">{{ scope.row.layerName }}</el-tag>
-                    <el-tag size="small" type="info" v-if="scope.row.methodName">{{ scope.row.methodName }}</el-tag>
-                    <el-tag size="small" type="info" v-if="scope.row.modelCode">{{ scope.row.modelCode }}</el-tag>
+                  <el-tag
+                    v-if="scope.row.layerName"
+                    size="small"
+                    type="info"
+                  >
+                    {{ scope.row.layerName }}
+                  </el-tag>
+                  <el-tag
+                    v-if="scope.row.methodName"
+                    size="small"
+                    type="info"
+                  >
+                    {{ scope.row.methodName }}
+                  </el-tag>
+                  <el-tag
+                    v-if="scope.row.modelCode"
+                    size="small"
+                    type="info"
+                  >
+                    {{ scope.row.modelCode }}
+                  </el-tag>
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="STATUS" width="100">
+            <el-table-column
+              label="STATUS"
+              width="100"
+            >
               <template #default="scope">
-                <el-tag :type="getTaskStatusType(scope.row.taskStatus)" effect="plain">
+                <el-tag
+                  :type="getTaskStatusType(scope.row.taskStatus)"
+                  effect="plain"
+                >
                   {{ getTaskStatusText(scope.row.taskStatus) }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="CASES" width="120">
+            <el-table-column
+              label="CASES"
+              width="120"
+            >
               <template #default="scope">
-                 <span :class="{'text-success': true}">{{ scope.row.successCases }}</span> / {{ scope.row.totalCases }}
+                <span :class="{'text-success': true}">{{ scope.row.successCases }}</span> / {{ scope.row.totalCases }}
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="TIME" width="180">
-                <template #default="scope">
-                    <span class="mono-text text-sm">{{ scope.row.createTime }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column label="ACTIONS" width="180" fixed="right">
+            <el-table-column
+              prop="createTime"
+              label="TIME"
+              width="180"
+            >
               <template #default="scope">
-                <el-button size="small" link type="primary" @click="viewTaskDetail(scope.row)">
+                <span class="mono-text text-sm">{{ scope.row.createTime }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="ACTIONS"
+              width="180"
+              fixed="right"
+            >
+              <template #default="scope">
+                <el-button
+                  size="small"
+                  link
+                  type="primary"
+                  @click="viewTaskDetail(scope.row)"
+                >
                   Details
                 </el-button>
                 <el-button
@@ -289,9 +408,9 @@
               :total="taskPagination.total"
               :page-sizes="[10, 20, 50, 100]"
               layout="prev, pager, next"
+              small
               @size-change="handleSizeChange"
               @current-change="handlePageChange"
-              small
             />
           </div>
         </el-card>
@@ -303,12 +422,17 @@
       v-model="taskDetailDialogVisible"
       title="TASK DETAILS"
       width="1000px"
-      @close="currentTaskDetail = null"
       class="bento-dialog"
+      @close="currentTaskDetail = null"
     >
-      <el-descriptions v-loading="taskDetailLoading" :column="2" border class="bento-descriptions">
+      <el-descriptions
+        v-loading="taskDetailLoading"
+        :column="2"
+        border
+        class="bento-descriptions"
+      >
         <el-descriptions-item label="任务编号 (Task Code)">
-             <span class="mono-text">{{ currentTaskDetail?.taskCode }}</span>
+          <span class="mono-text">{{ currentTaskDetail?.taskCode }}</span>
         </el-descriptions-item>
         <el-descriptions-item label="任务状态 (Status)">
           <el-tag :type="getTaskStatusType(currentTaskDetail?.taskStatus)">
@@ -316,20 +440,22 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="需求 (Requirement)">
-            {{ currentTaskDetail?.requirementCode }} - {{ currentTaskDetail?.requirementName }}
+          {{ currentTaskDetail?.requirementCode }} - {{ currentTaskDetail?.requirementName }}
         </el-descriptions-item>
         <el-descriptions-item label="配置 (Config)">
-            {{ currentTaskDetail?.layerName }} / {{ currentTaskDetail?.methodName }} / {{ currentTaskDetail?.modelCode }}
+          {{ currentTaskDetail?.layerName }} / {{ currentTaskDetail?.methodName }} / {{ currentTaskDetail?.modelCode }}
         </el-descriptions-item>
         <el-descriptions-item label="用例统计 (Stats)">
           Total: {{ currentTaskDetail?.totalCases }} | Success: {{ currentTaskDetail?.successCases }} | Failed: {{ currentTaskDetail?.failCases }}
         </el-descriptions-item>
         <el-descriptions-item label="时间 (Time)">
-            {{ currentTaskDetail?.createTime }}
+          {{ currentTaskDetail?.createTime }}
         </el-descriptions-item>
       </el-descriptions>
 
-      <el-divider content-position="left">CASES GENERATED</el-divider>
+      <el-divider content-position="left">
+        CASES GENERATED
+      </el-divider>
 
       <el-table
         :data="currentTaskDetail?.cases || []"
@@ -337,23 +463,54 @@
         max-height="400"
         class="bento-table"
       >
-        <el-table-column prop="caseCode" label="ID" width="150" >
-             <template #default="scope"><span class="mono-text">{{ scope.row.caseCode }}</span></template>
-        </el-table-column>
-        <el-table-column prop="caseName" label="Name" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="casePriority" label="Pri" width="80">
+        <el-table-column
+          prop="caseCode"
+          label="ID"
+          width="150"
+        >
           <template #default="scope">
-            <el-tag v-if="scope.row.casePriority" :type="getPriorityType(scope.row.casePriority)" size="small">
+            <span class="mono-text">{{ scope.row.caseCode }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="caseName"
+          label="Name"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="casePriority"
+          label="Pri"
+          width="80"
+        >
+          <template #default="scope">
+            <el-tag
+              v-if="scope.row.casePriority"
+              :type="getPriorityType(scope.row.casePriority)"
+              size="small"
+            >
               {{ scope.row.casePriority }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="testStep" label="Steps" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="expectedResult" label="Expected" min-width="150" show-overflow-tooltip />
+        <el-table-column
+          prop="testStep"
+          label="Steps"
+          min-width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="expectedResult"
+          label="Expected"
+          min-width="150"
+          show-overflow-tooltip
+        />
       </el-table>
 
       <template #footer>
-        <el-button @click="taskDetailDialogVisible = false">Close</el-button>
+        <el-button @click="taskDetailDialogVisible = false">
+          Close
+        </el-button>
         <el-button
           type="primary"
           :disabled="currentTaskDetail?.taskStatus !== 'SUCCESS'"
@@ -363,7 +520,6 @@
         </el-button>
       </template>
     </el-dialog>
-
   </div>
 </template>
 
@@ -422,8 +578,7 @@ const modelLoading = computed(() => cacheStore.loading.modelList)
 
 
 
-const form = reactive<CaseGenerationRequest & { templateId?: number; workflowId?: number }>({
-
+const form = reactive<Partial<CaseGenerationRequest> & { templateId?: number; workflowId?: number }>({
   requirementId: undefined,
 
   layerCode: '',
@@ -501,28 +656,6 @@ const getStatusText = (status?: string) => {
 
 }
 
-
-
-// 获取状态类型
-
-const getStatusType = (status?: string) => {
-
-  const typeMap: Record<string, string> = {
-
-    PENDING: 'info',
-
-    PROCESSING: 'warning',
-
-    SUCCESS: 'success',
-
-    FAILED: 'danger'
-
-  }
-
-  return typeMap[status || ''] || ''
-
-}
-
 // 获取任务状态文本
 const getTaskStatusText = (status?: string) => {
   const statusMap: Record<string, string> = {
@@ -592,6 +725,10 @@ const viewTaskDetail = async (task: TaskListItem) => {
   } finally {
     taskDetailLoading.value = false
   }
+}
+
+const handleRefreshTaskList = () => {
+  loadTaskList()
 }
 
 // 导出任务用例到Excel
@@ -731,7 +868,7 @@ const handleGenerateWithWorkflow = async () => {
 
       requirement_id: form.requirementId,
 
-      requirement_text: requirementList.value.find(r => r.id === form.requirementId)?.requirementText || '',
+      requirement_text: requirementList.value.find(r => r.id === form.requirementId)?.requirementDescription || '',
 
       layer_code: form.layerCode || undefined,
 
@@ -1046,8 +1183,6 @@ onMounted(() => {
 
 
 // 组件卸载时清理定时器
-
-import { onUnmounted } from 'vue'
 
 onUnmounted(() => {
 

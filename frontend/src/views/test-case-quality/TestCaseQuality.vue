@@ -2,24 +2,50 @@
   <div class="test-case-quality">
     <div class="page-header">
       <div class="header-left">
-        <h2 class="page-title">用例质量评估管理</h2>
-        <p class="page-subtitle">评估测试用例的质量、完整性和规范�</p>
+        <h2 class="page-title">
+          用例质量评估管理
+        </h2>
+        <p class="page-subtitle">
+          评估测试用例的质量、完整性和规范�
+        </p>
       </div>
     </div>
 
-    <el-card class="action-card" shadow="never">
-      <el-form :inline="true" class="action-form">
+    <el-card
+      class="action-card"
+      shadow="never"
+    >
+      <el-form
+        :inline="true"
+        class="action-form"
+      >
         <el-form-item label="测试用例ID">
-          <el-input-number v-model="caseId" :min="1" placeholder="请输入用例ID" />
+          <el-input-number
+            v-model="caseId"
+            :min="1"
+            placeholder="请输入用例ID"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleAssessQuality" :loading="qualityLoading">
+          <el-button
+            type="primary"
+            :loading="qualityLoading"
+            @click="handleAssessQuality"
+          >
             <el-icon><DataLine /></el-icon> 综合质量评估
           </el-button>
-          <el-button type="success" @click="handleCheckCompleteness" :loading="completenessLoading">
+          <el-button
+            type="success"
+            :loading="completenessLoading"
+            @click="handleCheckCompleteness"
+          >
             <el-icon><CircleCheck /></el-icon> 完整性检查�?
           </el-button>
-          <el-button type="warning" @click="handleCheckStandardization" :loading="standardizationLoading">
+          <el-button
+            type="warning"
+            :loading="standardizationLoading"
+            @click="handleCheckStandardization"
+          >
             <el-icon><EditPen /></el-icon> 规范性检查�?
           </el-button>
         </el-form-item>
@@ -27,57 +53,107 @@
     </el-card>
 
     <div class="results-container">
-        <!-- Quality Result -->
-        <el-card v-if="qualityScore" class="result-card" shadow="never">
-             <template #header>
-                <div class="card-header">
-                    <span>综合质量评分</span>
-                    <el-tag :type="getLevelType(qualityScore.qualityLevel)">{{ qualityScore.qualityLevel }}</el-tag>
-                </div>
-            </template>
-            <div class="score-display">
-                <el-progress type="dashboard" :percentage="qualityScore.totalScore" :color="getScoreColor" />
-                <div class="score-details">
-                    <el-descriptions :column="3" border>
-                        <el-descriptions-item label="完整性得�">{{ qualityScore.completenessScore }}</el-descriptions-item>
-                        <el-descriptions-item label="规范性得�">{{ qualityScore.standardizationScore }}</el-descriptions-item>
-                        <el-descriptions-item label="可执行人中性得�">{{ qualityScore.executabilityScore }}</el-descriptions-item>
-                    </el-descriptions>
-                </div>
-            </div>
-        </el-card>
-
-        <!-- Completeness Result -->
-        <el-card v-if="completenessScore" class="result-card" shadow="never">
-             <template #header>
-                <div class="card-header">
-                    <span>完整性详情�</span>
-                    <el-tag effect="plain">总分: {{ completenessScore.totalScore }}</el-tag>
-                </div>
-            </template>
-            <el-descriptions :column="2" border>
-                <el-descriptions-item label="基本信息">{{ completenessScore.basicInfoScore }}</el-descriptions-item>
-                <el-descriptions-item label="前置条件">{{ completenessScore.preConditionScore }}</el-descriptions-item>
-                <el-descriptions-item label="测试步骤">{{ completenessScore.testStepScore }}</el-descriptions-item>
-                <el-descriptions-item label="预期结果">{{ completenessScore.expectedResultScore }}</el-descriptions-item>
+      <!-- Quality Result -->
+      <el-card
+        v-if="qualityScore"
+        class="result-card"
+        shadow="never"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>综合质量评分</span>
+            <el-tag :type="getLevelType(qualityScore.qualityLevel)">
+              {{ qualityScore.qualityLevel }}
+            </el-tag>
+          </div>
+        </template>
+        <div class="score-display">
+          <el-progress
+            type="dashboard"
+            :percentage="qualityScore.totalScore"
+            :color="getScoreColor"
+          />
+          <div class="score-details">
+            <el-descriptions
+              :column="3"
+              border
+            >
+              <el-descriptions-item label="完整性得�">
+                {{ qualityScore.completenessScore }}
+              </el-descriptions-item>
+              <el-descriptions-item label="规范性得�">
+                {{ qualityScore.standardizationScore }}
+              </el-descriptions-item>
+              <el-descriptions-item label="可执行人中性得�">
+                {{ qualityScore.executabilityScore }}
+              </el-descriptions-item>
             </el-descriptions>
-        </el-card>
+          </div>
+        </div>
+      </el-card>
 
-         <!-- Standardization Result -->
-        <el-card v-if="standardizationScore" class="result-card" shadow="never">
-             <template #header>
-                <div class="card-header">
-                    <span>规范性详情�</span>
-                    <el-tag effect="plain">总分: {{ standardizationScore.totalScore }}</el-tag>
-                </div>
-            </template>
-            <el-descriptions :column="3" border>
-                <el-descriptions-item label="命名规范">{{ standardizationScore.namingScore }}</el-descriptions-item>
-                <el-descriptions-item label="格式规范">{{ standardizationScore.formatScore }}</el-descriptions-item>
-                <el-descriptions-item label="内容规范">{{ standardizationScore.contentScore }}</el-descriptions-item>
-            </el-descriptions>
-        </el-card>
+      <!-- Completeness Result -->
+      <el-card
+        v-if="completenessScore"
+        class="result-card"
+        shadow="never"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>完整性详情�</span>
+            <el-tag effect="plain">
+              总分: {{ completenessScore.totalScore }}
+            </el-tag>
+          </div>
+        </template>
+        <el-descriptions
+          :column="2"
+          border
+        >
+          <el-descriptions-item label="基本信息">
+            {{ completenessScore.basicInfoScore }}
+          </el-descriptions-item>
+          <el-descriptions-item label="前置条件">
+            {{ completenessScore.preConditionScore }}
+          </el-descriptions-item>
+          <el-descriptions-item label="测试步骤">
+            {{ completenessScore.testStepScore }}
+          </el-descriptions-item>
+          <el-descriptions-item label="预期结果">
+            {{ completenessScore.expectedResultScore }}
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
 
+      <!-- Standardization Result -->
+      <el-card
+        v-if="standardizationScore"
+        class="result-card"
+        shadow="never"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>规范性详情�</span>
+            <el-tag effect="plain">
+              总分: {{ standardizationScore.totalScore }}
+            </el-tag>
+          </div>
+        </template>
+        <el-descriptions
+          :column="3"
+          border
+        >
+          <el-descriptions-item label="命名规范">
+            {{ standardizationScore.namingScore }}
+          </el-descriptions-item>
+          <el-descriptions-item label="格式规范">
+            {{ standardizationScore.formatScore }}
+          </el-descriptions-item>
+          <el-descriptions-item label="内容规范">
+            {{ standardizationScore.contentScore }}
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
     </div>
   </div>
 </template>

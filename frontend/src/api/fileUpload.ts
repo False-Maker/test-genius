@@ -1,4 +1,5 @@
 import request from './request'
+import type { ApiResult } from './types'
 
 // 文件上传响应类型
 export interface FileUploadResponse {
@@ -14,7 +15,7 @@ export const fileUploadApi = {
   uploadFile(file: File) {
     const formData = new FormData()
     formData.append('file', file)
-    return request.post<FileUploadResponse>('/v1/files/upload', formData, {
+    return request.post<any, ApiResult<FileUploadResponse>>('/v1/files/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

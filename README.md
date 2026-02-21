@@ -78,10 +78,72 @@
    npm run dev
    ```
 
-### 使用Docker Compose启动
+### Docker启动命令速查
+
+**完整启动（包含监控组件）**
 
 ```bash
-docker-compose up -d
+docker compose --profile monitoring up -d
+```
+
+**快速启动（只启动前端/后端/AI + 基础依赖，不启动监控）**
+
+```bash
+docker compose up -d postgres redis backend-java backend-python frontend
+```
+
+**开发模式（自动重载，不重建镜像）**
+
+```bash
+docker compose --profile dev up postgres redis backend-java-dev backend-python-dev frontend-dev
+```
+
+**开发模式访问端口**
+
+- 前端（dev）：http://localhost:3000
+- Java 后端（dev）：http://localhost:8081
+- AI 服务（dev）：http://localhost:8001
+
+**查看日志**
+
+```bash
+docker compose logs -f backend-java backend-python frontend
+```
+
+**单独启动某一端**
+
+```bash
+docker compose up -d backend-java
+docker compose up -d backend-python
+docker compose up -d frontend
+```
+
+**进入容器调试**
+
+```bash
+docker exec -it test-design-backend-java-dev sh
+docker exec -it test-design-backend-python-dev sh
+docker exec -it test-design-frontend-dev sh
+```
+
+**停止与清理**
+
+```bash
+docker compose down
+```
+
+**清理卷（会清空数据库与缓存）**
+
+```bash
+docker compose down -v
+```
+
+> 注意：执行 `down -v` 会删除命名卷（含 `uploads_data`）。之后需求分析若报「文档不存在或不是文件」，是因为历史上传文件已清空，请重新上传需求文档或在该需求中填写需求描述后再分析。
+
+**重新构建镜像（仅当 Dockerfile 或依赖变化时需要）**
+
+```bash
+docker compose build
 ```
 
 ## API文档

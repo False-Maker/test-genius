@@ -29,6 +29,9 @@ export interface GenerationTask {
   status: string
   progress?: number
   message?: string
+  totalCases?: number
+  successCases?: number
+  failCases?: number
   result?: any
   createTime?: string
   updateTime?: string
@@ -139,9 +142,8 @@ export const caseGenerationApi = {
 
   // 导出任务用例到Excel
   exportTaskToExcel(taskId: number) {
-    return request.get(`/v1/case-generation/tasks/${taskId}/export-excel`, {
+    return request.get<any, Blob>(`/v1/case-generation/tasks/${taskId}/export-excel`, {
       responseType: 'blob'
     })
   }
 }
-

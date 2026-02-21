@@ -1,5 +1,5 @@
 import request from './request'
-import type { PageResult } from './types'
+import type { ApiResult, PageResult } from './types'
 
 // 用例相关类型定义
 export interface TestCase {
@@ -39,7 +39,7 @@ export const testCaseApi = {
 
   // 查询用例列表
   getTestCaseList(params: TestCaseListParams = {}) {
-    return request.get<PageResult<TestCase>>('/v1/test-cases', { params })
+    return request.get<any, ApiResult<PageResult<TestCase>>>('/v1/test-cases', { params })
   },
 
   // 获取用例详情

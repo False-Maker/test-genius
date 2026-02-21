@@ -3,23 +3,39 @@
     <div class="header">
       <h2>工作流编辑器</h2>
       <div class="header-actions">
-        <el-button @click="handleLoad">加载</el-button>
-        <el-button @click="handleSave">保存</el-button>
-        <el-button @click="handleValidate">验证</el-button>
-        <el-button type="primary" @click="handleExecute">执行</el-button>
+        <el-button @click="handleLoad">
+          加载
+        </el-button>
+        <el-button @click="handleSave">
+          保存
+        </el-button>
+        <el-button @click="handleValidate">
+          验证
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleExecute"
+        >
+          执行
+        </el-button>
       </div>
     </div>
 
     <el-row :gutter="20">
       <!-- 左侧：节点面板 -->
       <el-col :span="4">
-        <el-card class="node-panel" shadow="never">
+        <el-card
+          class="node-panel"
+          shadow="never"
+        >
           <template #header>
             <span>节点库</span>
           </template>
           <div class="node-list">
             <div class="node-category">
-              <div class="category-title">输入节点</div>
+              <div class="category-title">
+                输入节点
+              </div>
               <div
                 v-for="node in inputNodes"
                 :key="node.type"
@@ -31,7 +47,9 @@
               </div>
             </div>
             <div class="node-category">
-              <div class="category-title">处理节点</div>
+              <div class="category-title">
+                处理节点
+              </div>
               <div
                 v-for="node in processNodes"
                 :key="node.type"
@@ -43,7 +61,9 @@
               </div>
             </div>
             <div class="node-category">
-              <div class="category-title">转换节点</div>
+              <div class="category-title">
+                转换节点
+              </div>
               <div
                 v-for="node in transformNodes"
                 :key="node.type"
@@ -55,7 +75,9 @@
               </div>
             </div>
             <div class="node-category">
-              <div class="category-title">输出节点</div>
+              <div class="category-title">
+                输出节点
+              </div>
               <div
                 v-for="node in outputNodes"
                 :key="node.type"
@@ -67,7 +89,9 @@
               </div>
             </div>
             <div class="node-category">
-              <div class="category-title">控制节点</div>
+              <div class="category-title">
+                控制节点
+              </div>
               <div
                 v-for="node in controlNodes"
                 :key="node.type"
@@ -84,7 +108,10 @@
 
       <!-- 中间：画布区域 -->
       <el-col :span="16">
-        <el-card class="canvas-area" shadow="never">
+        <el-card
+          class="canvas-area"
+          shadow="never"
+        >
           <template #header>
             <span>工作流画布</span>
           </template>
@@ -110,127 +137,164 @@
 
       <!-- 右侧：配置面板 -->
       <el-col :span="4">
-        <el-card class="config-panel" shadow="never">
+        <el-card
+          class="config-panel"
+          shadow="never"
+        >
           <template #header>
             <span>{{ selectedNode ? '节点配置' : selectedEdge ? '连线配置' : '配置面板' }}</span>
           </template>
-          <div v-if="selectedNode" class="config-content">
-            <el-form :model="selectedNode.data.config" label-width="80px">
+          <div
+            v-if="selectedNode"
+            class="config-content"
+          >
+            <el-form
+              :model="selectedNode.data.config"
+              label-width="80px"
+            >
               <el-form-item label="节点名称">
                 <el-input v-model="selectedNode.data.name" />
               </el-form-item>
               <el-form-item label="节点类型">
-                <el-input v-model="selectedNode.data.type" disabled />
+                <el-input
+                  v-model="selectedNode.data.type"
+                  disabled
+                />
               </el-form-item>
               <!-- 动态配置组件 -->
               <component
-                v-if="selectedNode.data.type === NODE_TYPES.REQUIREMENT_INPUT"
                 :is="RequirementInputConfig"
+                v-if="selectedNode.data.type === NODE_TYPES.REQUIREMENT_INPUT"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.TEST_CASE_INPUT"
                 :is="TestCaseInputConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.TEST_CASE_INPUT"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.FILE_UPLOAD"
                 :is="FileUploadConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.FILE_UPLOAD"
                 v-model="selectedNode.data.config"
               />
 
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.REQUIREMENT_ANALYSIS"
                 :is="RequirementAnalysisConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.REQUIREMENT_ANALYSIS"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.TEMPLATE_SELECT"
                 :is="TemplateSelectConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.TEMPLATE_SELECT"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.PROMPT_GENERATE"
                 :is="PromptGenerateConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.PROMPT_GENERATE"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.LLM_CALL"
                 :is="LLMCallConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.LLM_CALL"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.RESULT_PARSE"
                 :is="ResultParseConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.RESULT_PARSE"
                 v-model="selectedNode.data.config"
               />
 
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.FORMAT_TRANSFORM"
                 :is="FormatTransformConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.FORMAT_TRANSFORM"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.DATA_CLEAN"
                 :is="DataCleanConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.DATA_CLEAN"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.DATA_MERGE"
                 :is="DataMergeConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.DATA_MERGE"
                 v-model="selectedNode.data.config"
               />
 
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.CASE_SAVE"
                 :is="CaseSaveConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.CASE_SAVE"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.REPORT_GENERATE"
                 :is="ReportGenerateConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.REPORT_GENERATE"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.FILE_EXPORT"
                 :is="FileExportConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.FILE_EXPORT"
                 v-model="selectedNode.data.config"
               />
 
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.CONDITION"
                 :is="ConditionConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.CONDITION"
                 v-model="selectedNode.data.config"
               />
               <component
-                v-else-if="selectedNode.data.type === NODE_TYPES.LOOP"
                 :is="LoopConfig"
+                v-else-if="selectedNode.data.type === NODE_TYPES.LOOP"
                 v-model="selectedNode.data.config"
               />
               
               <!-- 兜底提示 -->
-              <div v-else class="config-placeholder">
+              <div
+                v-else
+                class="config-placeholder"
+              >
                 该节点类型暂未配置组件，请联系管理员
               </div>
             </el-form>
-            <el-button type="danger" size="small" @click="handleDeleteNode" style="width: 100%; margin-top: 10px">
+            <el-button
+              type="danger"
+              size="small"
+              style="width: 100%; margin-top: 10px"
+              @click="handleDeleteNode"
+            >
               删除节点
             </el-button>
           </div>
-          <div v-else-if="selectedEdge" class="config-content">
+          <div
+            v-else-if="selectedEdge"
+            class="config-content"
+          >
             <el-form label-width="80px">
               <el-form-item label="源节点">
-                <el-input :value="selectedEdge.source" disabled />
+                <el-input
+                  :value="selectedEdge.source"
+                  disabled
+                />
               </el-form-item>
               <el-form-item label="目标节点">
-                <el-input :value="selectedEdge.target" disabled />
+                <el-input
+                  :value="selectedEdge.target"
+                  disabled
+                />
               </el-form-item>
             </el-form>
-            <el-button type="danger" size="small" @click="handleDeleteEdge" style="width: 100%; margin-top: 10px">
+            <el-button
+              type="danger"
+              size="small"
+              style="width: 100%; margin-top: 10px"
+              @click="handleDeleteEdge"
+            >
               删除连线
             </el-button>
           </div>
-          <div v-else class="config-empty">
+          <div
+            v-else
+            class="config-empty"
+          >
             请选择一个节点或连线进行配置
           </div>
         </el-card>
@@ -246,9 +310,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, defineAsyncComponent } from 'vue'
-import { ElMessage, ElDialog } from 'element-plus'
-import { VueFlow, useVueFlow } from '@vue-flow/core'
+import { ref, computed, onMounted, defineAsyncComponent } from 'vue'
+import { ElMessage } from 'element-plus'
+import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { MiniMap } from '@vue-flow/minimap'
@@ -256,7 +320,7 @@ import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import { workflowApi, type WorkflowNode, type WorkflowEdge, type WorkflowConfig, type WorkflowDefinition } from '@/api/workflow'
 import WorkflowSelectionDialog from './components/WorkflowSelectionDialog.vue'
-import { NODE_TYPES, NODE_CONFIGS, NODE_CATEGORIES } from '@/config/workflow-nodes'
+import { NODE_TYPES, NODE_CONFIGS } from '@/config/workflow-nodes'
 
 // 动态加载配置组件
 const RequirementInputConfig = defineAsyncComponent(() => import('./components/nodes/input/RequirementInputConfig.vue'))
@@ -285,6 +349,12 @@ const getNodeListByCategory = (categoryKey: string) => {
       ...NODE_CONFIGS[type]
     }))
 }
+
+const inputNodes = computed(() => getNodeListByCategory('input'))
+const processNodes = computed(() => getNodeListByCategory('process'))
+const transformNodes = computed(() => getNodeListByCategory('transform'))
+const outputNodes = computed(() => getNodeListByCategory('output'))
+const controlNodes = computed(() => getNodeListByCategory('control'))
 
 // Vue Flow 元素
 const elements = ref<any[]>([])
@@ -387,7 +457,7 @@ const elementsToWorkflowConfig = (): WorkflowConfig => {
 }
 
 // 将工作流配置转换为Vue Flow元素
-const workflowConfigToElements = (config: WorkflowConfig, workflowId?: number) => {
+const workflowConfigToElements = (config: WorkflowConfig) => {
   const flowElements: any[] = []
   let x = 100
   let y = 100
@@ -445,8 +515,8 @@ const handleWorkflowSelect = async (workflow: WorkflowDefinition) => {
   try {
     if (workflow.workflowConfig) {
       const config = JSON.parse(workflow.workflowConfig)
-      elements.value = workflowConfigToElements(config, workflow.id)
-      currentWorkflowId.value = workflow.id
+      elements.value = workflowConfigToElements(config)
+      currentWorkflowId.value = workflow.id ?? null
       ElMessage.success(`已加载工作流: ${workflow.workflowName}`)
     } else {
       ElMessage.warning('该工作流配置为空')

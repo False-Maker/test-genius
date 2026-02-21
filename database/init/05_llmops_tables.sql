@@ -106,11 +106,14 @@ CREATE TABLE IF NOT EXISTS alert_rule (
     is_enabled BOOLEAN DEFAULT TRUE,  -- 是否启用
     notification_channels TEXT,  -- 通知渠道（JSON格式：["email", "sms", "webhook"]）
     notification_recipients TEXT,  -- 通知接收人（JSON格式）
+    webhook_url VARCHAR(500),  -- Webhook URL（可选）
     description TEXT,  -- 描述
     creator_id BIGINT,  -- 创建人ID
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 创建时间
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 更新时间
 );
+ALTER TABLE alert_rule
+    ADD COLUMN IF NOT EXISTS webhook_url VARCHAR(500);
 
 -- 告警规则表索引
 CREATE INDEX IF NOT EXISTS idx_alert_rule_rule_code ON alert_rule(rule_code);
@@ -140,6 +143,16 @@ CREATE TABLE IF NOT EXISTS alert_record (
     FOREIGN KEY (rule_id) REFERENCES alert_rule(id)
 );
 
+CREATE TABLE IF NOT EXISTS notification_message (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    content TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    read_time TIMESTAMP
+);
+
 -- 告警记录表索引
 CREATE INDEX IF NOT EXISTS idx_alert_record_rule_id ON alert_record(rule_id);
 CREATE INDEX IF NOT EXISTS idx_alert_record_rule_code ON alert_record(rule_code);
@@ -147,6 +160,8 @@ CREATE INDEX IF NOT EXISTS idx_alert_record_alert_level ON alert_record(alert_le
 CREATE INDEX IF NOT EXISTS idx_alert_record_alert_time ON alert_record(alert_time);
 CREATE INDEX IF NOT EXISTS idx_alert_record_is_resolved ON alert_record(is_resolved);
 CREATE INDEX IF NOT EXISTS idx_alert_record_target ON alert_record(target_scope, target_value);
+CREATE INDEX IF NOT EXISTS idx_notification_message_user_id ON notification_message(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_message_is_read ON notification_message(is_read);
 
 -- 添加注释
 COMMENT ON TABLE app_log IS '应用日志表，记录所有模型调用和应用操作的详细信息';
