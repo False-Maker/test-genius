@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/store/user'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -316,6 +317,41 @@ const router = createRouter({
       }
     }
   ]
+})
+
+// 全局前置守卫
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+  const publicRoutes = ['Login', 'Register']
+  
+  // 检查登录状态
+  if (!userStore.isLoggedIn && !publicRoutes.includes(to.name as string)) {
+    // 保存原始目标路径
+    next({ 
+      name: 'Login', 
+      query: { redirect: to.fullPath } 
+    })
+  } else {
+    // 检查权限
+    if (to.meta.permission && Array.isArray(to.meta.permission)) {
+      const hasPermission = userStore.hasAnyPermission(to.meta.permission as string[])
+      if (!hasPermission) {
+        // 权限不足，跳转到首页或显示403页面
+        next({ path: '/' })
+      } else {
+        next()
+      }
+    } else {
+      next()
+    }
+  }
+})
+
+// 全局后置钩子
+router.afterEach((to) => {
+  // 设置页面标题
+  const title = to.meta.title || '测试设计助手系统'
+  document.title = `${title} - 测试设计助手`
 })
 
 export default router

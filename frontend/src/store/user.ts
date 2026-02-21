@@ -77,6 +77,24 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 检查权限
+  const hasPermission = (permission: string): boolean => {
+    if (!userInfo.value?.permissions) return false
+    return userInfo.value.permissions.includes(permission)
+  }
+
+  // 检查多个权限（满足任意一个即可）
+  const hasAnyPermission = (permissions: string[]): boolean => {
+    if (!userInfo.value?.permissions) return false
+    return permissions.some(p => userInfo.value?.permissions?.includes(p))
+  }
+
+  // 检查多个权限（必须全部满足）
+  const hasAllPermissions = (permissions: string[]): boolean => {
+    if (!userInfo.value?.permissions) return false
+    return permissions.every(p => userInfo.value?.permissions?.includes(p))
+  }
+
   // 初始化
   initFromStorage()
 
@@ -91,7 +109,10 @@ export const useUserStore = defineStore('user', () => {
     login,
     logout,
     updateUserInfo,
-    initFromStorage
+    initFromStorage,
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions
   }
 })
 
