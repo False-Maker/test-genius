@@ -11,7 +11,7 @@ export interface KnowledgeDocument {
   docCategory?: string
   docUrl?: string
   similarity?: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 // 知识库类型
@@ -27,8 +27,8 @@ export interface KnowledgeBase {
   chunkCount?: number
   lastSyncTime?: string
   createTime?: string
-  updateTime?: string
-  [key: string]: any
+updateTime?: string
+  [key: string]: unknown
 }
 
 export interface SearchDocumentsParams {
@@ -116,7 +116,7 @@ listDocuments(kbId: number, limit = 20) {
 // 获取知识库统计信息（通过详情接口，已包含 documentCount/chunkCount/lastSyncTime）
   getStatistics(kbId: number) {
     return request.get<ApiResult<KnowledgeBase>>(`/v1/knowledge-base/${kbId}`).then((res) => {
-      const dto = res.data
+      const dto = res.data as unknown as KnowledgeBase
       return {
         ...res,
         data: dto ? {

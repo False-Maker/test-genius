@@ -6,7 +6,7 @@ export interface SimilarCase {
   caseCode: string
   caseName: string
   similarity?: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface SearchSimilarCasesParams {
