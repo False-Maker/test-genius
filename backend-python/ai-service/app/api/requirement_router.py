@@ -32,7 +32,7 @@ class RequirementAnalyzeRequest(BaseModel):
     model_code: Optional[str] = None
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
-    model_cfg: Optional[ModelConfigData] = None
+    model_cfg: Optional[ModelConfigData] = Field(None, alias="model_config")
 
 
 
