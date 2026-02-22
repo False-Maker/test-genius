@@ -293,75 +293,75 @@
 <span class="cstat-no" title="statement not covered" >export const testCoverageApi = {</span>
 <span class="cstat-no" title="statement not covered" >    // Analyze coverage (general)</span>
 <span class="cstat-no" title="statement not covered" >    analyzeCoverage(data: TestCoverageAnalysisRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestCoverageAnalysisResponseDTO&gt;('/v1/test-coverage/analyze', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestCoverageAnalysisResponseDTO&gt;('/v1/test-coverage/analyze', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Analyze requirement coverage</span>
 <span class="cstat-no" title="statement not covered" >    analyzeRequirementCoverage(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/analyze/requirement/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/analyze/requirement/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Analyze function coverage</span>
 <span class="cstat-no" title="statement not covered" >    analyzeFunctionCoverage(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/analyze/function/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/analyze/function/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Analyze scenario coverage</span>
 <span class="cstat-no" title="statement not covered" >    analyzeScenarioCoverage(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/analyze/scenario/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/analyze/scenario/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Analyze code coverage</span>
 <span class="cstat-no" title="statement not covered" >    analyzeCodeCoverage(requirementId: number | undefined, coverageData: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestCoverageAnalysisResponseDTO&gt;('/v1/test-coverage/analyze/code', coverageData, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestCoverageAnalysisResponseDTO&gt;('/v1/test-coverage/analyze/code', coverageData, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get analysis list</span>
 <span class="cstat-no" title="statement not covered" >    getAnalysisList(page: number = 0, size: number = 10) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, ApiResult&lt;PageResult&lt;TestCoverageAnalysisResponseDTO&gt;&gt;&gt;('/v1/test-coverage', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;ApiResult&lt;PageResult&lt;TestCoverageAnalysisResponseDTO&gt;&gt;&gt;('/v1/test-coverage', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get analysis by ID</span>
 <span class="cstat-no" title="statement not covered" >    getAnalysisById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get analysis by requirement ID</span>
 <span class="cstat-no" title="statement not covered" >    getAnalysisByRequirementId(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestCoverageAnalysisResponseDTO[]&gt;(`/v1/test-coverage/requirement/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestCoverageAnalysisResponseDTO[]&gt;(`/v1/test-coverage/requirement/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get analysis by code</span>
 <span class="cstat-no" title="statement not covered" >    getAnalysisByCode(analysisCode: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/code/${analysisCode}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestCoverageAnalysisResponseDTO&gt;(`/v1/test-coverage/code/${analysisCode}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get analysis by coverage type</span>
 <span class="cstat-no" title="statement not covered" >    getAnalysisByCoverageType(coverageType: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestCoverageAnalysisResponseDTO[]&gt;(`/v1/test-coverage/type/${coverageType}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestCoverageAnalysisResponseDTO[]&gt;(`/v1/test-coverage/type/${coverageType}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get coverage trend</span>
 <span class="cstat-no" title="statement not covered" >    getCoverageTrend(requirementId?: number, coverageType?: string, days: number = 7) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;('/v1/test-coverage/trend', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;('/v1/test-coverage/trend', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId, coverageType, days }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Check coverage insufficiency</span>
 <span class="cstat-no" title="statement not covered" >    checkCoverageInsufficiency(requirementId?: number, threshold: number = 80.0) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;('/v1/test-coverage/insufficiency', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;('/v1/test-coverage/insufficiency', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId, threshold }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Generate coverage report</span>
 <span class="cstat-no" title="statement not covered" >    generateCoverageReport(requirementId?: number, coverageType?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;('/v1/test-coverage/report', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;('/v1/test-coverage/report', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId, coverageType }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -373,7 +373,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

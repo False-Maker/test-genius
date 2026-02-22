@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1218</span>
+                <span class='fraction'>0/1207</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1218</span>
+                <span class='fraction'>0/1207</span>
             </div>
         
             
@@ -1270,29 +1270,7 @@
 <a name='L1205'></a><a href='#L1205'>1205</a>
 <a name='L1206'></a><a href='#L1206'>1206</a>
 <a name='L1207'></a><a href='#L1207'>1207</a>
-<a name='L1208'></a><a href='#L1208'>1208</a>
-<a name='L1209'></a><a href='#L1209'>1209</a>
-<a name='L1210'></a><a href='#L1210'>1210</a>
-<a name='L1211'></a><a href='#L1211'>1211</a>
-<a name='L1212'></a><a href='#L1212'>1212</a>
-<a name='L1213'></a><a href='#L1213'>1213</a>
-<a name='L1214'></a><a href='#L1214'>1214</a>
-<a name='L1215'></a><a href='#L1215'>1215</a>
-<a name='L1216'></a><a href='#L1216'>1216</a>
-<a name='L1217'></a><a href='#L1217'>1217</a>
-<a name='L1218'></a><a href='#L1218'>1218</a>
-<a name='L1219'></a><a href='#L1219'>1219</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L1208'></a><a href='#L1208'>1208</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3017,15 +2995,10 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { ref, reactive, computed, onMounted } from 'vue'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { Plus, Edit, Delete, Star } from '@element-plus/icons-vue'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { testReportTemplateApi, type TestReportTemplateRequestDTO, type TestReportTemplateResponseDTO } from '@/api/testReportTemplate'</span>
+<span class="cstat-no" title="statement not covered" >import { logger } from '@/utils/logger'</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3059,14 +3032,15 @@
 <span class="cstat-no" title="statement not covered" >const formRef = ref&lt;FormInstance&gt;()</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >const formData = reactive&lt;TestReportTemplateRequestDTO&gt;({</span>
+<span class="cstat-no" title="statement not covered" >const formData = reactive&lt;TestReportTemplateRequestDTO &amp; { id?: number }&gt;({</span>
 <span class="cstat-no" title="statement not covered" >  templateName: '',</span>
 <span class="cstat-no" title="statement not covered" >  templateType: 'EXECUTION',</span>
 <span class="cstat-no" title="statement not covered" >  templateContent: '{}',</span>
 <span class="cstat-no" title="statement not covered" >  fileFormat: 'WORD',</span>
 <span class="cstat-no" title="statement not covered" >  templateDescription: '',</span>
 <span class="cstat-no" title="statement not covered" >  isActive: '1',</span>
-<span class="cstat-no" title="statement not covered" >  isDefault: '0'</span>
+<span class="cstat-no" title="statement not covered" >  isDefault: '0',</span>
+<span class="cstat-no" title="statement not covered" >  id: undefined</span>
 <span class="cstat-no" title="statement not covered" >})</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3187,7 +3161,7 @@
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    console.error('Failed to load templates', error)</span>
+<span class="cstat-no" title="statement not covered" >    logger.error('Failed to load templates', error)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    ElMessage.error('加载模板列表失败')</span>
@@ -3270,7 +3244,8 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // Store ID for update</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  ;(formData as any).id = row.id</span>
+<span class="cstat-no" title="statement not covered" >  formData.id = row.id</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  dialogVisible.value = true</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3296,12 +3271,8 @@
 <span class="cstat-no" title="statement not covered" >        viewDialogVisible.value = true</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    } catch(e) {</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        console.error(e)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >  } catch(e) {</span>
+<span class="cstat-no" title="statement not covered" >        logger.error(e)</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3359,13 +3330,9 @@
 <span class="cstat-no" title="statement not covered" >    } catch (e) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        // revert</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >      // revert</span>
 <span class="cstat-no" title="statement not covered" >        row.isActive = row.isActive === '1' ? '0' : '1'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        console.error(e)</span>
+<span class="cstat-no" title="statement not covered" >        logger.error(e)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -3428,7 +3395,7 @@
 <span class="cstat-no" title="statement not covered" >                if (isEdit.value) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                     await testReportTemplateApi.updateTemplate((formData as any).id, formData)</span>
+<span class="cstat-no" title="statement not covered" >                     await testReportTemplateApi.updateTemplate(formData.id!, formData)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                     ElMessage.success('更新成功')</span>
@@ -3455,7 +3422,7 @@
 <span class="cstat-no" title="statement not covered" >            } catch (e) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                console.error(e)</span>
+<span class="cstat-no" title="statement not covered" >      logger.error(e)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            } finally {</span>
@@ -3521,7 +3488,7 @@
 <span class="cstat-no" title="statement not covered" >    })</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    delete (formData as any).id</span>
+<span class="cstat-no" title="statement not covered" >    formData.id = undefined</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >}</span>
@@ -3724,7 +3691,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

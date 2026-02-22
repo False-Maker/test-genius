@@ -287,60 +287,60 @@
 <span class="cstat-no" title="statement not covered" >export const testReportTemplateApi = {</span>
 <span class="cstat-no" title="statement not covered" >    // Create template</span>
 <span class="cstat-no" title="statement not covered" >    createTemplate(data: TestReportTemplateRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestReportTemplateResponseDTO&gt;('/v1/test-report-templates', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestReportTemplateResponseDTO&gt;('/v1/test-report-templates', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get template list</span>
 <span class="cstat-no" title="statement not covered" >    getTemplateList(page: number = 0, size: number = 10) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, ApiResult&lt;PageResult&lt;TestReportTemplateResponseDTO&gt;&gt;&gt;('/v1/test-report-templates', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;ApiResult&lt;PageResult&lt;TestReportTemplateResponseDTO&gt;&gt;&gt;('/v1/test-report-templates', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get template detail</span>
 <span class="cstat-no" title="statement not covered" >    getTemplateById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get template by code</span>
 <span class="cstat-no" title="statement not covered" >    getTemplateByCode(templateCode: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/code/${templateCode}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/code/${templateCode}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Update template</span>
 <span class="cstat-no" title="statement not covered" >    updateTemplate(id: number, data: TestReportTemplateRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Delete template</span>
 <span class="cstat-no" title="statement not covered" >    deleteTemplate(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.delete&lt;any, void&gt;(`/v1/test-report-templates/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.delete&lt;void&gt;(`/v1/test-report-templates/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Toggle template status</span>
 <span class="cstat-no" title="statement not covered" >    toggleTemplateStatus(id: number, isActive: '0' | '1') {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}/status`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}/status`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Set default template</span>
 <span class="cstat-no" title="statement not covered" >    setDefaultTemplate(id: number, templateType: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}/default`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestReportTemplateResponseDTO&gt;(`/v1/test-report-templates/${id}/default`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { templateType }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get active templates by type</span>
 <span class="cstat-no" title="statement not covered" >    getActiveTemplatesByType(templateType: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportTemplateResponseDTO[]&gt;('/v1/test-report-templates/active', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportTemplateResponseDTO[]&gt;('/v1/test-report-templates/active', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { templateType }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get default template by type</span>
 <span class="cstat-no" title="statement not covered" >    getDefaultTemplateByType(templateType: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportTemplateResponseDTO&gt;('/v1/test-report-templates/default', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportTemplateResponseDTO&gt;('/v1/test-report-templates/default', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { templateType }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -352,7 +352,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

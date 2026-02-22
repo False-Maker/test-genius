@@ -227,6 +227,128 @@ class LLMService:
             )
             raise
     
+    def call_model_with_config(
+        self,
+        model_code: Optional[str],
+        prompt: str,
+        max_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        model_config: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        调用大模型生成内容，支持动态传入模型配置
+        
+        Args:
+            model_code: 模型代码（可选，如果为None则使用默认模型）
+            prompt: 提示词
+            max_tokens: 最大token数（可选，覆盖配置）
+            temperature: 温度参数（可选，覆盖配置）
+            model_config: 动态传入的模型配置字典（可选）
+            
+        Returns:
+            模型响应结果，包含：
+            - content: 响应内容
+            - model_code: 模型代码
+            - tokens_used: 使用的token数（如果可用）
+            - response_time: 响应时间（毫秒）
+        """
+        start_time = time.time()
+        
+        try:
+            # 如果未提供model_code，使用默认模型
+            if not model_code:
+                default_config = self.model_config_service.get_default_config()
+                if not default_config:
+                    raise ValueError("没有可用的模型配置，请先配置模型")
+                model_code = default_config.model_code
+                logger.info(f"使用默认模型: {model_code}")
+            
+            # 使用传入的model_config创建临时ModelConfig对象，或者使用数据库配置
+            if model_config is not None:
+                # 创建临时ModelConfig对象
+                temp_model_config = type('ModelConfig', (), {
+                    'model_code': model_code,
+                    'model_type': model_config.get('model_type', 'DEEPSEEK'),
+                    'api_endpoint': model_config.get('api_endpoint', ''),
+                    'api_key': model_config.get('api_key', ''),
+                    'model_version': model_config.get('model_version', ''),
+                    'max_tokens': max_tokens or model_config.get('max_tokens', 2000),
+                    'temperature': temperature if temperature is not None else 
+                        model_config.get('temperature', 0.7),
+                    'is_active': '1'
+                })()
+                
+                # 使用临时配置覆盖参数
+                max_tokens = temp_model_config.max_tokens
+                temperature = temp_model_config.temperature
+                
+                # 生成缓存键
+                cache_key = f"{model_code}_{max_tokens}_{temperature}"
+                
+                # 如果缓存中存在，直接返回
+                if cache_key in self._llm_cache:
+                    llm = self._llm_cache[cache_key]
+                else:
+                    # 创建新的LLM实例
+                    try:
+                        llm = ModelAdapterFactory.create_llm(
+                            model_type=temp_model_config.model_type,
+                            api_key=temp_model_config.api_key,
+                            api_endpoint=temp_model_config.api_endpoint,
+                            model_version=temp_model_config.model_version,
+                            max_tokens=max_tokens,
+                            temperature=temperature
+                        )
+                        
+                        # 缓存实例
+                        self._llm_cache[cache_key] = llm
+                        logger.info(f"创建LLM实例成功（动态配置）: {model_code}")
+                    except Exception as e:
+                        logger.error(f"创建LLM实例失败（动态配置）: {model_code}, 错误: {str(e)}")
+                        raise
+            else:
+                # 回退到现有的数据库查询逻辑
+                llm = self._get_llm_instance(model_code, max_tokens, temperature)
+            
+            # 调用模型（带重试）
+            content = self._call_with_retry(llm, prompt)
+            
+            # 计算响应时间
+            response_time = int((time.time() - start_time) * 1000)
+            
+            # 尝试获取token使用量（如果LLM支持）
+            tokens_used = None
+            if hasattr(llm, 'get_num_tokens'):
+                try:
+                    tokens_used = llm.get_num_tokens(prompt) + llm.get_num_tokens(content)
+                except Exception as e:
+                    logger.debug(f"获取token数量失败: {str(e)}")
+                    pass
+            
+            logger.info(
+                f"模型调用完成: {model_code}, "
+                f"响应时间: {response_time}ms, "
+                f"tokens: {tokens_used}"
+            )
+            
+            return {
+                "content": content,
+                "model_code": model_code,
+                "tokens_used": tokens_used,
+                "response_time": response_time
+            }
+            
+        except Exception as e:
+            response_time = int((time.time() - start_time) * 1000)
+            logger.error(
+                f"模型调用失败: {model_code}, "
+                f"耗时: {response_time}ms, "
+                f"错误: {str(e)}"
+            )
+            raise
+    
+
+    
     def batch_call(
         self,
         requests: List[Dict[str, Any]]

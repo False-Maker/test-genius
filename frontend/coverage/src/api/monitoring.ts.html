@@ -506,7 +506,7 @@
 <span class="cstat-no" title="statement not covered" >    appType?: string,</span>
 <span class="cstat-no" title="statement not covered" >    userId?: number</span>
 <span class="cstat-no" title="statement not covered" >  ) {</span>
-<span class="cstat-no" title="statement not covered" >    const params: any = { startTime, endTime }</span>
+<span class="cstat-no" title="statement not covered" >    const params: Record&lt;string, string | number&gt; = { startTime, endTime }</span>
 <span class="cstat-no" title="statement not covered" >    if (modelCode) params.modelCode = modelCode</span>
 <span class="cstat-no" title="statement not covered" >    if (appType) params.appType = appType</span>
 <span class="cstat-no" title="statement not covered" >    if (userId) params.userId = userId</span>
@@ -520,7 +520,7 @@
 <span class="cstat-no" title="statement not covered" >    modelCode?: string,</span>
 <span class="cstat-no" title="statement not covered" >    appType?: string</span>
 <span class="cstat-no" title="statement not covered" >  ) {</span>
-<span class="cstat-no" title="statement not covered" >    const params: any = { startTime, endTime }</span>
+<span class="cstat-no" title="statement not covered" >    const params: Record&lt;string, string&gt; = { startTime, endTime }</span>
 <span class="cstat-no" title="statement not covered" >    if (modelCode) params.modelCode = modelCode</span>
 <span class="cstat-no" title="statement not covered" >    if (appType) params.appType = appType</span>
 <span class="cstat-no" title="statement not covered" >    return request.get&lt;ResponseTimeStats&gt;('/v1/monitoring/response-time', { params })</span>
@@ -533,7 +533,7 @@
 <span class="cstat-no" title="statement not covered" >    modelCode?: string,</span>
 <span class="cstat-no" title="statement not covered" >    appType?: string</span>
 <span class="cstat-no" title="statement not covered" >  ) {</span>
-<span class="cstat-no" title="statement not covered" >    const params: any = { startTime, endTime }</span>
+<span class="cstat-no" title="statement not covered" >    const params: Record&lt;string, string&gt; = { startTime, endTime }</span>
 <span class="cstat-no" title="statement not covered" >    if (modelCode) params.modelCode = modelCode</span>
 <span class="cstat-no" title="statement not covered" >    if (appType) params.appType = appType</span>
 <span class="cstat-no" title="statement not covered" >    return request.get&lt;SuccessRateStats&gt;('/v1/monitoring/success-rate', { params })</span>
@@ -546,7 +546,7 @@
 <span class="cstat-no" title="statement not covered" >    modelCode?: string,</span>
 <span class="cstat-no" title="statement not covered" >    appType?: string</span>
 <span class="cstat-no" title="statement not covered" >  ) {</span>
-<span class="cstat-no" title="statement not covered" >    const params: any = { startTime, endTime }</span>
+<span class="cstat-no" title="statement not covered" >    const params: Record&lt;string, string&gt; = { startTime, endTime }</span>
 <span class="cstat-no" title="statement not covered" >    if (modelCode) params.modelCode = modelCode</span>
 <span class="cstat-no" title="statement not covered" >    if (appType) params.appType = appType</span>
 <span class="cstat-no" title="statement not covered" >    return request.get&lt;TokenUsageStats&gt;('/v1/monitoring/token-usage', { params })</span>
@@ -560,7 +560,7 @@
 <span class="cstat-no" title="statement not covered" >    appType?: string,</span>
 <span class="cstat-no" title="statement not covered" >    userId?: number</span>
 <span class="cstat-no" title="statement not covered" >  ) {</span>
-<span class="cstat-no" title="statement not covered" >    const params: any = { startTime, endTime }</span>
+<span class="cstat-no" title="statement not covered" >    const params: Record&lt;string, string | number&gt; = { startTime, endTime }</span>
 <span class="cstat-no" title="statement not covered" >    if (modelCode) params.modelCode = modelCode</span>
 <span class="cstat-no" title="statement not covered" >    if (appType) params.appType = appType</span>
 <span class="cstat-no" title="statement not covered" >    if (userId) params.userId = userId</span>
@@ -590,7 +590,7 @@
 <span class="cstat-no" title="statement not covered" >    modelCode?: string,</span>
 <span class="cstat-no" title="statement not covered" >    appType?: string</span>
 <span class="cstat-no" title="statement not covered" >  ) {</span>
-<span class="cstat-no" title="statement not covered" >    const params: any = { startTime, endTime, interval, metric }</span>
+<span class="cstat-no" title="statement not covered" >    const params: Record&lt;string, string&gt; = { startTime, endTime, interval, metric }</span>
 <span class="cstat-no" title="statement not covered" >    if (modelCode) params.modelCode = modelCode</span>
 <span class="cstat-no" title="statement not covered" >    if (appType) params.appType = appType</span>
 <span class="cstat-no" title="statement not covered" >    return request.get&lt;TimeSeriesData&gt;('/v1/monitoring/time-series', { params })</span>
@@ -598,7 +598,7 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 获取模型性能对比统计</span>
 <span class="cstat-no" title="statement not covered" >  getModelPerformanceStats(startTime: string, endTime: string) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any[]&gt;('/v1/monitoring/model-performance', {</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;Record&lt;string, unknown&gt;[]&gt;('/v1/monitoring/model-performance', {</span>
 <span class="cstat-no" title="statement not covered" >      params: { startTime, endTime }</span>
 <span class="cstat-no" title="statement not covered" >    })</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
@@ -610,7 +610,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

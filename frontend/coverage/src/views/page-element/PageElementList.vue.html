@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/648</span>
+                <span class='fraction'>0/649</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/648</span>
+                <span class='fraction'>0/649</span>
             </div>
         
             
@@ -711,7 +711,8 @@
 <a name='L646'></a><a href='#L646'>646</a>
 <a name='L647'></a><a href='#L647'>647</a>
 <a name='L648'></a><a href='#L648'>648</a>
-<a name='L649'></a><a href='#L649'>649</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L649'></a><a href='#L649'>649</a>
+<a name='L650'></a><a href='#L650'>650</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1359,7 +1360,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >&lt;template&gt;</span></span></span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >&lt;template&gt;<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
 <span class="cstat-no" title="statement not covered" >  &lt;div class="page-element-list"&gt;</span>
 <span class="cstat-no" title="statement not covered" >    &lt;div class="page-header"&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div class="header-left"&gt;</span>
@@ -1776,6 +1778,7 @@
 <span class="cstat-no" title="statement not covered" >import { ElMessage, type FormInstance, type FormRules } from 'element-plus'</span>
 <span class="cstat-no" title="statement not covered" >import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'</span>
 <span class="cstat-no" title="statement not covered" >import { pageElementApi, type PageElementInfoRequestDTO, type PageElementInfoResponseDTO } from '@/api/pageElement'</span>
+<span class="cstat-no" title="statement not covered" >import { logger } from '@/utils/logger'</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >// 响应式数据</span>
 <span class="cstat-no" title="statement not covered" >const loading = ref(false)</span>
@@ -1832,11 +1835,11 @@
 <span class="cstat-no" title="statement not covered" >      searchForm.elementType || undefined</span>
 <span class="cstat-no" title="statement not covered" >    )</span>
 <span class="cstat-no" title="statement not covered" >    if (response.data) {</span>
-<span class="cstat-no" title="statement not covered" >      elementList.value = response.data.content || []</span>
-<span class="cstat-no" title="statement not covered" >      pagination.total = response.data.totalElements || 0</span>
+<span class="cstat-no" title="statement not covered" >      elementList.value = response.data?.content || []</span>
+<span class="cstat-no" title="statement not covered" >      pagination.total = response.data?.totalElements || 0</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error('Failed to load element list', error)</span>
+<span class="cstat-no" title="statement not covered" >    logger.error('Failed to load element list', error)</span>
 <span class="cstat-no" title="statement not covered" >    ElMessage.error('加载元素列表失败')</span>
 <span class="cstat-no" title="statement not covered" >  } finally {</span>
 <span class="cstat-no" title="statement not covered" >    loading.value = false</span>
@@ -1896,7 +1899,7 @@
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >        loadElementList()</span>
 <span class="cstat-no" title="statement not covered" >    } catch(e) {</span>
-<span class="cstat-no" title="statement not covered" >        console.error(e)</span>
+<span class="cstat-no" title="statement not covered" >        logger.error(e)</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -1916,7 +1919,7 @@
 <span class="cstat-no" title="statement not covered" >                dialogVisible.value = false</span>
 <span class="cstat-no" title="statement not covered" >                loadElementList()</span>
 <span class="cstat-no" title="statement not covered" >            } catch (e) {</span>
-<span class="cstat-no" title="statement not covered" >                console.error(e)</span>
+<span class="cstat-no" title="statement not covered" >                logger.error(e)</span>
 <span class="cstat-no" title="statement not covered" >            } finally {</span>
 <span class="cstat-no" title="statement not covered" >                submitLoading.value = false</span>
 <span class="cstat-no" title="statement not covered" >            }</span>
@@ -2014,7 +2017,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

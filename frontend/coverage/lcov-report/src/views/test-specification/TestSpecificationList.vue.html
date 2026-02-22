@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1394</span>
+                <span class='fraction'>0/1383</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1394</span>
+                <span class='fraction'>0/1383</span>
             </div>
         
             
@@ -1446,29 +1446,7 @@
 <a name='L1381'></a><a href='#L1381'>1381</a>
 <a name='L1382'></a><a href='#L1382'>1382</a>
 <a name='L1383'></a><a href='#L1383'>1383</a>
-<a name='L1384'></a><a href='#L1384'>1384</a>
-<a name='L1385'></a><a href='#L1385'>1385</a>
-<a name='L1386'></a><a href='#L1386'>1386</a>
-<a name='L1387'></a><a href='#L1387'>1387</a>
-<a name='L1388'></a><a href='#L1388'>1388</a>
-<a name='L1389'></a><a href='#L1389'>1389</a>
-<a name='L1390'></a><a href='#L1390'>1390</a>
-<a name='L1391'></a><a href='#L1391'>1391</a>
-<a name='L1392'></a><a href='#L1392'>1392</a>
-<a name='L1393'></a><a href='#L1393'>1393</a>
-<a name='L1394'></a><a href='#L1394'>1394</a>
-<a name='L1395'></a><a href='#L1395'>1395</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L1384'></a><a href='#L1384'>1384</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3545,15 +3523,10 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { ref, reactive, onMounted } from 'vue'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { ElMessage, type FormInstance, type FormRules } from 'element-plus'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { Plus, Search, Refresh, Edit, Delete, View } from '@element-plus/icons-vue'</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >import { testSpecificationApi, type TestSpecificationRequestDTO, type TestSpecificationResponseDTO } from '@/api/testSpecification'</span>
+<span class="cstat-no" title="statement not covered" >import { logger } from '@/utils/logger'</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3671,14 +3644,9 @@
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
+<span class="cstat-no" title="statement not covered" >} catch (error) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    console.error('Failed to load specification list', error)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    ElMessage.error('加载规约列表失败')</span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >    logger.error('Failed to load specification list', error)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  } finally {</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3965,10 +3933,9 @@
 <span class="cstat-no" title="statement not covered" >                loadSpecList()</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >            } catch (e) {</span>
+<span class="cstat-no" title="statement not covered" >          } catch (e) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                console.error(e)</span>
+<span class="cstat-no" title="statement not covered" >                logger.error(e)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >            } finally {</span>
@@ -4252,7 +4219,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

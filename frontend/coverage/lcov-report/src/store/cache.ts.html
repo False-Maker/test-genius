@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.13% </span>
+                <span class="strong">87.87% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>208/236</span>
+                <span class='fraction'>203/231</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.13% </span>
+                <span class="strong">87.87% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>208/236</span>
+                <span class='fraction'>203/231</span>
             </div>
         
             
@@ -295,12 +295,8 @@
 <a name='L230'></a><a href='#L230'>230</a>
 <a name='L231'></a><a href='#L231'>231</a>
 <a name='L232'></a><a href='#L232'>232</a>
-<a name='L233'></a><a href='#L233'>233</a>
-<a name='L234'></a><a href='#L234'>234</a>
-<a name='L235'></a><a href='#L235'>235</a>
-<a name='L236'></a><a href='#L236'>236</a>
-<a name='L237'></a><a href='#L237'>237</a>
-<a name='L238'></a><a href='#L238'>238</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L233'></a><a href='#L233'>233</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -351,9 +347,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -417,9 +410,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -545,14 +535,15 @@ import type { PromptTemplate } from '@/api/promptTemplate'
 import { requirementApi } from '@/api/requirement'
 import { commonApi } from '@/api/common'
 import { promptTemplateApi } from '@/api/promptTemplate'
+import { cacheConfig } from '@/config/cache'
 &nbsp;
 /**
  * 缓存数据Store
  * 管理需求列表、测试分层、测试方法、模板列表、模型配置等缓存数据
  */
 export const useCacheStore = defineStore('cache', () =&gt; {
-  // 缓存过期时间（毫秒）- 默认5分钟
-  const CACHE_EXPIRE_TIME = 5 * 60 * 1000
+  // 使用配置文件中的缓存过期时间
+  const CACHE_EXPIRE_TIME = cacheConfig.expireTime
 &nbsp;
   // 状态
   const requirementList = ref&lt;TestRequirement[]&gt;([])
@@ -591,11 +582,8 @@ export const useCacheStore = defineStore('cache', () =&gt; {
 &nbsp;
     loading.value.requirementList = true
     try {
-      const response = await requirementApi.getRequirementList({ page: 0, size: 1000 })
-      if (response.data) {
-        requirementList.value = response.data.<span class="branch-0 cbranch-no" title="branch not covered" >content || []</span>
-        requirementListTime.value = Date.now()
-      }
+    const response = await requirementApi.getRequirementList({ page: 0, size: 1000 })
+      requirementList.value = response.data?.<span class="branch-0 cbranch-no" title="branch not covered" >content || []</span>
       return requirementList.value
 <span class="branch-0 cbranch-no" title="branch not covered" >    } catch (error) {</span>
 <span class="cstat-no" title="statement not covered" >      console.error('加载需求列表失败:', error)</span>
@@ -657,14 +645,11 @@ export const useCacheStore = defineStore('cache', () =&gt; {
 &nbsp;
     loading.value.templateList = true
     try {
-      const response = await promptTemplateApi.getTemplateList({ page: 0, size: 1000 })
-      if (response.data) {
-        // 只缓存启用的模板
-        templateList.value = (response.data.<span class="branch-0 cbranch-no" title="branch not covered" >content || []).f</span>ilter(
-          (t: PromptTemplate) =&gt; t.isActive === '1'
-        )
-        templateListTime.value = Date.now()
-      }
+  const response = await promptTemplateApi.getTemplateList({ page: 0, size: 1000 })
+      // 只缓存启用的模板
+      templateList.value = (response.data?.<span class="branch-0 cbranch-no" title="branch not covered" >content || []).f</span>ilter(
+        (t: PromptTemplate) =&gt; t.isActive === '1'
+      )
       return templateList.value
 <span class="branch-0 cbranch-no" title="branch not covered" >    } catch (error) {</span>
 <span class="cstat-no" title="statement not covered" >      console.error('加载提示词模板列表失败:', error)</span>
@@ -781,7 +766,7 @@ export const useCacheStore = defineStore('cache', () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

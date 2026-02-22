@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1560</span>
+                <span class='fraction'>0/1556</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1560</span>
+                <span class='fraction'>0/1556</span>
             </div>
         
             
@@ -1619,11 +1619,7 @@
 <a name='L1554'></a><a href='#L1554'>1554</a>
 <a name='L1555'></a><a href='#L1555'>1555</a>
 <a name='L1556'></a><a href='#L1556'>1556</a>
-<a name='L1557'></a><a href='#L1557'>1557</a>
-<a name='L1558'></a><a href='#L1558'>1558</a>
-<a name='L1559'></a><a href='#L1559'>1559</a>
-<a name='L1560'></a><a href='#L1560'>1560</a>
-<a name='L1561'></a><a href='#L1561'>1561</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L1557'></a><a href='#L1557'>1557</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3179,11 +3175,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >&lt;template&gt;</span></span></span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >&lt;template&gt;<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
 <span class="cstat-no" title="statement not covered" >  &lt;div class="data-document-generation"&gt;</span>
 <span class="cstat-no" title="statement not covered" >    &lt;el-card&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;template #header&gt;</span>
@@ -4046,7 +4038,7 @@
 <span class="cstat-no" title="statement not covered" >    const res = await requirementApi.getRequirementList({ page: 0, size: 1000 })</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    requirementList.value = res.data.content || []</span>
+<span class="cstat-no" title="statement not covered" >    requirementList.value = res.data?.content || []</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
@@ -4085,7 +4077,7 @@
 <span class="cstat-no" title="statement not covered" >    const res = await testCaseApi.getTestCaseList({ page: 0, size: 1000 })</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    testCaseList.value = res.data.content || []</span>
+<span class="cstat-no" title="statement not covered" >    testCaseList.value = res.data?.content || []</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
@@ -4375,9 +4367,8 @@
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const blob = await dataDocumentApi.exportEquivalenceTableToExcel(equivalenceResult.value)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >const response = await dataDocumentApi.exportEquivalenceTableToExcel(equivalenceResult.value)</span>
+<span class="cstat-no" title="statement not covered" >    const blob = response.data</span>
 <span class="cstat-no" title="statement not covered" >    downloadFile(blob, `${equivalenceResult.value.title || '等价类表'}.xlsx`)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -4411,9 +4402,8 @@
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const blob = await dataDocumentApi.exportEquivalenceTableToWord(equivalenceResult.value)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >const response = await dataDocumentApi.exportEquivalenceTableToWord(equivalenceResult.value)</span>
+<span class="cstat-no" title="statement not covered" >    const blob = response.data</span>
 <span class="cstat-no" title="statement not covered" >    downloadFile(blob, `${equivalenceResult.value.title || '等价类表'}.docx`)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -4447,9 +4437,8 @@
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const blob = await dataDocumentApi.exportOrthogonalTableToExcel(orthogonalResult.value)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >const response = await dataDocumentApi.exportOrthogonalTableToExcel(orthogonalResult.value)</span>
+<span class="cstat-no" title="statement not covered" >    const blob = response.data</span>
 <span class="cstat-no" title="statement not covered" >    downloadFile(blob, `${orthogonalResult.value.title || '正交表'}.xlsx`)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -4483,9 +4472,8 @@
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const blob = await dataDocumentApi.exportOrthogonalTableToWord(orthogonalResult.value)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >const response = await dataDocumentApi.exportOrthogonalTableToWord(orthogonalResult.value)</span>
+<span class="cstat-no" title="statement not covered" >    const blob = response.data</span>
 <span class="cstat-no" title="statement not covered" >    downloadFile(blob, `${orthogonalResult.value.title || '正交表'}.docx`)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -4750,7 +4738,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

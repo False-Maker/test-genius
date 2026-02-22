@@ -1,9 +1,9 @@
 {
-  "active_plan": "D:\\Demo\\test-genius\\.sisyphus\\plans\\phase-4-test-coverage.md",
-  "started_at": "2026-02-21T13:44:31.012Z",
+  "active_plan": "D:\\Demo\\test-genius\\.sisyphus\\plans\\fix-401-auth-error.md",
+  "started_at": "2026-02-22T15:55:35.821Z",
   "session_ids": [
-    "ses_37f8e2636ffe3wFSY0kHHVdBgt"
+    "ses_37a6f004bffeaQhVgToXQw84y0"
   ],
-  "plan_name": "phase-4-test-coverage",
+  "plan_name": "fix-401-auth-error",
   "agent": "atlas"
 }

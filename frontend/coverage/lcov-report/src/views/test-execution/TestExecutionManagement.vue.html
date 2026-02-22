@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/4294</span>
+                <span class='fraction'>0/4280</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/4294</span>
+                <span class='fraction'>0/4280</span>
             </div>
         
             
@@ -4343,35 +4343,7 @@
 <a name='L4278'></a><a href='#L4278'>4278</a>
 <a name='L4279'></a><a href='#L4279'>4279</a>
 <a name='L4280'></a><a href='#L4280'>4280</a>
-<a name='L4281'></a><a href='#L4281'>4281</a>
-<a name='L4282'></a><a href='#L4282'>4282</a>
-<a name='L4283'></a><a href='#L4283'>4283</a>
-<a name='L4284'></a><a href='#L4284'>4284</a>
-<a name='L4285'></a><a href='#L4285'>4285</a>
-<a name='L4286'></a><a href='#L4286'>4286</a>
-<a name='L4287'></a><a href='#L4287'>4287</a>
-<a name='L4288'></a><a href='#L4288'>4288</a>
-<a name='L4289'></a><a href='#L4289'>4289</a>
-<a name='L4290'></a><a href='#L4290'>4290</a>
-<a name='L4291'></a><a href='#L4291'>4291</a>
-<a name='L4292'></a><a href='#L4292'>4292</a>
-<a name='L4293'></a><a href='#L4293'>4293</a>
-<a name='L4294'></a><a href='#L4294'>4294</a>
-<a name='L4295'></a><a href='#L4295'>4295</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L4281'></a><a href='#L4281'>4281</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -11136,15 +11108,8 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      taskList.value = response.data.content || []</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      pagination.total = response.data.totalElements || 0</span>
+<span class="cstat-no" title="statement not covered" >taskList.value = response.data?.content || []</span>
+<span class="cstat-no" title="statement not covered" >      pagination.total = response.data?.totalElements || 0</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -11296,15 +11261,8 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      recordList.value = response.data.content || []</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      recordPagination.total = response.data.totalElements || 0</span>
+<span class="cstat-no" title="statement not covered" >recordList.value = response.data?.content || []</span>
+<span class="cstat-no" title="statement not covered" >      recordPagination.total = response.data?.totalElements || 0</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -12952,7 +12910,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

@@ -317,63 +317,63 @@
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >export const testReportApi = {</span>
-<span class="cstat-no" title="statement not covered" >    // Generate report</span>
+<span class="cstat-no" title="statement not covered" >// Generate report</span>
 <span class="cstat-no" title="statement not covered" >    generateReport(data: TestReportRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestReportResponseDTO&gt;('/v1/test-reports', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestReportResponseDTO&gt;('/v1/test-reports', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get report list</span>
 <span class="cstat-no" title="statement not covered" >    getReportList(page: number = 0, size: number = 10) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, ApiResult&lt;PageResult&lt;TestReportResponseDTO&gt;&gt;&gt;('/v1/test-reports', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;ApiResult&lt;PageResult&lt;TestReportResponseDTO&gt;&gt;&gt;('/v1/test-reports', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get report detail</span>
 <span class="cstat-no" title="statement not covered" >    getReportById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportResponseDTO&gt;(`/v1/test-reports/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportResponseDTO&gt;(`/v1/test-reports/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get report by code</span>
 <span class="cstat-no" title="statement not covered" >    getReportByCode(reportCode: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportResponseDTO&gt;(`/v1/test-reports/code/${reportCode}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportResponseDTO&gt;(`/v1/test-reports/code/${reportCode}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get reports by requirement ID</span>
 <span class="cstat-no" title="statement not covered" >    getReportsByRequirementId(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportResponseDTO[]&gt;(`/v1/test-reports/requirement/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportResponseDTO[]&gt;(`/v1/test-reports/requirement/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get reports by execution task ID</span>
 <span class="cstat-no" title="statement not covered" >    getReportsByExecutionTaskId(executionTaskId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestReportResponseDTO[]&gt;(`/v1/test-reports/execution-task/${executionTaskId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestReportResponseDTO[]&gt;(`/v1/test-reports/execution-task/${executionTaskId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Update report</span>
 <span class="cstat-no" title="statement not covered" >    updateReport(id: number, data: TestReportRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestReportResponseDTO&gt;(`/v1/test-reports/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestReportResponseDTO&gt;(`/v1/test-reports/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Publish report</span>
 <span class="cstat-no" title="statement not covered" >    publishReport(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestReportResponseDTO&gt;(`/v1/test-reports/${id}/publish`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestReportResponseDTO&gt;(`/v1/test-reports/${id}/publish`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Delete report</span>
 <span class="cstat-no" title="statement not covered" >    deleteReport(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.delete&lt;any, void&gt;(`/v1/test-reports/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.delete&lt;void&gt;(`/v1/test-reports/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Export report</span>
 <span class="cstat-no" title="statement not covered" >    exportReport(reportCode: string, format: 'WORD' | 'PDF' | 'EXCEL') {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;(`/v1/test-reports/${reportCode}/export`, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;(`/v1/test-reports/${reportCode}/export`, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { format }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Summarize execution results</span>
 <span class="cstat-no" title="statement not covered" >    summarizeExecutionResults(requirementId?: number, executionTaskId?: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;('/v1/test-reports/summarize', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;('/v1/test-reports/summarize', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId, executionTaskId }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -385,7 +385,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

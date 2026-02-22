@@ -465,7 +465,7 @@
 <span class="cstat-no" title="statement not covered" >  agentName: string</span>
 <span class="cstat-no" title="statement not covered" >  agentType: string // TEST_DESIGN_ASSISTANT, CASE_OPTIMIZATION, CUSTOM</span>
 <span class="cstat-no" title="statement not covered" >  agentDescription?: string</span>
-<span class="cstat-no" title="statement not covered" >  agentConfig?: any</span>
+<span class="cstat-no" title="statement not covered" >  agentConfig?: Record&lt;string, unknown&gt;</span>
 <span class="cstat-no" title="statement not covered" >  systemPrompt?: string</span>
 <span class="cstat-no" title="statement not covered" >  maxIterations?: number</span>
 <span class="cstat-no" title="statement not covered" >  maxTokens?: number</span>
@@ -484,7 +484,7 @@
 <span class="cstat-no" title="statement not covered" >  userId?: number</span>
 <span class="cstat-no" title="statement not covered" >  userName?: string</span>
 <span class="cstat-no" title="statement not covered" >  sessionTitle?: string</span>
-<span class="cstat-no" title="statement not covered" >  contextData?: any</span>
+<span class="cstat-no" title="statement not covered" >  contextData?: Record&lt;string, unknown&gt;</span>
 <span class="cstat-no" title="statement not covered" >  status?: string // ACTIVE, CLOSED, EXPIRED</span>
 <span class="cstat-no" title="statement not covered" >  totalTokens?: number</span>
 <span class="cstat-no" title="statement not covered" >  totalIterations?: number</span>
@@ -499,8 +499,8 @@
 <span class="cstat-no" title="statement not covered" >  messageType: string // USER, ASSISTANT, TOOL, SYSTEM</span>
 <span class="cstat-no" title="statement not covered" >  role: string // user, assistant, tool, system</span>
 <span class="cstat-no" title="statement not covered" >  content: string</span>
-<span class="cstat-no" title="statement not covered" >  toolCalls?: any</span>
-<span class="cstat-no" title="statement not covered" >  toolResults?: any</span>
+<span class="cstat-no" title="statement not covered" >  toolCalls?: unknown[]</span>
+<span class="cstat-no" title="statement not covered" >  toolResults?: unknown[]</span>
 <span class="cstat-no" title="statement not covered" >  tokensUsed?: number</span>
 <span class="cstat-no" title="statement not covered" >  responseTime?: number</span>
 <span class="cstat-no" title="statement not covered" >  modelCode?: string</span>
@@ -514,9 +514,9 @@
 <span class="cstat-no" title="statement not covered" >  toolName: string</span>
 <span class="cstat-no" title="statement not covered" >  toolType: string // TEST_RELATED, GENERAL, CUSTOM</span>
 <span class="cstat-no" title="statement not covered" >  toolDescription: string</span>
-<span class="cstat-no" title="statement not covered" >  toolSchema?: any</span>
+<span class="cstat-no" title="statement not covered" >  toolSchema?: Record&lt;string, unknown&gt;</span>
 <span class="cstat-no" title="statement not covered" >  toolImplementation?: string</span>
-<span class="cstat-no" title="statement not covered" >  toolConfig?: any</span>
+<span class="cstat-no" title="statement not covered" >  toolConfig?: Record&lt;string, unknown&gt;</span>
 <span class="cstat-no" title="statement not covered" >  isBuiltin?: string</span>
 <span class="cstat-no" title="statement not covered" >  isActive?: string</span>
 <span class="cstat-no" title="statement not covered" >  permissionLevel?: string</span>
@@ -530,42 +530,42 @@
 <span class="cstat-no" title="statement not covered" >export const agentApi = {</span>
 <span class="cstat-no" title="statement not covered" >  // 创建Agent</span>
 <span class="cstat-no" title="statement not covered" >  createAgent(data: Agent) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.post&lt;any, ApiResult&lt;Agent&gt;&gt;('/v1/agents', data)</span>
+<span class="cstat-no" title="statement not covered" >    return request.post&lt;ApiResult&lt;Agent&gt;&gt;('/v1/agents', data)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 更新Agent</span>
 <span class="cstat-no" title="statement not covered" >  updateAgent(id: number, data: Agent) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.put&lt;any, ApiResult&lt;Agent&gt;&gt;(`/v1/agents/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >    return request.put&lt;ApiResult&lt;Agent&gt;&gt;(`/v1/agents/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 根据ID查询Agent</span>
 <span class="cstat-no" title="statement not covered" >  getAgentById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;Agent&gt;&gt;(`/v1/agents/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;Agent&gt;&gt;(`/v1/agents/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 根据编码查询Agent</span>
 <span class="cstat-no" title="statement not covered" >  getAgentByCode(code: string) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;Agent&gt;&gt;(`/v1/agents/code/${code}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;Agent&gt;&gt;(`/v1/agents/code/${code}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 查询所有启用的Agent</span>
 <span class="cstat-no" title="statement not covered" >  getAllActiveAgents() {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;Agent[]&gt;&gt;('/v1/agents/active')</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;Agent[]&gt;&gt;('/v1/agents/active')</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 查询指定类型的Agent</span>
 <span class="cstat-no" title="statement not covered" >  getAgentsByType(type: string) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;Agent[]&gt;&gt;(`/v1/agents/type/${type}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;Agent[]&gt;&gt;(`/v1/agents/type/${type}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 删除Agent</span>
 <span class="cstat-no" title="statement not covered" >  deleteAgent(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.delete&lt;any, ApiResult&lt;void&gt;&gt;(`/v1/agents/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.delete&lt;ApiResult&lt;void&gt;&gt;(`/v1/agents/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 启用/禁用Agent</span>
 <span class="cstat-no" title="statement not covered" >  toggleAgentActive(id: number, active: boolean) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.put&lt;any, ApiResult&lt;Agent&gt;&gt;(`/v1/agents/${id}/active`, null, {</span>
+<span class="cstat-no" title="statement not covered" >    return request.put&lt;ApiResult&lt;Agent&gt;&gt;(`/v1/agents/${id}/active`, null, {</span>
 <span class="cstat-no" title="statement not covered" >      params: { active }</span>
 <span class="cstat-no" title="statement not covered" >    })</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
@@ -573,50 +573,50 @@
 <span class="cstat-no" title="statement not covered" >  // Agent Session API</span>
 <span class="cstat-no" title="statement not covered" >  // 创建会话</span>
 <span class="cstat-no" title="statement not covered" >  createSession(data: AgentSession) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.post&lt;any, ApiResult&lt;AgentSession&gt;&gt;('/v1/agent-sessions', data)</span>
+<span class="cstat-no" title="statement not covered" >    return request.post&lt;ApiResult&lt;AgentSession&gt;&gt;('/v1/agent-sessions', data)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 根据ID查询会话</span>
 <span class="cstat-no" title="statement not covered" >  getSessionById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentSession&gt;&gt;(`/v1/agent-sessions/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentSession&gt;&gt;(`/v1/agent-sessions/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 根据编码查询会话</span>
 <span class="cstat-no" title="statement not covered" >  getSessionByCode(code: string) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentSession&gt;&gt;(`/v1/agent-sessions/code/${code}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentSession&gt;&gt;(`/v1/agent-sessions/code/${code}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 查询Agent的所有会话</span>
 <span class="cstat-no" title="statement not covered" >  getSessionsByAgentId(agentId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentSession[]&gt;&gt;(`/v1/agent-sessions/agent/${agentId}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentSession[]&gt;&gt;(`/v1/agent-sessions/agent/${agentId}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 查询用户的所有会话</span>
 <span class="cstat-no" title="statement not covered" >  getSessionsByUserId(userId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentSession[]&gt;&gt;(`/v1/agent-sessions/user/${userId}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentSession[]&gt;&gt;(`/v1/agent-sessions/user/${userId}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 查询Agent和用户的所有会话</span>
 <span class="cstat-no" title="statement not covered" >  getSessionsByAgentIdAndUserId(agentId: number, userId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentSession[]&gt;&gt;(</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentSession[]&gt;&gt;(</span>
 <span class="cstat-no" title="statement not covered" >      `/v1/agent-sessions/agent/${agentId}/user/${userId}`</span>
 <span class="cstat-no" title="statement not covered" >    )</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 关闭会话</span>
 <span class="cstat-no" title="statement not covered" >  closeSession(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.put&lt;any, ApiResult&lt;AgentSession&gt;&gt;(`/v1/agent-sessions/${id}/close`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.put&lt;ApiResult&lt;AgentSession&gt;&gt;(`/v1/agent-sessions/${id}/close`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 删除会话</span>
 <span class="cstat-no" title="statement not covered" >  deleteSession(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.delete&lt;any, ApiResult&lt;void&gt;&gt;(`/v1/agent-sessions/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.delete&lt;ApiResult&lt;void&gt;&gt;(`/v1/agent-sessions/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // Agent Message API (从Python服务)</span>
 <span class="cstat-no" title="statement not covered" >  // Agent对话</span>
 <span class="cstat-no" title="statement not covered" >  chatWithAgent(sessionId: number, message: string) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.post&lt;any, ApiResult&lt;any&gt;&gt;('/api/v1/agent/chat', {</span>
+<span class="cstat-no" title="statement not covered" >    return request.post&lt;ApiResult&lt;unknown&gt;&gt;('/api/v1/agent/chat', {</span>
 <span class="cstat-no" title="statement not covered" >      session_id: sessionId,</span>
 <span class="cstat-no" title="statement not covered" >      message: message</span>
 <span class="cstat-no" title="statement not covered" >    })</span>
@@ -624,28 +624,28 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 获取会话历史</span>
 <span class="cstat-no" title="statement not covered" >  getSessionHistory(sessionId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentMessage[]&gt;&gt;(`/api/v1/agent/sessions/${sessionId}/history`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentMessage[]&gt;&gt;(`/api/v1/agent/sessions/${sessionId}/history`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // Agent Tool API</span>
 <span class="cstat-no" title="statement not covered" >  // 获取所有可用工具</span>
 <span class="cstat-no" title="statement not covered" >  getAllTools() {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentTool[]&gt;&gt;('/api/v1/agent/tools')</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentTool[]&gt;&gt;('/api/v1/agent/tools')</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 获取Agent可用的工具</span>
 <span class="cstat-no" title="statement not covered" >  getAgentTools(agentId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.get&lt;any, ApiResult&lt;AgentTool[]&gt;&gt;(`/v1/agent-tools/${agentId}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.get&lt;ApiResult&lt;AgentTool[]&gt;&gt;(`/v1/agent-tools/${agentId}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 为Agent添加工具</span>
 <span class="cstat-no" title="statement not covered" >  addAgentTool(agentId: number, toolId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.post&lt;any, ApiResult&lt;void&gt;&gt;(`/v1/agent-tools/${agentId}/${toolId}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.post&lt;ApiResult&lt;void&gt;&gt;(`/v1/agent-tools/${agentId}/${toolId}`)</span>
 <span class="cstat-no" title="statement not covered" >  },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // 移除Agent工具</span>
 <span class="cstat-no" title="statement not covered" >  removeAgentTool(agentId: number, toolId: number) {</span>
-<span class="cstat-no" title="statement not covered" >    return request.delete&lt;any, ApiResult&lt;void&gt;&gt;(`/v1/agent-tools/${agentId}/${toolId}`)</span>
+<span class="cstat-no" title="statement not covered" >    return request.delete&lt;ApiResult&lt;void&gt;&gt;(`/v1/agent-tools/${agentId}/${toolId}`)</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -658,7 +658,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

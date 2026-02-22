@@ -259,46 +259,46 @@
 <span class="cstat-no" title="statement not covered" >export const uiScriptTemplateApi = {</span>
 <span class="cstat-no" title="statement not covered" >    // Create template</span>
 <span class="cstat-no" title="statement not covered" >    createTemplate(data: UIScriptTemplateRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, UIScriptTemplateResponseDTO&gt;('/v1/ui-script-templates', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;UIScriptTemplateResponseDTO&gt;('/v1/ui-script-templates', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get template list</span>
 <span class="cstat-no" title="statement not covered" >    getTemplateList(page: number = 0, size: number = 10, templateName?: string, templateType?: string, scriptLanguage?: string, isActive?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, ApiResult&lt;PageResult&lt;UIScriptTemplateResponseDTO&gt;&gt;&gt;('/v1/ui-script-templates', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;ApiResult&lt;PageResult&lt;UIScriptTemplateResponseDTO&gt;&gt;&gt;('/v1/ui-script-templates', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size, templateName, templateType, scriptLanguage, isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get template by ID</span>
 <span class="cstat-no" title="statement not covered" >    getTemplateById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get template by code</span>
 <span class="cstat-no" title="statement not covered" >    getTemplateByCode(templateCode: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/code/${templateCode}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/code/${templateCode}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Update template</span>
 <span class="cstat-no" title="statement not covered" >    updateTemplate(id: number, data: UIScriptTemplateRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Delete template</span>
 <span class="cstat-no" title="statement not covered" >    deleteTemplate(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.delete&lt;any, void&gt;(`/v1/ui-script-templates/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.delete&lt;void&gt;(`/v1/ui-script-templates/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get active templates by type and language</span>
 <span class="cstat-no" title="statement not covered" >    getActiveTemplates(templateType?: string, scriptLanguage?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, UIScriptTemplateResponseDTO[]&gt;('/v1/ui-script-templates/active', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;UIScriptTemplateResponseDTO[]&gt;('/v1/ui-script-templates/active', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { templateType, scriptLanguage }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Update template status</span>
 <span class="cstat-no" title="statement not covered" >    updateTemplateStatus(id: number, isActive: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/${id}/status`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;UIScriptTemplateResponseDTO&gt;(`/v1/ui-script-templates/${id}/status`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -310,7 +310,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

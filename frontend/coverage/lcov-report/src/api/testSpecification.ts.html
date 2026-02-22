@@ -629,92 +629,92 @@
 <span class="cstat-no" title="statement not covered" >    // --- Specification Management ---</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    createSpecification(data: TestSpecificationRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestSpecificationResponseDTO&gt;('/v1/specifications', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestSpecificationResponseDTO&gt;('/v1/specifications', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getSpecificationList(page: number = 0, size: number = 10, specName?: string, specType?: string, isActive?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, ApiResult&lt;PageResult&lt;TestSpecificationResponseDTO&gt;&gt;&gt;('/v1/specifications', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;ApiResult&lt;PageResult&lt;TestSpecificationResponseDTO&gt;&gt;&gt;('/v1/specifications', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size, specName, specType, isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getSpecificationById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestSpecificationResponseDTO&gt;(`/v1/specifications/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestSpecificationResponseDTO&gt;(`/v1/specifications/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getSpecificationByCode(specCode: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestSpecificationResponseDTO&gt;(`/v1/specifications/code/${specCode}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestSpecificationResponseDTO&gt;(`/v1/specifications/code/${specCode}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    updateSpecification(id: number, data: TestSpecificationRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestSpecificationResponseDTO&gt;(`/v1/specifications/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestSpecificationResponseDTO&gt;(`/v1/specifications/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    deleteSpecification(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.delete&lt;any, void&gt;(`/v1/specifications/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.delete&lt;void&gt;(`/v1/specifications/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    updateSpecificationStatus(id: number, isActive: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestSpecificationResponseDTO&gt;(`/v1/specifications/${id}/status`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestSpecificationResponseDTO&gt;(`/v1/specifications/${id}/status`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getApplicationSpecifications() {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestSpecificationResponseDTO[]&gt;('/v1/specifications/application')</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestSpecificationResponseDTO[]&gt;('/v1/specifications/application')</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getPublicSpecifications() {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestSpecificationResponseDTO[]&gt;('/v1/specifications/public')</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestSpecificationResponseDTO[]&gt;('/v1/specifications/public')</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // --- Version Management ---</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    createVersion(specId: number, versionNumber: string, versionName?: string, versionDescription?: string, changeLog?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestSpecificationResponseDTO&gt;(`/v1/specifications/${specId}/versions`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestSpecificationResponseDTO&gt;(`/v1/specifications/${specId}/versions`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { versionNumber, versionName, versionDescription, changeLog }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    switchVersion(specId: number, versionNumber: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, TestSpecificationResponseDTO&gt;(`/v1/specifications/${specId}/versions/${versionNumber}/switch`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;TestSpecificationResponseDTO&gt;(`/v1/specifications/${specId}/versions/${versionNumber}/switch`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getVersionList(specId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, SpecVersionResponseDTO[]&gt;(`/v1/specifications/${specId}/versions`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;SpecVersionResponseDTO[]&gt;(`/v1/specifications/${specId}/versions`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // --- Field Test Point Management ---</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    createFieldTestPoint(data: FieldTestPointRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, FieldTestPointResponseDTO&gt;('/v1/specifications/field-points', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;FieldTestPointResponseDTO&gt;('/v1/specifications/field-points', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getFieldTestPointList(page: number = 0, size: number = 10, fieldName?: string, specId?: number, isActive?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, PageResult&lt;FieldTestPointResponseDTO&gt;&gt;('/v1/specifications/field-points', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;PageResult&lt;FieldTestPointResponseDTO&gt;&gt;('/v1/specifications/field-points', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size, fieldName, specId, isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getFieldTestPointById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, FieldTestPointResponseDTO&gt;(`/v1/specifications/field-points/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;FieldTestPointResponseDTO&gt;(`/v1/specifications/field-points/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getFieldTestPointsBySpecId(specId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, FieldTestPointResponseDTO[]&gt;(`/v1/specifications/${specId}/field-points`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;FieldTestPointResponseDTO[]&gt;(`/v1/specifications/${specId}/field-points`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    updateFieldTestPoint(id: number, data: FieldTestPointRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, FieldTestPointResponseDTO&gt;(`/v1/specifications/field-points/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;FieldTestPointResponseDTO&gt;(`/v1/specifications/field-points/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    deleteFieldTestPoint(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.delete&lt;any, void&gt;(`/v1/specifications/field-points/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.delete&lt;void&gt;(`/v1/specifications/field-points/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    updateFieldTestPointStatus(id: number, isActive: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, FieldTestPointResponseDTO&gt;(`/v1/specifications/field-points/${id}/status`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;FieldTestPointResponseDTO&gt;(`/v1/specifications/field-points/${id}/status`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
@@ -722,33 +722,33 @@
 <span class="cstat-no" title="statement not covered" >    // --- Logic Test Point Management ---</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    createLogicTestPoint(data: LogicTestPointRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, LogicTestPointResponseDTO&gt;('/v1/specifications/logic-points', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;LogicTestPointResponseDTO&gt;('/v1/specifications/logic-points', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getLogicTestPointList(page: number = 0, size: number = 10, logicName?: string, specId?: number, isActive?: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, PageResult&lt;LogicTestPointResponseDTO&gt;&gt;('/v1/specifications/logic-points', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;PageResult&lt;LogicTestPointResponseDTO&gt;&gt;('/v1/specifications/logic-points', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size, logicName, specId, isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getLogicTestPointById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, LogicTestPointResponseDTO&gt;(`/v1/specifications/logic-points/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;LogicTestPointResponseDTO&gt;(`/v1/specifications/logic-points/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    getLogicTestPointsBySpecId(specId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, LogicTestPointResponseDTO[]&gt;(`/v1/specifications/${specId}/logic-points`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;LogicTestPointResponseDTO[]&gt;(`/v1/specifications/${specId}/logic-points`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    updateLogicTestPoint(id: number, data: LogicTestPointRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, LogicTestPointResponseDTO&gt;(`/v1/specifications/logic-points/${id}`, data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;LogicTestPointResponseDTO&gt;(`/v1/specifications/logic-points/${id}`, data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    deleteLogicTestPoint(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.delete&lt;any, void&gt;(`/v1/specifications/logic-points/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.delete&lt;void&gt;(`/v1/specifications/logic-points/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    updateLogicTestPointStatus(id: number, isActive: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.put&lt;any, LogicTestPointResponseDTO&gt;(`/v1/specifications/logic-points/${id}/status`, null, {</span>
+<span class="cstat-no" title="statement not covered" >        return request.put&lt;LogicTestPointResponseDTO&gt;(`/v1/specifications/logic-points/${id}/status`, null, {</span>
 <span class="cstat-no" title="statement not covered" >            params: { isActive }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
@@ -760,7 +760,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

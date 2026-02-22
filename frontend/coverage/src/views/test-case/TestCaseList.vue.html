@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1328</span>
+                <span class='fraction'>0/1324</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1328</span>
+                <span class='fraction'>0/1324</span>
             </div>
         
             
@@ -1387,15 +1387,7 @@
 <a name='L1322'></a><a href='#L1322'>1322</a>
 <a name='L1323'></a><a href='#L1323'>1323</a>
 <a name='L1324'></a><a href='#L1324'>1324</a>
-<a name='L1325'></a><a href='#L1325'>1325</a>
-<a name='L1326'></a><a href='#L1326'>1326</a>
-<a name='L1327'></a><a href='#L1327'>1327</a>
-<a name='L1328'></a><a href='#L1328'>1328</a>
-<a name='L1329'></a><a href='#L1329'>1329</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L1325'></a><a href='#L1325'>1325</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3659,17 +3651,15 @@
 <span class="cstat-no" title="statement not covered" >const loadTestCaseList = async () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  loading.value = true</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
-<span class="cstat-no" title="statement not covered" >    const response = await testCaseApi.getTestCaseList({</span>
+<span class="cstat-no" title="statement not covered" >  const response = await testCaseApi.getTestCaseList({</span>
 <span class="cstat-no" title="statement not covered" >      page: pagination.page - 1,</span>
 <span class="cstat-no" title="statement not covered" >      size: pagination.size,</span>
 <span class="cstat-no" title="statement not covered" >      caseName: searchForm.caseName || undefined,</span>
 <span class="cstat-no" title="statement not covered" >      caseStatus: searchForm.caseStatus || undefined</span>
 <span class="cstat-no" title="statement not covered" >    })</span>
 <span class="cstat-no" title="statement not covered" >    </span>
-<span class="cstat-no" title="statement not covered" >    if (response.data) {</span>
-<span class="cstat-no" title="statement not covered" >      testCaseList.value = response.data.content || []</span>
-<span class="cstat-no" title="statement not covered" >      pagination.total = response.data.totalElements || 0</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >    testCaseList.value = response.data?.content || []</span>
+<span class="cstat-no" title="statement not covered" >    pagination.total = response.data?.totalElements || 0</span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
 <span class="cstat-no" title="statement not covered" >    console.error('加载用例列表失败:', error)</span>
 <span class="cstat-no" title="statement not covered" >  } finally {</span>
@@ -3962,12 +3952,10 @@
 <span class="cstat-no" title="statement not covered" >  qualityResult.value = null</span>
 <span class="cstat-no" title="statement not covered" >  activeCollapse.value = []</span>
 <span class="cstat-no" title="statement not covered" >  </span>
-<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >try {</span>
 <span class="cstat-no" title="statement not covered" >    const response = await testCaseQualityApi.assessQuality(row.id!)</span>
-<span class="cstat-no" title="statement not covered" >    if (response.data) {</span>
-<span class="cstat-no" title="statement not covered" >      qualityResult.value = normalizeQualityResult(response.data)</span>
-<span class="cstat-no" title="statement not covered" >      activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >    qualityResult.value = normalizeQualityResult(response.data?.data)</span>
+<span class="cstat-no" title="statement not covered" >    activeCollapse.value = ['completeness', 'standardization', 'executability', 'suggestions']</span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
 <span class="cstat-no" title="statement not covered" >    console.error('质量评估失败:', error)</span>
 <span class="cstat-no" title="statement not covered" >    ElMessage.error('质量评估失败')</span>
@@ -4054,7 +4042,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

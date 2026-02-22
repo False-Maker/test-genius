@@ -14,12 +14,27 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+class ModelConfigData(BaseModel):
+    model_code: Optional[str] = None
+    model_name: Optional[str] = None
+    model_type: Optional[str] = None
+    api_endpoint: Optional[str] = None
+    api_key: Optional[str] = None
+    model_version: Optional[str] = None
+    max_tokens: Optional[int] = None
+    temperature: Optional[float] = None
+
+
+
 class RequirementAnalyzeRequest(BaseModel):
     requirement_text: str = Field(..., min_length=1, description="需求文本")
     prompt: Optional[str] = None
     model_code: Optional[str] = None
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
+    model_cfg: Optional[ModelConfigData] = None
+
+
 
 
 @router.post("/requirement/analyze")
@@ -36,12 +51,16 @@ async def analyze_requirement(
     llm_service = LLMService(db)
 
     try:
+        # 使用model_config中的参数优先
+        effective_model_code = request.model_cfg.model_code if request.model_cfg else request.model_code
+        effective_max_tokens = request.model_cfg.max_tokens if request.model_cfg else request.max_tokens
+        effective_temperature = request.model_cfg.temperature if request.model_cfg else request.temperature
+        
+        logger.info(f"effective_model_code: {effective_model_code}")
         result = await run_in_threadpool(
-            llm_service.call_model,
-            model_code=request.model_code,
-            prompt=prompt,
-            max_tokens=request.max_tokens,
-            temperature=request.temperature
+            llm_service.call_model_with_config,
+            model_config=request.model_cfg.dict() if request.model_cfg else None,
+            prompt=prompt
         )
         content = result.get("content", "")
         parsed = _parse_analysis_output(content)

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/1422</span>
+                <span class='fraction'>0/1409</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/1422</span>
+                <span class='fraction'>0/1409</span>
             </div>
         
             
@@ -1472,33 +1472,7 @@
 <a name='L1407'></a><a href='#L1407'>1407</a>
 <a name='L1408'></a><a href='#L1408'>1408</a>
 <a name='L1409'></a><a href='#L1409'>1409</a>
-<a name='L1410'></a><a href='#L1410'>1410</a>
-<a name='L1411'></a><a href='#L1411'>1411</a>
-<a name='L1412'></a><a href='#L1412'>1412</a>
-<a name='L1413'></a><a href='#L1413'>1413</a>
-<a name='L1414'></a><a href='#L1414'>1414</a>
-<a name='L1415'></a><a href='#L1415'>1415</a>
-<a name='L1416'></a><a href='#L1416'>1416</a>
-<a name='L1417'></a><a href='#L1417'>1417</a>
-<a name='L1418'></a><a href='#L1418'>1418</a>
-<a name='L1419'></a><a href='#L1419'>1419</a>
-<a name='L1420'></a><a href='#L1420'>1420</a>
-<a name='L1421'></a><a href='#L1421'>1421</a>
-<a name='L1422'></a><a href='#L1422'>1422</a>
-<a name='L1423'></a><a href='#L1423'>1423</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L1410'></a><a href='#L1410'>1410</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -3516,11 +3490,12 @@
 <span class="cstat-no" title="statement not covered" >const formRef = ref&lt;FormInstance&gt;()</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const reportList = ref&lt;TestReportResponseDTO[]&gt;([])</span>
-<span class="cstat-no" title="statement not covered" >const formData = reactive&lt;TestReportRequestDTO&gt;({</span>
+<span class="cstat-no" title="statement not covered" >const formData = reactive&lt;TestReportRequestDTO &amp; { id?: number }&gt;({</span>
 <span class="cstat-no" title="statement not covered" >  reportName: '',</span>
 <span class="cstat-no" title="statement not covered" >  reportType: 'EXECUTION',</span>
 <span class="cstat-no" title="statement not covered" >  requirementId: undefined,</span>
-<span class="cstat-no" title="statement not covered" >  executionTaskId: undefined</span>
+<span class="cstat-no" title="statement not covered" >  executionTaskId: undefined,</span>
+<span class="cstat-no" title="statement not covered" >  id: undefined</span>
 <span class="cstat-no" title="statement not covered" >})</span>
 <span class="cstat-no" title="statement not covered" >const viewData = ref&lt;TestReportResponseDTO&gt;({} as TestReportResponseDTO)</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3664,19 +3639,9 @@
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    const response = await testReportApi.getReportList(pagination.page - 1, pagination.size)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    if (response.data) {</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      reportList.value = response.data.content || []</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      pagination.total = response.data.totalElements || 0</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+<span class="cstat-no" title="statement not covered" >const response = await testReportApi.getReportList(pagination.page - 1, pagination.size)</span>
+<span class="cstat-no" title="statement not covered" >      reportList.value = response.data?.content || []</span>
+<span class="cstat-no" title="statement not covered" >      pagination.total = response.data?.totalElements || 0</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  } catch (error) {</span>
@@ -3816,14 +3781,13 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >const handleEdit = (row: TestReportResponseDTO) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  isEdit.value = true</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  formData.reportName = row.reportName</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  formData.reportType = row.reportType as any</span>
+<span class="cstat-no" title="statement not covered" >  formData.reportType = row.reportType</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  formData.requirementId = row.requirementId</span>
@@ -3834,7 +3798,8 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  // Store ID for update</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >  ;(formData as any).id = row.id</span>
+<span class="cstat-no" title="statement not covered" >  formData.id = row.id</span>
+<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >  dialogVisible.value = true</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -3852,12 +3817,8 @@
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >        const res = await testReportApi.getReportById(row.id)</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        viewData.value = res</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >        viewDialogVisible.value = true</span>
+<span class="cstat-no" title="statement not covered" >      viewData.value = res.data</span>
+<span class="cstat-no" title="statement not covered" >      viewDialogVisible.value = true</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    } catch(e) {</span>
@@ -4001,7 +3962,7 @@
 <span class="cstat-no" title="statement not covered" >                if (isEdit.value) {</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >                     await testReportApi.updateReport((formData as any).id, formData)</span>
+<span class="cstat-no" title="statement not covered" >                     await testReportApi.updateReport(formData.id!, formData)</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >                     ElMessage.success('更新成功')</span>
@@ -4079,7 +4040,7 @@
 <span class="cstat-no" title="statement not covered" >    formData.executionTaskId = undefined</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    delete (formData as any).id</span>
+<span class="cstat-no" title="statement not covered" >    formData.id = undefined</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >}</span>
@@ -4336,7 +4297,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.500Z
+                at 2026-02-21T15:37:15.476Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

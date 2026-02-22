@@ -285,70 +285,70 @@
 <span class="cstat-no" title="statement not covered" >export const testRiskAssessmentApi = {</span>
 <span class="cstat-no" title="statement not covered" >    // Assess risk (general)</span>
 <span class="cstat-no" title="statement not covered" >    assessRisk(data: TestRiskAssessmentRequestDTO) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestRiskAssessmentResponseDTO&gt;('/v1/test-risk-assessment/assess', data)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestRiskAssessmentResponseDTO&gt;('/v1/test-risk-assessment/assess', data)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Assess requirement risk</span>
 <span class="cstat-no" title="statement not covered" >    assessRequirementRisk(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/assess/requirement/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/assess/requirement/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Assess execution task risk</span>
 <span class="cstat-no" title="statement not covered" >    assessExecutionTaskRisk(executionTaskId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.post&lt;any, TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/assess/execution-task/${executionTaskId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.post&lt;TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/assess/execution-task/${executionTaskId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Assess risk level</span>
 <span class="cstat-no" title="statement not covered" >    assessRiskLevel(riskScore: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;('/v1/test-risk-assessment/assess/level', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;('/v1/test-risk-assessment/assess/level', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { riskScore }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Assess feasibility</span>
 <span class="cstat-no" title="statement not covered" >    assessFeasibility(requirementId?: number, executionTaskId?: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, number&gt;('/v1/test-risk-assessment/assess/feasibility', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;number&gt;('/v1/test-risk-assessment/assess/feasibility', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId, executionTaskId }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Identify risk items</span>
 <span class="cstat-no" title="statement not covered" >    identifyRiskItems(requirementId?: number, executionTaskId?: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, string&gt;('/v1/test-risk-assessment/identify/risk-items', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;string&gt;('/v1/test-risk-assessment/identify/risk-items', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { requirementId, executionTaskId }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get assessment list</span>
 <span class="cstat-no" title="statement not covered" >    getAssessmentList(page: number = 0, size: number = 10) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, ApiResult&lt;PageResult&lt;TestRiskAssessmentResponseDTO&gt;&gt;&gt;('/v1/test-risk-assessment', {</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;ApiResult&lt;PageResult&lt;TestRiskAssessmentResponseDTO&gt;&gt;&gt;('/v1/test-risk-assessment', {</span>
 <span class="cstat-no" title="statement not covered" >            params: { page, size }</span>
 <span class="cstat-no" title="statement not covered" >        })</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get assessment details</span>
 <span class="cstat-no" title="statement not covered" >    getAssessmentById(id: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/${id}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/${id}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get assessment by code</span>
 <span class="cstat-no" title="statement not covered" >    getAssessmentByCode(assessmentCode: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/code/${assessmentCode}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestRiskAssessmentResponseDTO&gt;(`/v1/test-risk-assessment/code/${assessmentCode}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get assessments by requirement ID</span>
 <span class="cstat-no" title="statement not covered" >    getAssessmentByRequirementId(requirementId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestRiskAssessmentResponseDTO[]&gt;(`/v1/test-risk-assessment/requirement/${requirementId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestRiskAssessmentResponseDTO[]&gt;(`/v1/test-risk-assessment/requirement/${requirementId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get assessments by execution task ID</span>
 <span class="cstat-no" title="statement not covered" >    getAssessmentByExecutionTaskId(executionTaskId: number) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestRiskAssessmentResponseDTO[]&gt;(`/v1/test-risk-assessment/execution-task/${executionTaskId}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestRiskAssessmentResponseDTO[]&gt;(`/v1/test-risk-assessment/execution-task/${executionTaskId}`)</span>
 <span class="cstat-no" title="statement not covered" >    },</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    // Get assessments by risk level</span>
 <span class="cstat-no" title="statement not covered" >    getAssessmentByRiskLevel(riskLevel: string) {</span>
-<span class="cstat-no" title="statement not covered" >        return request.get&lt;any, TestRiskAssessmentResponseDTO[]&gt;(`/v1/test-risk-assessment/level/${riskLevel}`)</span>
+<span class="cstat-no" title="statement not covered" >        return request.get&lt;TestRiskAssessmentResponseDTO[]&gt;(`/v1/test-risk-assessment/level/${riskLevel}`)</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;</pre></td></tr></table></pre>
@@ -358,7 +358,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-02-20T17:59:53.262Z
+                at 2026-02-21T15:37:15.298Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
