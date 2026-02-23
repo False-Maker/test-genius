@@ -59,8 +59,9 @@ async def analyze_requirement(
         logger.info(f"effective_model_code: {effective_model_code}")
         result = await run_in_threadpool(
             llm_service.call_model_with_config,
-            model_config=request.model_cfg.dict() if request.model_cfg else None,
-            prompt=prompt
+            model_code=effective_model_code,
+            prompt=prompt,
+            model_config=request.model_cfg.dict() if request.model_cfg else None
         )
         content = result.get("content", "")
         parsed = _parse_analysis_output(content)
