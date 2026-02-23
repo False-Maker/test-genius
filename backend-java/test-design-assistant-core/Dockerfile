@@ -38,7 +38,7 @@ RUN mvn dependency:go-offline -B || true
 COPY test-design-assistant-core/src ./test-design-assistant-core/src
 
 # 构建应用（跳过测试，使用批处理模式减少输出，确保 Spring Boot 插件执行 repackage）
-RUN mvn clean package -DskipTests -B && \
+RUN mvn clean package -Dmaven.test.skip=true -B && \
     ls -la /app/test-design-assistant-core/target/ && \
     echo "JAR files:" && \
     find /app/test-design-assistant-core/target -name "*.jar" -type f
