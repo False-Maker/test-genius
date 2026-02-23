@@ -17,6 +17,10 @@ import java.math.BigDecimal;
 public class ModelConfigRequestDTO {
     
     /**
+     * 模型配置ID
+     */
+    private Long id;
+    /**
      * 模型名称
      */
     @NotBlank(message = "模型名称不能为空")
