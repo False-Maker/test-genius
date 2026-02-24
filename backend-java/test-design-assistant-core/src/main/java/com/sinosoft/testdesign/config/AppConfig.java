@@ -29,7 +29,8 @@ public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {
         org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000); // 5秒连接超时
+        factory.setConnectTimeout(10000); // 10秒连接超时
+        factory.setReadTimeout(180000);   // 180秒读取超时（3分钟，支持GLM等慢响应模型）
         factory.setReadTimeout(30000);   // 30秒读取超时
         return new RestTemplate(factory);
     }

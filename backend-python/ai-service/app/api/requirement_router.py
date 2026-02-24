@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import Session
 import logging
@@ -23,6 +23,9 @@ class ModelConfigData(BaseModel):
     model_version: Optional[str] = None
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
+
+
+    model_config = ConfigDict(protected_namespaces=())
 
 
 
