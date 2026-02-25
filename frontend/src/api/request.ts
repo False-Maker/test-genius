@@ -47,7 +47,7 @@ const getBaseURL = () => {
 
 const service: AxiosInstance = axios.create({
   baseURL: getBaseURL(),
-  timeout: 30000,
+  timeout: 180000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -178,4 +178,3 @@ declare module 'axios' {
 }
 
 export default service
-
