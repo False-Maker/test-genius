@@ -9,19 +9,25 @@ from typing import Optional, Dict, Any
 import httpx
 import json
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 尝试导入LangChain相关模块（新版本 0.3.x）
 try:
     from langchain_openai import ChatOpenAI
     from langchain_core.messages import HumanMessage
+    logger.info(f"已加载 langchain_openai, ChatOpenAI={ChatOpenAI}")
 except ImportError:
     try:
         # 兼容旧版本
         from langchain.chat_models import ChatOpenAI
         from langchain.schema import HumanMessage
+        logger.info(f"已加载 langchain (旧版), ChatOpenAI={ChatOpenAI}")
     except ImportError:
         ChatOpenAI = None
         HumanMessage = None
+        logger.warning("未找到 ChatOpenAI，将使用 HTTP 适配器")
 
 try:
     from langchain_community.chat_models import ChatTongyi
@@ -115,15 +121,16 @@ def _create_chat_openai(
         request_timeout: 请求超时时间（秒）
         
     Returns:
-        ChatOpenAI 实例
+        ChatOpenAI 实例，如果创建失败返回 None
     """
     if ChatOpenAI is None:
         return None
 
+    http_client = _create_http_client(request_timeout)
+    async_http_client = _create_async_http_client(request_timeout)
+
     # 方式1: 新版本 langchain-openai (0.2.x+)，使用 http_client 确保超时生效
     try:
-        http_client = _create_http_client(request_timeout)
-        async_http_client = _create_async_http_client(request_timeout)
         params = {
             "model": model_version,
             "api_key": api_key,
@@ -135,11 +142,38 @@ def _create_chat_openai(
         }
         if base_url:
             params["base_url"] = base_url
-        return ChatOpenAI(**params)
-    except (TypeError, ValueError):
-        pass
+        llm = ChatOpenAI(**params)
+        logger.info(
+            f"ChatOpenAI 创建成功(方式1-新版本): model={model_version}, "
+            f"timeout={request_timeout}s, base_url={base_url or '默认'}"
+        )
+        return llm
+    except (TypeError, ValueError) as e:
+        logger.debug(f"ChatOpenAI 方式1失败: {e}")
 
-    # 方式2: 旧版本 langchain-openai (0.0.x)
+    # 方式2: 新版本但不支持 http_client 参数
+    try:
+        params = {
+            "model": model_version,
+            "api_key": api_key,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "timeout": request_timeout,
+        }
+        if base_url:
+            params["base_url"] = base_url
+        llm = ChatOpenAI(**params)
+        # 尝试手动替换底层 client 的超时配置
+        _patch_openai_client_timeout(llm, request_timeout)
+        logger.info(
+            f"ChatOpenAI 创建成功(方式2-无http_client): model={model_version}, "
+            f"timeout={request_timeout}s"
+        )
+        return llm
+    except (TypeError, ValueError) as e:
+        logger.debug(f"ChatOpenAI 方式2失败: {e}")
+
+    # 方式3: 旧版本 langchain-openai (0.0.x)
     try:
         params = {
             "model": model_version,
@@ -150,11 +184,60 @@ def _create_chat_openai(
         }
         if base_url:
             params["openai_api_base"] = base_url
-        return ChatOpenAI(**params)
-    except (TypeError, ValueError):
-        pass
+        llm = ChatOpenAI(**params)
+        logger.info(
+            f"ChatOpenAI 创建成功(方式3-旧版本): model={model_version}, "
+            f"timeout={request_timeout}s"
+        )
+        return llm
+    except (TypeError, ValueError) as e:
+        logger.debug(f"ChatOpenAI 方式3失败: {e}")
 
+    logger.warning(f"所有 ChatOpenAI 创建方式均失败，将回退到 HTTP 适配器")
     return None
+
+
+def _patch_openai_client_timeout(llm: Any, timeout: float) -> None:
+    """
+    尝试手动修补 ChatOpenAI 底层 openai client 的超时配置
+    
+    Args:
+        llm: ChatOpenAI 实例
+        timeout: 超时时间（秒）
+    """
+    try:
+        # langchain-openai 内部持有 openai.OpenAI client
+        # 路径: llm.client -> openai 的 chat.completions 资源 -> _client -> timeout
+        target_timeout = httpx.Timeout(
+            connect=10.0,
+            read=timeout,
+            write=30.0,
+            pool=10.0,
+        )
+
+        # 尝试路径1: llm.client._client.timeout (openai>=1.0)
+        if hasattr(llm, 'client') and llm.client is not None:
+            inner = getattr(llm.client, '_client', None)
+            if inner is not None and hasattr(inner, 'timeout'):
+                inner.timeout = target_timeout
+                logger.info(f"已修补 openai client timeout: read={timeout}s")
+                return
+            # 尝试路径2: llm.client 本身就是 openai client
+            if hasattr(llm.client, 'timeout'):
+                llm.client.timeout = target_timeout
+                logger.info(f"已修补 client timeout: read={timeout}s")
+                return
+
+        # 尝试路径3: llm.root_client (某些版本)
+        if hasattr(llm, 'root_client') and llm.root_client is not None:
+            if hasattr(llm.root_client, '_client'):
+                llm.root_client._client.timeout = target_timeout
+                logger.info(f"已修补 root_client timeout: read={timeout}s")
+                return
+
+        logger.debug("未找到可修补的 openai client timeout 路径")
+    except Exception as e:
+        logger.debug(f"修补 openai client timeout 失败: {e}")
 
 
 class OpenAIAdapter:
@@ -463,8 +546,10 @@ class ModelAdapterFactory:
         Returns:
             LLM实例
         """
+        logger.info(f"创建LLM: type={model_type}, model={model_version}, timeout={request_timeout}s")
         adapter_class = cls._adapters.get(model_type.upper())
         if not adapter_class:
+            logger.warning(f"未知模型类型: {model_type}，使用 HTTP 适配器")
             adapter_class = HTTPLLMAdapter
 
         return adapter_class.create_llm(
