@@ -7,6 +7,19 @@ DEFAULT_MODEL_CODE = os.getenv("DEFAULT_MODEL_CODE", "DEEPSEEK_CHAT")
 JAVA_API_BASE_URL = os.getenv("JAVA_API_BASE_URL", "http://localhost:8080")
 
 # =============================================================================
+# 模型调用配置
+# =============================================================================
+
+# 模型调用超时时间（秒），默认120秒
+LLM_REQUEST_TIMEOUT = int(os.getenv("LLM_REQUEST_TIMEOUT", "120"))
+
+# 模型调用最大重试次数
+LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "3"))
+
+# 模型调用重试基础延迟（秒）
+LLM_RETRY_DELAY = float(os.getenv("LLM_RETRY_DELAY", "2.0"))
+
+# =============================================================================
 # RAG (Retrieval-Augmented Generation) 配置
 # =============================================================================
 

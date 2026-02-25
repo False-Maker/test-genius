@@ -29,6 +29,10 @@ except ImportError:
     ChatTongyi = None
 
 
+# 默认超时时间（秒）
+DEFAULT_TIMEOUT = 120.0
+
+
 def _normalize_api_endpoint(api_endpoint: str) -> str:
     """
     规范化API端点URL
@@ -61,6 +65,7 @@ class OpenAIAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建OpenAI LLM实例
@@ -68,7 +73,7 @@ class OpenAIAdapter:
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(
-                api_key, api_endpoint, model_version, max_tokens, temperature
+                api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
             )
 
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
@@ -84,7 +89,7 @@ class OpenAIAdapter:
                 "api_key": api_key,
                 "max_tokens": max_tokens,
                 "temperature": temperature,
-                "timeout": 60.0,
+                "timeout": request_timeout,
             }
             # 如果提供了自定义endpoint，则使用base_url
             if normalized_endpoint:
@@ -99,7 +104,7 @@ class OpenAIAdapter:
                     "openai_api_key": api_key,
                     "max_tokens": max_tokens,
                     "temperature": temperature,
-                    "timeout": 60,
+                    "request_timeout": int(request_timeout),
                 }
                 # 如果提供了自定义endpoint，则使用openai_api_base
                 if normalized_endpoint:
@@ -109,7 +114,7 @@ class OpenAIAdapter:
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
                 return HTTPLLMAdapter.create_llm(
-                    api_key, api_endpoint, model_version, max_tokens, temperature
+                    api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
                 )
 
 
@@ -123,6 +128,7 @@ class DeepSeekAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建DeepSeek LLM实例
@@ -131,7 +137,7 @@ class DeepSeekAdapter:
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(
-                api_key, api_endpoint, model_version, max_tokens, temperature
+                api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
             )
 
         # LangChain 0.3.x 兼容：新版本 API
@@ -144,7 +150,7 @@ class DeepSeekAdapter:
                 base_url=api_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0,
+                timeout=request_timeout,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -155,12 +161,12 @@ class DeepSeekAdapter:
                     openai_api_base=api_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60,
+                    request_timeout=int(request_timeout),
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
                 return HTTPLLMAdapter.create_llm(
-                    api_key, api_endpoint, model_version, max_tokens, temperature
+                    api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
                 )
 
 
@@ -174,6 +180,7 @@ class DoubaoAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建豆包 LLM实例
@@ -182,7 +189,7 @@ class DoubaoAdapter:
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(
-                api_key, api_endpoint, model_version, max_tokens, temperature
+                api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
             )
 
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
@@ -198,7 +205,7 @@ class DoubaoAdapter:
                 base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0,
+                timeout=request_timeout,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -209,12 +216,12 @@ class DoubaoAdapter:
                     openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60,
+                    request_timeout=int(request_timeout),
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
                 return HTTPLLMAdapter.create_llm(
-                    api_key, api_endpoint, model_version, max_tokens, temperature
+                    api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
                 )
 
 
@@ -228,6 +235,7 @@ class KimiAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建Kimi LLM实例
@@ -236,7 +244,7 @@ class KimiAdapter:
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(
-                api_key, api_endpoint, model_version, max_tokens, temperature
+                api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
             )
 
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
@@ -252,7 +260,7 @@ class KimiAdapter:
                 base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0,
+                timeout=request_timeout,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -263,12 +271,12 @@ class KimiAdapter:
                     openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60,
+                    request_timeout=int(request_timeout),
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
                 return HTTPLLMAdapter.create_llm(
-                    api_key, api_endpoint, model_version, max_tokens, temperature
+                    api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
                 )
 
 
@@ -282,6 +290,7 @@ class QianwenAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建通义千问 LLM实例
@@ -297,14 +306,14 @@ class QianwenAdapter:
                     dashscope_api_key=api_key,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60,
+                    timeout=int(request_timeout),
                 )
             except Exception:
                 pass
 
         # 如果ChatTongyi不可用，使用HTTP方式
         return HTTPLLMAdapter.create_llm(
-            api_key, api_endpoint, model_version, max_tokens, temperature
+            api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
         )
 
 
@@ -318,6 +327,7 @@ class ZhipuAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建智谱 LLM实例
@@ -326,7 +336,7 @@ class ZhipuAdapter:
         if ChatOpenAI is None:
             # 如果ChatOpenAI不可用，使用HTTP方式
             return HTTPLLMAdapter.create_llm(
-                api_key, api_endpoint, model_version, max_tokens, temperature
+                api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
             )
 
         # 规范化API端点，移除可能存在的 /chat/completions 后缀
@@ -342,7 +352,7 @@ class ZhipuAdapter:
                 base_url=normalized_endpoint,  # 新版本使用 base_url
                 max_tokens=max_tokens,
                 temperature=temperature,
-                timeout=60.0,
+                timeout=request_timeout,
             )
         except (TypeError, ValueError):
             # 兼容旧版本 API（langchain-openai 0.0.x）
@@ -353,12 +363,12 @@ class ZhipuAdapter:
                     openai_api_base=normalized_endpoint,
                     max_tokens=max_tokens,
                     temperature=temperature,
-                    timeout=60,
+                    request_timeout=int(request_timeout),
                 )
             except Exception:
                 # 如果都失败，使用 HTTP 适配器
                 return HTTPLLMAdapter.create_llm(
-                    api_key, api_endpoint, model_version, max_tokens, temperature
+                    api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
                 )
 
 
@@ -372,19 +382,21 @@ class HTTPLLMAdapter:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """创建HTTP方式调用的LLM（简化版本）"""
 
         # 这里返回一个可调用对象
         class HTTPLLMWrapper:
             def __init__(
-                self, api_key, api_endpoint, model_version, max_tokens, temperature
+                self, api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
             ):
                 self.api_key = api_key
                 self.api_endpoint = api_endpoint
                 self.model_version = model_version
                 self.max_tokens = max_tokens
                 self.temperature = temperature
+                self.request_timeout = request_timeout
 
             def invoke(self, prompt: str) -> str:
                 """调用模型"""
@@ -400,7 +412,7 @@ class HTTPLLMAdapter:
                     "temperature": self.temperature,
                 }
 
-                with httpx.Client(timeout=60.0) as client:
+                with httpx.Client(timeout=self.request_timeout) as client:
                     response = client.post(
                         self.api_endpoint, headers=headers, json=payload
                     )
@@ -416,7 +428,7 @@ class HTTPLLMAdapter:
                         return str(result)
 
         return HTTPLLMWrapper(
-            api_key, api_endpoint, model_version, max_tokens, temperature
+            api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
         )
 
 
@@ -442,6 +454,7 @@ class ModelAdapterFactory:
         model_version: str,
         max_tokens: int,
         temperature: float,
+        request_timeout: float = DEFAULT_TIMEOUT,
     ):
         """
         创建LLM实例
@@ -453,6 +466,7 @@ class ModelAdapterFactory:
             model_version: 模型版本
             max_tokens: 最大token数
             temperature: 温度参数
+            request_timeout: 请求超时时间（秒）
 
         Returns:
             LLM实例
@@ -463,5 +477,5 @@ class ModelAdapterFactory:
             adapter_class = HTTPLLMAdapter
 
         return adapter_class.create_llm(
-            api_key, api_endpoint, model_version, max_tokens, temperature
+            api_key, api_endpoint, model_version, max_tokens, temperature, request_timeout
         )

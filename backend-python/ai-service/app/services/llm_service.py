@@ -11,6 +11,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from app.services.model_config_service import ModelConfigService
 from app.utils.model_adapter import ModelAdapterFactory
+from app.config import LLM_REQUEST_TIMEOUT, LLM_MAX_RETRIES, LLM_RETRY_DELAY
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,8 @@ class LLMService:
         self._llm_cache: Dict[str, Any] = {}
     
     def _get_llm_instance(self, model_code: str, max_tokens: Optional[int] = None,
-                        temperature: Optional[float] = None) -> Any:
+                        temperature: Optional[float] = None,
+                        request_timeout: Optional[int] = None) -> Any:
         """
         获取或创建LLM实例
         
@@ -39,6 +41,7 @@ class LLMService:
             model_code: 模型代码
             max_tokens: 最大token数（可选，覆盖配置）
             temperature: 温度参数（可选，覆盖配置）
+            request_timeout: 请求超时时间（秒）（可选，覆盖配置）
             
         Returns:
             LLM实例
@@ -56,9 +59,10 @@ class LLMService:
         temperature = temperature if temperature is not None else (
             float(model_config.temperature) if model_config.temperature else 0.7
         )
+        timeout = request_timeout or LLM_REQUEST_TIMEOUT
         
         # 生成缓存键
-        cache_key = f"{model_code}_{max_tokens}_{temperature}"
+        cache_key = f"{model_code}_{max_tokens}_{temperature}_{timeout}"
         
         # 如果缓存中存在，直接返回
         if cache_key in self._llm_cache:
@@ -72,20 +76,21 @@ class LLMService:
                 api_endpoint=model_config.api_endpoint or "",
                 model_version=model_config.model_version or "",
                 max_tokens=max_tokens,
-                temperature=temperature
+                temperature=temperature,
+                request_timeout=timeout
             )
             
             # 缓存实例
             self._llm_cache[cache_key] = llm
-            logger.info(f"创建LLM实例成功: {model_code}")
+            logger.info(f"创建LLM实例成功: {model_code}, timeout={timeout}s")
             
             return llm
         except Exception as e:
             logger.error(f"创建LLM实例失败: {model_code}, 错误: {str(e)}")
             raise
     
-    def _call_with_retry(self, llm: Any, prompt: str, max_retries: int = 3,
-                        retry_delay: float = 1.0) -> str:
+    def _call_with_retry(self, llm: Any, prompt: str, max_retries: Optional[int] = None,
+                        retry_delay: Optional[float] = None) -> str:
         """
         带重试机制的模型调用
         兼容 LangChain 0.3.x 和旧版本
@@ -100,6 +105,8 @@ class LLMService:
             模型响应内容
         """
         last_error = None
+        max_retries = max_retries or LLM_MAX_RETRIES
+        retry_delay = retry_delay or LLM_RETRY_DELAY
         
         for attempt in range(max_retries):
             try:
@@ -207,273 +214,4 @@ class LLMService:
             
             logger.info(
                 f"模型调用完成: {model_code}, "
-                f"响应时间: {response_time}ms, "
-                f"tokens: {tokens_used}"
-            )
-            
-            return {
-                "content": content,
-                "model_code": model_code,
-                "tokens_used": tokens_used,
-                "response_time": response_time
-            }
-            
-        except Exception as e:
-            response_time = int((time.time() - start_time) * 1000)
-            logger.error(
-                f"模型调用失败: {model_code}, "
-                f"耗时: {response_time}ms, "
-                f"错误: {str(e)}"
-            )
-            raise
-    
-    def call_model_with_config(
-        self,
-        model_code: Optional[str],
-        prompt: str,
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None,
-        model_config: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        调用大模型生成内容，支持动态传入模型配置
-        
-        Args:
-            model_code: 模型代码（可选，如果为None则使用默认模型）
-            prompt: 提示词
-            max_tokens: 最大token数（可选，覆盖配置）
-            temperature: 温度参数（可选，覆盖配置）
-            model_config: 动态传入的模型配置字典（可选）
-            
-        Returns:
-            模型响应结果，包含：
-            - content: 响应内容
-            - model_code: 模型代码
-            - tokens_used: 使用的token数（如果可用）
-            - response_time: 响应时间（毫秒）
-        """
-        start_time = time.time()
-        
-        try:
-            # 如果未提供model_code，使用默认模型
-            if not model_code:
-                default_config = self.model_config_service.get_default_config()
-                if not default_config:
-                    raise ValueError("没有可用的模型配置，请先配置模型")
-                model_code = default_config.model_code
-                logger.info(f"使用默认模型: {model_code}")
-            
-            # 使用传入的model_config创建临时ModelConfig对象，或者使用数据库配置
-            if model_config is not None:
-                # 创建临时ModelConfig对象
-                temp_model_config = type('ModelConfig', (), {
-                    'model_code': model_code,
-                    'model_type': model_config.get('model_type', 'DEEPSEEK'),
-                    'api_endpoint': model_config.get('api_endpoint', ''),
-                    'api_key': model_config.get('api_key', ''),
-                    'model_version': model_config.get('model_version', ''),
-                    'max_tokens': max_tokens or model_config.get('max_tokens', 2000),
-                    'temperature': temperature if temperature is not None else 
-                        model_config.get('temperature', 0.7),
-                    'is_active': '1'
-                })()
-                
-                # 使用临时配置覆盖参数
-                max_tokens = temp_model_config.max_tokens
-                temperature = temp_model_config.temperature
-                
-                # 生成缓存键
-                cache_key = f"{model_code}_{max_tokens}_{temperature}"
-                
-                # 如果缓存中存在，直接返回
-                if cache_key in self._llm_cache:
-                    llm = self._llm_cache[cache_key]
-                else:
-                    # 创建新的LLM实例
-                    try:
-                        llm = ModelAdapterFactory.create_llm(
-                            model_type=temp_model_config.model_type,
-                            api_key=temp_model_config.api_key,
-                            api_endpoint=temp_model_config.api_endpoint,
-                            model_version=temp_model_config.model_version,
-                            max_tokens=max_tokens,
-                            temperature=temperature
-                        )
-                        
-                        # 缓存实例
-                        self._llm_cache[cache_key] = llm
-                        logger.info(f"创建LLM实例成功（动态配置）: {model_code}")
-                    except Exception as e:
-                        logger.error(f"创建LLM实例失败（动态配置）: {model_code}, 错误: {str(e)}")
-                        raise
-            else:
-                # 回退到现有的数据库查询逻辑
-                llm = self._get_llm_instance(model_code, max_tokens, temperature)
-            
-            # 调用模型（带重试）
-            content = self._call_with_retry(llm, prompt)
-            
-            # 计算响应时间
-            response_time = int((time.time() - start_time) * 1000)
-            
-            # 尝试获取token使用量（如果LLM支持）
-            tokens_used = None
-            if hasattr(llm, 'get_num_tokens'):
-                try:
-                    tokens_used = llm.get_num_tokens(prompt) + llm.get_num_tokens(content)
-                except Exception as e:
-                    logger.debug(f"获取token数量失败: {str(e)}")
-                    pass
-            
-            logger.info(
-                f"模型调用完成: {model_code}, "
-                f"响应时间: {response_time}ms, "
-                f"tokens: {tokens_used}"
-            )
-            
-            return {
-                "content": content,
-                "model_code": model_code,
-                "tokens_used": tokens_used,
-                "response_time": response_time
-            }
-            
-        except Exception as e:
-            response_time = int((time.time() - start_time) * 1000)
-            logger.error(
-                f"模型调用失败: {model_code}, "
-                f"耗时: {response_time}ms, "
-                f"错误: {str(e)}"
-            )
-            raise
-    
-
-    
-    def batch_call(
-        self,
-        requests: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
-        """
-        批量调用模型（顺序执行）
-        
-        Args:
-            requests: 请求列表，每个请求包含：
-                - model_code: 模型代码
-                - prompt: 提示词
-                - max_tokens: 最大token数（可选）
-                - temperature: 温度参数（可选）
-            
-        Returns:
-            响应列表，每个响应包含：
-                - content: 响应内容
-                - model_code: 模型代码
-                - tokens_used: 使用的token数
-                - response_time: 响应时间（毫秒）
-        """
-        results = []
-        
-        for request in requests:
-            try:
-                result = self.call_model(
-                    model_code=request.get("model_code"),
-                    prompt=request.get("prompt", ""),
-                    max_tokens=request.get("max_tokens"),
-                    temperature=request.get("temperature")
-                )
-                results.append(result)
-            except Exception as e:
-                logger.error(f"批量调用失败: {str(e)}")
-                # 失败时返回错误信息
-                results.append({
-                    "content": "",
-                    "model_code": request.get("model_code", ""),
-                    "error": str(e),
-                    "tokens_used": None,
-                    "response_time": None
-                })
-        
-        return results
-    
-    def parallel_call(
-        self,
-        prompt: str,
-        model_codes: List[str],
-        max_tokens: Optional[int] = None,
-        temperature: Optional[float] = None,
-        max_workers: int = 5
-    ) -> List[Dict[str, Any]]:
-        """
-        并行调用多个模型（用于性能对比）
-        
-        Args:
-            prompt: 提示词
-            model_codes: 模型代码列表
-            max_tokens: 最大token数（可选）
-            temperature: 温度参数（可选）
-            max_workers: 最大并发数
-            
-        Returns:
-            响应列表，每个响应包含：
-                - content: 响应内容
-                - model_code: 模型代码
-                - tokens_used: 使用的token数
-                - response_time: 响应时间（毫秒）
-                - error: 错误信息（如果失败）
-        """
-        if not model_codes:
-            return []
-        
-        results = []
-        
-        def call_single_model(model_code: str) -> Dict[str, Any]:
-            """调用单个模型"""
-            start_time = time.time()
-            try:
-                result = self.call_model(
-                    model_code=model_code,
-                    prompt=prompt,
-                    max_tokens=max_tokens,
-                    temperature=temperature
-                )
-                result["model_code"] = model_code
-                return result
-            except Exception as e:
-                response_time = int((time.time() - start_time) * 1000)
-                logger.error(f"并行调用模型失败: {model_code}, 错误: {str(e)}")
-                return {
-                    "content": "",
-                    "model_code": model_code,
-                    "error": str(e),
-                    "tokens_used": None,
-                    "response_time": response_time
-                }
-        
-        # 使用线程池并行执行
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # 提交所有任务
-            future_to_model = {
-                executor.submit(call_single_model, model_code): model_code
-                for model_code in model_codes
-            }
-            
-            # 收集结果（按完成顺序）
-            for future in as_completed(future_to_model):
-                model_code = future_to_model[future]
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as e:
-                    logger.error(f"获取模型{model_code}结果失败: {str(e)}")
-                    results.append({
-                        "content": "",
-                        "model_code": model_code,
-                        "error": str(e),
-                        "tokens_used": None,
-                        "response_time": None
-                    })
-        
-        # 按原始顺序排序
-        model_order = {code: idx for idx, code in enumerate(model_codes)}
-        results.sort(key=lambda x: model_order.get(x.get("model_code", ""), 999))
-        
-        return results
+                f"响应时
