@@ -110,10 +110,10 @@ public class GlobalExceptionHandler {
      * 处理业务异常
      */
     @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleBusinessException(BusinessException e) {
         log.warn("业务异常: [{}] {}", e.getCode(), e.getMessage());
-        return Result.fail(e.getCode() != null ? e.getCode() : ResultCode.BUSINESS_ERROR.getCode(), e.getMessage());
+        return Result.fail(e.getCode() != null ? e.getCode() : ResultCode.PARAM_ERROR.getCode(), e.getMessage());
     }
     
     /**
