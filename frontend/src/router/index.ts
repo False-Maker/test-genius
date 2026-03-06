@@ -5,6 +5,15 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/login',
+      name: 'Login',
+      component: () => import('../views/login/Login.vue'),
+      meta: {
+        title: '登录',
+        public: true
+      }
+    },
+    {
       path: '/',
       redirect: '/requirement'
     },
@@ -319,32 +328,45 @@ const router = createRouter({
   ]
 })
 
-// 全局前置守卫
+// 全局前置守卫（临时禁用登录和权限检查）
 router.beforeEach((to, from, next) => {
-  const userStore = useUserStore()
-  const publicRoutes = ['Login', 'Register']
-  
-  // 检查登录状态
-  if (!userStore.isLoggedIn && !publicRoutes.includes(to.name as string)) {
-    // 保存原始目标路径
-    next({ 
-      name: 'Login', 
-      query: { redirect: to.fullPath } 
-    })
-  } else {
-    // 检查权限
-    if (to.meta.permission && Array.isArray(to.meta.permission)) {
-      const hasPermission = userStore.hasAnyPermission(to.meta.permission as string[])
-      if (!hasPermission) {
-        // 权限不足，跳转到首页或显示403页面
-        next({ path: '/' })
-      } else {
-        next()
-      }
-    } else {
-      next()
-    }
-  }
+  // TODO: 正式环境需要恢复登录和权限检查
+  // const userStore = useUserStore()
+
+  // // 检查是否是公开路由
+  // if (to.meta.public) {
+  //   // 如果已登录且访问登录页，直接跳转到首页
+  //   if (to.name === 'Login' && userStore.isLoggedIn) {
+  //     next({ path: '/' })
+  //     return
+  //   }
+  //   next()
+  //   return
+  // }
+
+  // // 检查登录状态
+  // if (!userStore.isLoggedIn) {
+  //   // 保存原始目标路径
+  //   next({
+  //     name: 'Login',
+  //     query: { redirect: to.fullPath }
+  //   })
+  // } else {
+  //   // 检查权限
+  //   if (to.meta.permission && Array.isArray(to.meta.permission)) {
+  //     const hasPermission = userStore.hasAnyPermission(to.meta.permission as string[])
+  //     if (!hasPermission) {
+  //       // 权限不足，跳转到首页（如果没有权限则停留在当前页或显示提示）
+  //       console.warn(`权限不足，无法访问: ${to.path}, 需要权限: ${to.meta.permission}`)
+  //       next({ path: '/' })  // 跳转到首页重定向
+  //       return
+  //     }
+  //   }
+  //   next()
+  // }
+
+  // 临时：直接放行所有请求
+  next()
 })
 
 // 全局后置钩子

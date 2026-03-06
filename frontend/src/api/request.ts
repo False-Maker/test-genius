@@ -36,12 +36,10 @@ const pendingRequests = new Map<string, AbortController>()
 
 // 创建axios实例
 // 统一使用相对路径，由Vite代理（开发环境）或Nginx代理（生产环境）处理
+// 注意：前端API路径已经包含了 /v1，所以baseURL只需要 /api
 const getBaseURL = () => {
-  // 如果设置了环境变量，使用环境变量
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL
-  }
-  // 否则使用相对路径，由代理处理（开发环境Vite代理，生产环境Nginx代理）
+  // 直接返回 /api，让前端 API 调用自行添加 /v1
+  // 避免环境变量配置错误导致 /api/v1/v1 的问题
   return '/api'
 }
 
