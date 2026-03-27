@@ -1,0 +1,109 @@
+name: Knowledge Base Embedding Backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      kb_id:
+        description: Optional knowledge base ID to scope the backfill
+        required: false
+        type: string
+      batch_size:
+        description: Documents per batch
+        required: false
+        default: "100"
+        type: string
+      max_batches:
+        description: Optional max batch count
+        required: false
+        type: string
+      dry_run:
+        description: Only count missing embeddings
+        required: true
+        default: true
+        type: boolean
+      fail_on_remaining:
+        description: Fail if documents still miss embeddings after execution
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  backfill:
+    name: Run Backfill
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      EMBEDDING_PROVIDER: ${{ secrets.EMBEDDING_PROVIDER }}
+      EMBEDDING_MODEL_NAME: ${{ secrets.EMBEDDING_MODEL_NAME }}
+      EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
+      EMBEDDING_API_BASE: ${{ secrets.EMBEDDING_API_BASE }}
+      OPENAI_EMBEDDING_MODEL: ${{ secrets.OPENAI_EMBEDDING_MODEL }}
+      EMBEDDING_DIMENSION: ${{ secrets.EMBEDDING_DIMENSION }}
+      EMBEDDING_MAX_SEQ_LENGTH: ${{ secrets.EMBEDDING_MAX_SEQ_LENGTH }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+          cache-dependency-path: backend-python/ai-service/requirements.txt
+
+      - name: Validate required secrets
+        run: bash ./scripts/check-required-env.sh kb-backfill
+
+      - name: Install dependencies
+        working-directory: ./backend-python/ai-service
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run knowledge-base embedding backfill
+        working-directory: ./backend-python/ai-service
+        run: |
+          set -euo pipefail
+          args=()
+          if [ -n "${{ github.event.inputs.kb_id }}" ]; then
+            args+=(--kb-id "${{ github.event.inputs.kb_id }}")
+          fi
+          if [ -n "${{ github.event.inputs.batch_size }}" ]; then
+            args+=(--batch-size "${{ github.event.inputs.batch_size }}")
+          fi
+          if [ -n "${{ github.event.inputs.max_batches }}" ]; then
+            args+=(--max-batches "${{ github.event.inputs.max_batches }}")
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          if [ "${{ github.event.inputs.fail_on_remaining }}" = "true" ]; then
+            args+=(--fail-on-remaining)
+          fi
+          args+=(--output-file kb-embedding-backfill-result.json)
+          python scripts/backfill_knowledge_document_embeddings.py "${args[@]}"
+
+      - name: Append workflow summary
+        if: always()
+        working-directory: ./backend-python/ai-service
+        run: |
+          {
+            echo "## Knowledge Base Embedding Backfill"
+            echo
+            if [ -f kb-embedding-backfill-result.json ]; then
+              echo '```json'
+              cat kb-embedding-backfill-result.json
+              echo
+              echo '```'
+            else
+              echo "No result file generated."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload backfill result
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kb-embedding-backfill-result
+          path: backend-python/ai-service/kb-embedding-backfill-result.json
+          retention-days: 7
