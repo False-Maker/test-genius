@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
 
 async function loginThroughUi(page: Page) {
   await page.goto('/login')
@@ -16,14 +16,39 @@ async function loginThroughUi(page: Page) {
   await expect(page.locator('.sidebar-menu')).toBeVisible()
 }
 
+async function seedCaseReuseEmbeddings(request: APIRequestContext) {
+  const initResponse = await request.post('/api/v1/case-reuse/init')
+  expect(initResponse.ok()).toBeTruthy()
+
+  const keywordResponse = await request.get('/api/v1/case-reuse/cases/search/keyword/投保', {
+    params: {
+      topK: 5
+    }
+  })
+  expect(keywordResponse.ok()).toBeTruthy()
+
+  const keywordPayload = await keywordResponse.json()
+  const cases = Array.isArray(keywordPayload.data) ? keywordPayload.data : []
+  expect(cases.length).toBeGreaterThan(0)
+
+  for (const caseItem of cases.slice(0, 3) as Array<{ id?: number; caseId?: number }>) {
+    const caseId = caseItem.caseId ?? caseItem.id
+    expect(caseId).toBeTruthy()
+
+    const embeddingResponse = await request.post(`/api/v1/case-reuse/cases/${caseId}/embedding`)
+    expect(embeddingResponse.ok()).toBeTruthy()
+  }
+}
+
 test('login flow reaches the main shell', async ({ page }) => {
   await loginThroughUi(page)
   await expect(page).toHaveURL(/\/requirement$/)
   await expect(page.locator('.sidebar-menu')).toContainText('知识库')
 })
 
-test('case reuse supports semantic search and embedding update', async ({ page }) => {
+test('case reuse supports semantic search and embedding update', async ({ page, request }) => {
   await loginThroughUi(page)
+  await seedCaseReuseEmbeddings(request)
   await page.goto('/case-reuse')
 
   await expect(page.getByRole('heading', { name: '用例复用管理' })).toBeVisible()
@@ -140,13 +165,34 @@ test('knowledge base supports upload and semantic search', async ({ page }) => {
   const semanticResponse = await semanticResponsePromise
   expect(semanticResponse.ok()).toBeTruthy()
 
-  const semanticPayload = await semanticResponse.json()
-  const documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
+  const isUploadedDocumentHit = (candidateDocuments: Array<{ doc_name?: string; docName?: string }>) => {
+    return candidateDocuments.some((doc) => (doc.doc_name ?? doc.docName) === fileName)
+  }
+
+  let semanticPayload = await semanticResponse.json()
+  let documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
+
+  for (let attempt = 0; attempt < 5 && !isUploadedDocumentHit(documents); attempt += 1) {
+    await page.waitForTimeout(1_000)
+
+    const retryResponsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'POST' &&
+        response.url().includes('/api/v1/knowledge-base/documents/search')
+    })
+
+    await page.getByPlaceholder('Search knowledge base...').fill(fileContent)
+    await page.getByPlaceholder('Search knowledge base...').press('Enter')
+
+    const retryResponse = await retryResponsePromise
+    expect(retryResponse.ok()).toBeTruthy()
+
+    semanticPayload = await retryResponse.json()
+    documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
+  }
+
   expect(documents.length).toBeGreaterThan(0)
 
-  expect(
-    documents.some((doc: { doc_name?: string; docName?: string }) => (doc.doc_name ?? doc.docName) === fileName)
-  ).toBeTruthy()
+  expect(isUploadedDocumentHit(documents)).toBeTruthy()
   await expect(page.locator('.document-grid')).toContainText(fileName)
 })
 
