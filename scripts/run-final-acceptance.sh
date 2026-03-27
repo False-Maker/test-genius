@@ -12,6 +12,7 @@ FINAL_ACCEPTANCE_SUMMARY_FILE="${FINAL_ACCEPTANCE_SUMMARY_FILE:-final-acceptance
 FINAL_ACCEPTANCE_LOG_FILE="${FINAL_ACCEPTANCE_LOG_FILE:-}"
 FINAL_ACCEPTANCE_DOCKER_LOG_FILE="${FINAL_ACCEPTANCE_DOCKER_LOG_FILE:-}"
 SCRIPT_STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+DEV_STACK_SERVICES=(postgres redis backend-java-dev backend-python-dev frontend-dev)
 declare -a STEP_RECORDS=()
 
 if [ -n "$FINAL_ACCEPTANCE_LOG_FILE" ] && [ -z "${FINAL_ACCEPTANCE_LOGGING_INITIALIZED:-}" ]; then
@@ -139,7 +140,7 @@ if [ "$START_DEV_STACK" = "1" ]; then
     echo "Dev stack already running, skip docker compose up -d"
     record_step "Ensure dev stack" "passed"
   else
-    run_step "Ensure dev stack" docker compose --profile dev up -d
+    run_step "Ensure dev stack" docker compose --profile dev up -d "${DEV_STACK_SERVICES[@]}"
   fi
 fi
 
