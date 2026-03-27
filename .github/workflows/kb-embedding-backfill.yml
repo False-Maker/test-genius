@@ -32,7 +32,7 @@ jobs:
     name: Run Backfill
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/test_design_assistant
       EMBEDDING_PROVIDER: ${{ secrets.EMBEDDING_PROVIDER }}
       EMBEDDING_MODEL_NAME: ${{ secrets.EMBEDDING_MODEL_NAME }}
       EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
@@ -43,6 +43,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Start local postgres
+        run: |
+          docker compose --profile dev up -d postgres
+          until docker exec test-design-postgres pg_isready -U postgres; do
+            sleep 2
+          done
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -107,3 +114,8 @@ jobs:
           name: kb-embedding-backfill-result
           path: backend-python/ai-service/kb-embedding-backfill-result.json
           retention-days: 7
+
+      - name: Tear down postgres
+        if: always()
+        run: |
+          docker compose --profile dev down -v || true
