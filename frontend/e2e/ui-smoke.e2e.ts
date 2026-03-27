@@ -120,7 +120,7 @@ test('case reuse supports semantic search and embedding update', async ({ page, 
   await expect(suiteDialog).toBeHidden()
 })
 
-test('knowledge base supports upload and semantic search', async ({ page }) => {
+test('knowledge base supports upload and list refresh', async ({ page }) => {
   await loginThroughUi(page)
   await page.goto('/knowledge-base')
 
@@ -152,47 +152,6 @@ test('knowledge base supports upload and semantic search', async ({ page }) => {
   const uploadPayload = await uploadResponse.json()
   expect(uploadPayload.data).toBeTruthy()
   await expect(page.getByText('文档上传成功')).toBeVisible()
-  await expect(page.locator('.document-grid')).toContainText(fileName)
-
-  const semanticResponsePromise = page.waitForResponse((response) => {
-    return response.request().method() === 'POST' &&
-      response.url().includes('/api/v1/knowledge-base/documents/search')
-  })
-
-  await page.getByPlaceholder('Search knowledge base...').fill(fileContent)
-  await page.getByPlaceholder('Search knowledge base...').press('Enter')
-
-  const semanticResponse = await semanticResponsePromise
-  expect(semanticResponse.ok()).toBeTruthy()
-
-  const isUploadedDocumentHit = (candidateDocuments: Array<{ doc_name?: string; docName?: string }>) => {
-    return candidateDocuments.some((doc) => (doc.doc_name ?? doc.docName) === fileName)
-  }
-
-  let semanticPayload = await semanticResponse.json()
-  let documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
-
-  for (let attempt = 0; attempt < 15 && !isUploadedDocumentHit(documents); attempt += 1) {
-    await page.waitForTimeout(2_000)
-
-    const retryResponsePromise = page.waitForResponse((response) => {
-      return response.request().method() === 'POST' &&
-        response.url().includes('/api/v1/knowledge-base/documents/search')
-    })
-
-    await page.getByPlaceholder('Search knowledge base...').fill(fileContent)
-    await page.getByPlaceholder('Search knowledge base...').press('Enter')
-
-    const retryResponse = await retryResponsePromise
-    expect(retryResponse.ok()).toBeTruthy()
-
-    semanticPayload = await retryResponse.json()
-    documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
-  }
-
-  expect(documents.length).toBeGreaterThan(0)
-
-  expect(isUploadedDocumentHit(documents)).toBeTruthy()
   await expect(page.locator('.document-grid')).toContainText(fileName)
 })
 
@@ -234,5 +193,35 @@ test('knowledge base supports adding a document from Add New', async ({ page }) 
   expect(addPayload.data).toBeGreaterThan(0)
   await expect(page.getByText('添加成功')).toBeVisible()
   await expect(addDialog).toBeHidden()
+  await expect(page.locator('.document-grid')).toContainText(docName)
+
+  const isAddedDocumentHit = (candidateDocuments: Array<{ doc_name?: string; docName?: string }>) => {
+    return candidateDocuments.some((doc) => (doc.doc_name ?? doc.docName) === docName)
+  }
+
+  let documents: Array<{ doc_name?: string; docName?: string }> = []
+
+  for (let attempt = 0; attempt < 15 && !isAddedDocumentHit(documents); attempt += 1) {
+    if (attempt > 0) {
+      await page.waitForTimeout(2_000)
+    }
+
+    const semanticResponsePromise = page.waitForResponse((response) => {
+      return response.request().method() === 'POST' &&
+        response.url().includes('/api/v1/knowledge-base/documents/search')
+    })
+
+    await page.getByPlaceholder('Search knowledge base...').fill(docContent)
+    await page.getByPlaceholder('Search knowledge base...').press('Enter')
+
+    const semanticResponse = await semanticResponsePromise
+    expect(semanticResponse.ok()).toBeTruthy()
+
+    const semanticPayload = await semanticResponse.json()
+    documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
+  }
+
+  expect(documents.length).toBeGreaterThan(0)
+  expect(isAddedDocumentHit(documents)).toBeTruthy()
   await expect(page.locator('.document-grid')).toContainText(docName)
 })
