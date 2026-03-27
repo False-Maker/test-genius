@@ -33,5 +33,9 @@ ensure_playwright_libs
 
 export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
+if [[ -z "${E2E_BASE_URL:-}" && -n "${FRONTEND_DEV_PORT:-}" ]]; then
+  export E2E_BASE_URL="http://127.0.0.1:${FRONTEND_DEV_PORT}"
+fi
+
 cd "$ROOT_DIR"
 exec npx playwright test -c playwright.smoke.config.ts "$@"
