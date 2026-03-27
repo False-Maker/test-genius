@@ -72,7 +72,7 @@ services:
     image: maven:3.9-eclipse-temurin-17
     container_name: test-design-backend-java-dev
     working_dir: /workspace
-    command: mvn -pl test-design-assistant-core -am spring-boot:run
+    command: mvn -f test-design-assistant-core/pom.xml spring-boot:run
     ports:
       - "8081:8080"
     environment:
@@ -81,7 +81,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      APP_AI_SERVICE_URL: http://backend-python:8000
+      APP_AI_SERVICE_URL: http://backend-python-dev:8000
       # 与 volumes 挂载点一致
       APP_UPLOAD_BASE_PATH: /workspace/uploads
     volumes:
@@ -108,10 +108,13 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_design_assistant
-      EMBEDDING_PROVIDER: local
-      EMBEDDING_MODEL_NAME: BAAI/bge-m3
+      JAVA_API_BASE_URL: http://backend-java:8080
+      EMBEDDING_PROVIDER: openai
+      EMBEDDING_API_KEY: ${BIGMODEL_API_KEY}
+      EMBEDDING_API_BASE: ${BIGMODEL_API_BASE}
+      OPENAI_EMBEDDING_MODEL: ${BIGMODEL_EMBEDDING_MODEL}
       EMBEDDING_MAX_SEQ_LENGTH: 8192
-      EMBEDDING_DIMENSION: 1024
+      EMBEDDING_DIMENSION: ${BIGMODEL_EMBEDDING_DIMENSION}
     depends_on:
       postgres:
         condition: service_healthy
@@ -125,24 +128,35 @@ services:
       - test-design-network
 
   backend-python-dev:
-    image: python:3.10-slim
+    build:
+      context: ./backend-python/ai-service
+      dockerfile: Dockerfile
     container_name: test-design-backend-python-dev
     working_dir: /app
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8001:8000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test_design_assistant
+      JAVA_API_BASE_URL: http://backend-java-dev:8080
       PYTHONUNBUFFERED: "1"
-      EMBEDDING_PROVIDER: local
-      EMBEDDING_MODEL_NAME: BAAI/bge-m3
+      EMBEDDING_PROVIDER: openai
+      EMBEDDING_API_KEY: ${BIGMODEL_API_KEY}
+      EMBEDDING_API_BASE: ${BIGMODEL_API_BASE}
+      OPENAI_EMBEDDING_MODEL: ${BIGMODEL_EMBEDDING_MODEL}
       EMBEDDING_MAX_SEQ_LENGTH: 8192
-      EMBEDDING_DIMENSION: 1024
+      EMBEDDING_DIMENSION: ${BIGMODEL_EMBEDDING_DIMENSION}
     volumes:
       - ./backend-python/ai-service:/app
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
     profiles:
       - dev
     networks:
@@ -174,9 +188,10 @@ services:
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
     ports:
-      - "3000:5173"
+      - "${FRONTEND_DEV_PORT:-3000}:5173"
     environment:
       CHOKIDAR_USEPOLLING: "true"
+      VITE_API_PROXY_TARGET: http://backend-java-dev:8080
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
