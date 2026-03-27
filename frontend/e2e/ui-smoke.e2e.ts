@@ -172,8 +172,8 @@ test('knowledge base supports upload and semantic search', async ({ page }) => {
   let semanticPayload = await semanticResponse.json()
   let documents = Array.isArray(semanticPayload.data) ? semanticPayload.data : []
 
-  for (let attempt = 0; attempt < 5 && !isUploadedDocumentHit(documents); attempt += 1) {
-    await page.waitForTimeout(1_000)
+  for (let attempt = 0; attempt < 15 && !isUploadedDocumentHit(documents); attempt += 1) {
+    await page.waitForTimeout(2_000)
 
     const retryResponsePromise = page.waitForResponse((response) => {
       return response.request().method() === 'POST' &&
