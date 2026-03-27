@@ -221,6 +221,20 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.4</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <spring.datasource.url>jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;INIT=CREATE DOMAIN IF NOT EXISTS JSONB AS VARCHAR</spring.datasource.url>
+                        <spring.datasource.driver-class-name>org.h2.Driver</spring.datasource.driver-class-name>
+                        <spring.datasource.username>sa</spring.datasource.username>
+                        <spring.datasource.password></spring.datasource.password>
+                        <spring.flyway.enabled>false</spring.flyway.enabled>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <!-- JaCoCo (代码覆盖率) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -263,4 +277,3 @@
         </plugins>
     </build>
 </project>
-

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.services.case_reuse_service import CaseReuseService
 
-router = APIRouter(prefix="/api/case-reuse", tags=["用例复用"])
+router = APIRouter(prefix="/case-reuse", tags=["用例复用"])
 
 
 class SimilarCaseSearchRequest(BaseModel):
@@ -161,4 +161,3 @@ async def create_case_suite(
             return {"success": False, "message": "用例套件创建失败"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"创建失败: {str(e)}")
-

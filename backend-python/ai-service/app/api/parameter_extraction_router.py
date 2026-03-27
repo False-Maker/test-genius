@@ -2,7 +2,7 @@
 参数提取API路由
 """
 from fastapi import APIRouter, HTTPException, Depends, Body
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List, Dict, Any, Union
 import logging
 from sqlalchemy.orm import Session
@@ -23,6 +23,8 @@ class TestCaseInfo(BaseModel):
 
 class ParameterExtractionRequest(BaseModel):
     """参数提取请求"""
+    model_config = ConfigDict(protected_namespaces=())
+
     test_cases: List[TestCaseInfo]
     model_code: Optional[str] = None
     use_llm: bool = True

@@ -124,7 +124,8 @@ describe('CaseGenerationAPI', () => {
 
       expect(result.data).toEqual(mockBlob)
       expect(request.get).toHaveBeenCalledWith('/v1/case-generation/tasks/1/export-excel', {
-        responseType: 'blob'
+        responseType: 'blob',
+        responseMode: 'blob'
       })
     })
   })

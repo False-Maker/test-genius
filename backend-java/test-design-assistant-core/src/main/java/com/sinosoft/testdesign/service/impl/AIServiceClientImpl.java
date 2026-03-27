@@ -9,9 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,25 +63,37 @@ public class AIServiceClientImpl implements AIServiceClient {
             log.error("没有可用的模型配置");
             throw new RuntimeException("没有可用的模型配置");
         }
-        
+
+        List<ModelConfig> configuredModels = new ArrayList<>();
+        for (ModelConfig model : activeModels) {
+            if (StringUtils.hasText(model.getApiKey())) {
+                configuredModels.add(model);
+            } else {
+                log.warn("跳过未配置 API Key 的模型: {}", model.getModelCode());
+            }
+        }
+        if (configuredModels.isEmpty()) {
+            throw new RuntimeException("没有已配置 API Key 的可用模型");
+        }
+
         // 如果指定了首选模型，优先使用
         ModelConfig preferredModel = null;
         if (preferredModelCode != null) {
-            preferredModel = activeModels.stream()
+            preferredModel = configuredModels.stream()
                     .filter(m -> preferredModelCode.equals(m.getModelCode()))
                     .findFirst()
                     .orElse(null);
         }
-        
+
         // 构建模型列表：首选模型 + 其他模型
         List<ModelConfig> modelsToTry = preferredModel != null 
                 ? List.of(preferredModel) 
-                : activeModels;
-        
+                : configuredModels;
+
         // 如果首选模型不在列表开头，需要调整顺序
-        if (preferredModel != null && !activeModels.isEmpty() && 
-            !activeModels.get(0).getModelCode().equals(preferredModelCode)) {
-            modelsToTry = new java.util.ArrayList<>(activeModels);
+        if (preferredModel != null && !configuredModels.isEmpty() &&
+            !configuredModels.get(0).getModelCode().equals(preferredModelCode)) {
+            modelsToTry = new ArrayList<>(configuredModels);
             modelsToTry.remove(preferredModel);
             modelsToTry.add(0, preferredModel);
         }
@@ -136,6 +151,10 @@ public class AIServiceClientImpl implements AIServiceClient {
         log.debug("调用AI服务: POST {}", url);
         try {
             return restTemplate.postForObject(url, request, Map.class);
+        } catch (HttpStatusCodeException e) {
+            String upstreamMessage = extractUpstreamMessage(e.getResponseBodyAsString());
+            log.error("AI服务调用失败: status={}, message={}", e.getStatusCode(), upstreamMessage);
+            throw new RuntimeException(upstreamMessage, e);
         } catch (RestClientException e) {
             log.error("AI服务调用失败: {}", e.getMessage());
             throw e;
@@ -147,5 +166,24 @@ public class AIServiceClientImpl implements AIServiceClient {
         log.debug("调用AI服务: GET {}", url);
         return restTemplate.getForObject(url, Map.class);
     }
-}
 
+    private String extractUpstreamMessage(String responseBody) {
+        if (!StringUtils.hasText(responseBody)) {
+            return "AI服务调用失败";
+        }
+
+        String body = responseBody.trim();
+        int detailIndex = body.indexOf("\"detail\"");
+        if (detailIndex >= 0) {
+            int colonIndex = body.indexOf(':', detailIndex);
+            int firstQuoteIndex = body.indexOf('"', colonIndex + 1);
+            int lastQuoteIndex = body.lastIndexOf('"');
+            if (colonIndex >= 0 && firstQuoteIndex >= 0 && lastQuoteIndex > firstQuoteIndex) {
+                return body.substring(firstQuoteIndex + 1, lastQuoteIndex)
+                        .replace("\\\"", "\"");
+            }
+        }
+
+        return body;
+    }
+}

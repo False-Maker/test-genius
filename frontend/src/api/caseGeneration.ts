@@ -143,7 +143,8 @@ export const caseGenerationApi = {
   // 导出任务用例到Excel
   exportTaskToExcel(taskId: number) {
     return request.get<Blob>(`/v1/case-generation/tasks/${taskId}/export-excel`, {
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   }
 }

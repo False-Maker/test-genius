@@ -1,5 +1,5 @@
 import request from './request'
-import type { ApiResult, PageResult } from './types'
+import type { PageResult } from './types'
 
 // 提示词模板相关类型定义
 export interface PromptTemplate {
@@ -39,7 +39,7 @@ export const promptTemplateApi = {
 
   // 查询模板列表
   getTemplateList(params: PromptTemplateListParams = {}) {
-    return request.get<ApiResult<PageResult<PromptTemplate>>>('/v1/prompt-templates', { params })
+    return request.get<PageResult<PromptTemplate>>('/v1/prompt-templates', { params })
   },
 
   // 获取模板详情

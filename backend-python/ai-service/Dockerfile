@@ -3,16 +3,23 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 系统依赖：Node.js（Mermaid CLI）、Chromium（mmdc 导出 PNG/PDF）、wget/curl（健康检查）
-RUN apt-get update -o Acquire::Check-Valid-Until=false || true && \
-    apt-get install -y --no-install-recommends \
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+        sed -i 's|http://deb.debian.org/debian|https://mirrors.tuna.tsinghua.edu.cn/debian|g; s|http://deb.debian.org/debian-security|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources; \
+    fi; \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|http://deb.debian.org/debian|https://mirrors.tuna.tsinghua.edu.cn/debian|g; s|http://deb.debian.org/debian-security|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g' /etc/apt/sources.list; \
+    fi; \
+    apt-get update -o Acquire::Retries=3 -o Acquire::Check-Valid-Until=false; \
+    apt-get install -y --fix-missing --no-install-recommends \
     bash \
     curl \
     ca-certificates \
     wget \
     chromium \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    nodejs \
+    npm; \
+    rm -rf /var/lib/apt/lists/*
 
 # 使用系统 Chromium，避免 Puppeteer 重复下载
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
@@ -42,4 +49,3 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
 
 # 启动命令
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -69,6 +70,12 @@ class IntelligentCaseGenerationServiceImplTest {
     
     @Mock
     private BusinessMetricsCollector metricsCollector;
+
+    @Mock
+    private ApplicationContext applicationContext;
+
+    @Mock
+    private IntelligentCaseGenerationServiceImpl selfProxy;
     
     @InjectMocks
     private IntelligentCaseGenerationServiceImpl intelligentCaseGenerationService;
@@ -85,6 +92,8 @@ class IntelligentCaseGenerationServiceImplTest {
         objectMapper = new ObjectMapper();
         ReflectionTestUtils.setField(intelligentCaseGenerationService, "objectMapper", objectMapper);
         ReflectionTestUtils.setField(intelligentCaseGenerationService, "aiServiceUrl", "http://localhost:8000");
+        lenient().when(applicationContext.getBean(IntelligentCaseGenerationServiceImpl.class)).thenReturn(selfProxy);
+        lenient().doNothing().when(selfProxy).executeGenerationTask(anyLong());
         
         // 初始化测试数据
         testRequirement = new TestRequirement();
@@ -458,4 +467,3 @@ class IntelligentCaseGenerationServiceImplTest {
         assertEquals(1, result.getTaskIds().size());
     }
 }
-

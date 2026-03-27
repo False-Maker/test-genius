@@ -227,7 +227,7 @@ class TestAgentContextService:
         """测试token估算"""
         text = "这是一个测试文本" * 4  # 16个字符
         tokens = context_service.estimate_tokens(text)
-        assert tokens == 4  # 16 / 4
+        assert tokens == len(text) // 4
 
     def test_estimate_context_tokens(self, context_service):
         """测试上下文token估算"""

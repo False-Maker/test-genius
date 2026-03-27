@@ -1,5 +1,5 @@
 import request from './request'
-import type { ApiResult, PageResult, TestCaseImportResult } from './types'
+import type { PageResult, TestCaseImportResult } from './types'
 
 // 用例相关类型定义
 export interface TestCase {
@@ -39,7 +39,7 @@ export const testCaseApi = {
 
 // 查询用例列表
   getTestCaseList(params: TestCaseListParams = {}) {
-    return request.get<ApiResult<PageResult<TestCase>>>('/v1/test-cases', { params })
+    return request.get<PageResult<TestCase>>('/v1/test-cases', { params })
   },
 
   // 获取用例详情
@@ -79,14 +79,16 @@ export const testCaseApi = {
   }) {
     return request.get('/v1/test-cases/export', {
       params,
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   },
 
   // 导出用例模板
   exportTemplate() {
     return request.get('/v1/test-cases/export-template', {
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   },
 
@@ -101,4 +103,3 @@ export const testCaseApi = {
     })
   }
 }
-

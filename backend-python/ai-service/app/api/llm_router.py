@@ -3,7 +3,7 @@
 """
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from sqlalchemy.orm import Session
 import logging
@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 class LLMRequest(BaseModel):
     """模型调用请求"""
+    model_config = ConfigDict(protected_namespaces=())
+
     model_code: str = Field(..., min_length=1, description="模型代码")
     prompt: str = Field(..., min_length=1, description="提示词")
     max_tokens: Optional[int] = None
@@ -25,6 +27,8 @@ class LLMRequest(BaseModel):
 
 class LLMResponse(BaseModel):
     """模型响应"""
+    model_config = ConfigDict(protected_namespaces=())
+
     content: str
     model_code: str
     tokens_used: Optional[int] = None
@@ -177,6 +181,8 @@ async def batch_call_llm(batch_request: BatchLLMRequest, db: Session = Depends(g
 
 class ParallelCallRequest(BaseModel):
     """并行调用请求（用于模型性能对比）"""
+    model_config = ConfigDict(protected_namespaces=())
+
     prompt: str
     model_codes: List[str] = Field(..., min_items=1, max_items=10, description="模型代码列表")
     max_tokens: Optional[int] = None

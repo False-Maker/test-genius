@@ -2,6 +2,8 @@ package com.sinosoft.testdesign.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -56,6 +58,7 @@ public class AgentSession {
      * 上下文数据（JSON格式）
      * 包含：对话历史、工具调用历史等
      */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "context_data", columnDefinition = "JSONB")
     private String contextData;
     
@@ -111,4 +114,3 @@ public class AgentSession {
         lastActiveTime = LocalDateTime.now();
     }
 }
-

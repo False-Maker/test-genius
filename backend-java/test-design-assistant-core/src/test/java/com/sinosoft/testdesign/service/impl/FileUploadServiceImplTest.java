@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,9 +42,10 @@ class FileUploadServiceImplTest {
     @BeforeEach
     void setUp() {
         // 设置测试用的基础路径
-        ReflectionTestUtils.setField(fileUploadService, "basePath", tempDir.toString());
+        ReflectionTestUtils.setField(fileUploadService, "basePathConfig", tempDir.toString());
         ReflectionTestUtils.setField(fileUploadService, "maxFileSize", 104857600L); // 100MB
         ReflectionTestUtils.setField(fileUploadService, "urlPrefix", "/api/v1/files");
+        fileUploadService.init();
         
         // 创建模拟文件
         mockFile = mock(MultipartFile.class);
@@ -65,7 +68,7 @@ class FileUploadServiceImplTest {
         
         // Then
         assertNotNull(result);
-        assertTrue(result.contains("2024") || result.contains("2025")); // 包含日期路径
+        assertTrue(result.startsWith(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))));
         assertTrue(result.endsWith(".docx"));
         verify(mockFile, times(1)).getInputStream();
     }
@@ -101,7 +104,6 @@ class FileUploadServiceImplTest {
         // Given
         when(mockFile.isEmpty()).thenReturn(false);
         when(mockFile.getSize()).thenReturn(104857601L); // 超过100MB
-        when(mockFile.getOriginalFilename()).thenReturn("large.pdf");
         
         // When & Then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
@@ -279,4 +281,3 @@ class FileUploadServiceImplTest {
         }
     }
 }
-

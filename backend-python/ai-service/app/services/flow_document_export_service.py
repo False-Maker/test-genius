@@ -2,6 +2,7 @@
 流程文档导出服务
 支持将Mermaid代码导出为PNG、SVG、PDF等格式
 """
+import json
 import logging
 import os
 import tempfile
@@ -21,6 +22,26 @@ class FlowDocumentExportService:
         self.temp_dir = Path(tempfile.gettempdir()) / "mermaid_exports"
         self.temp_dir.mkdir(parents=True, exist_ok=True)
         self._check_mermaid_cli()
+
+    def _get_puppeteer_config_path(self) -> Path:
+        """生成 Puppeteer 配置，避免容器内 root 用户触发 Chromium sandbox 限制。"""
+        config_path = self.temp_dir / "puppeteer-config.json"
+        config = {
+            "args": [
+                "--no-sandbox",
+                "--disable-setuid-sandbox"
+            ]
+        }
+
+        executable_path = os.getenv("PUPPETEER_EXECUTABLE_PATH")
+        if executable_path:
+            config["executablePath"] = executable_path
+
+        config_path.write_text(
+            json.dumps(config, ensure_ascii=False),
+            encoding="utf-8"
+        )
+        return config_path
     
     def _check_mermaid_cli(self) -> bool:
         """检查Mermaid CLI是否可用"""
@@ -125,6 +146,7 @@ class FlowDocumentExportService:
                 "mmdc",
                 "-i", str(mermaid_file),
                 "-o", str(output_file),
+                "-p", str(self._get_puppeteer_config_path()),
                 "-w", str(width),
                 "-H", str(height),
                 "-b", "transparent"  # 透明背景

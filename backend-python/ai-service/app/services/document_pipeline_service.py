@@ -231,6 +231,8 @@ class DocumentPipelineService:
             # 获取文件信息
             path_obj = Path(file_path)
             file_size = path_obj.stat().st_size if path_obj.exists() else 0
+            doc_embedding = self.embedding_service.get_embedding(doc_content)
+            embedding_list = str(doc_embedding) if doc_embedding else None
             
             # 提取元数据中的字段
             language = metadata.get("language", "unknown")
@@ -255,11 +257,11 @@ class DocumentPipelineService:
             insert_sql = """
             INSERT INTO knowledge_document 
             (doc_code, kb_id, doc_name, doc_type, doc_category, doc_content, 
-             file_size, file_path, language, encoding, page_count, slide_count, 
+             embedding, file_size, file_path, language, encoding, page_count, slide_count, 
              row_count, column_count, table_count, metadata)
             VALUES 
             (:doc_code, :kb_id, :doc_name, :doc_type, :doc_category, :doc_content,
-             :file_size, :file_path, :language, :encoding, :page_count, :slide_count,
+             CAST(:embedding AS vector), :file_size, :file_path, :language, :encoding, :page_count, :slide_count,
              :row_count, :column_count, :table_count, CAST(:metadata AS jsonb))
             RETURNING id
             """
@@ -273,6 +275,7 @@ class DocumentPipelineService:
                     "doc_type": doc_type,
                     "doc_category": doc_category,
                     "doc_content": doc_content,
+                    "embedding": embedding_list,
                     "file_size": file_size,
                     "file_path": file_path,
                     "language": language,
@@ -383,7 +386,12 @@ class DocumentPipelineService:
                 if chunk_id:
                     update_sql = """
                     UPDATE knowledge_document_chunk
-                    SET metadata = jsonb_set(metadata, '{keywords}', :keywords::jsonb)
+                    SET metadata = jsonb_set(
+                        COALESCE(metadata, '{}'::jsonb),
+                        '{keywords}',
+                        CAST(:keywords AS jsonb),
+                        true
+                    )
                     WHERE chunk_id = :chunk_id
                     """
                     
@@ -489,4 +497,3 @@ class DocumentPipelineService:
         
         logger.info(f"批量处理完成: 成功={results['success']}, 失败={results['failed']}")
         return results
-

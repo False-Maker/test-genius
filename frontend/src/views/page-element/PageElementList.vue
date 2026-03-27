@@ -536,7 +536,7 @@ const handleDelete = async (row: PageElementInfoResponseDTO) => {
         }
         loadElementList()
     } catch(e) {
-        logger.error(e)
+        logger.error('删除页面元素失败', e)
     }
 }
 
@@ -556,7 +556,7 @@ const handleSubmit = async () => {
                 dialogVisible.value = false
                 loadElementList()
             } catch (e) {
-                logger.error(e)
+                logger.error('保存页面元素失败', e)
             } finally {
                 submitLoading.value = false
             }

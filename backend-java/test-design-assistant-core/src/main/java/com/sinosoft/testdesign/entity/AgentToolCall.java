@@ -2,6 +2,8 @@ package com.sinosoft.testdesign.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -49,12 +51,14 @@ public class AgentToolCall {
     /**
      * 调用参数（JSON格式）
      */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "call_arguments", nullable = false, columnDefinition = "JSONB")
     private String callArguments;
     
     /**
      * 调用结果（JSON格式）
      */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "call_result", columnDefinition = "JSONB")
     private String callResult;
     
@@ -90,4 +94,3 @@ public class AgentToolCall {
         createTime = LocalDateTime.now();
     }
 }
-

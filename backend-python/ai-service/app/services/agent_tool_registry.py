@@ -274,8 +274,9 @@ def get_registry() -> ToolRegistry:
             if _global_registry is None:
                 _global_registry = ToolRegistry()
                 # 自动加载测试工具
+                tools_dir = Path(__file__).resolve().parent / "agent_tools"
                 _global_registry.load_from_directory(
-                    "backend-python/ai-service/app/services/agent_tools",
+                    str(tools_dir),
                     "*.py"
                 )
     return _global_registry
@@ -302,4 +303,3 @@ def register_tool_class(tool_class: Type[BaseTool], implementation_path: str = "
     """
     registry = get_registry()
     registry.register_class(tool_class, implementation_path)
-

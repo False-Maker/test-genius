@@ -1,5 +1,5 @@
 import request from './request'
-import type { ApiResult, PageResult } from './types'
+import type { PageResult } from './types'
 
 // 测试执行任务相关类型
 export interface TestExecutionTaskRequest {
@@ -124,7 +124,7 @@ export const testExecutionApi = {
 
 // 查询执行任务列表
   getExecutionTaskList(params?: TestExecutionTaskListParams) {
-    return request.get<ApiResult<PageResult<TestExecutionTaskResponse>>>('/v1/test-execution/tasks', { params })
+    return request.get<PageResult<TestExecutionTaskResponse>>('/v1/test-execution/tasks', { params })
   },
 
   // 获取执行任务详情（根据ID）
@@ -170,7 +170,7 @@ export const testExecutionApi = {
 
 // 查询执行记录列表
   getExecutionRecordList(params?: TestExecutionRecordListParams) {
-    return request.get<ApiResult<PageResult<TestExecutionRecordResponse>>>('/v1/test-execution/records', { params })
+    return request.get<PageResult<TestExecutionRecordResponse>>('/v1/test-execution/records', { params })
   },
 
   // 获取执行记录详情（根据ID）
@@ -202,4 +202,3 @@ export const testExecutionApi = {
     return request.get<TestExecutionStatistics>('/v1/test-execution/statistics', { params })
   }
 }
-

@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -280,7 +279,7 @@ class RequirementServiceImplTest {
         requirements.add(testRequirement);
         Page<TestRequirement> page = new PageImpl<>(requirements, pageable, 1);
         
-        when(requirementRepository.findAll(any(Specification.class), eq(pageable)))
+        when(requirementRepository.findWithFilters(null, null, pageable))
             .thenReturn(page);
         
         // When
@@ -289,7 +288,7 @@ class RequirementServiceImplTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(requirementRepository, times(1)).findAll(any(Specification.class), eq(pageable));
+        verify(requirementRepository, times(1)).findWithFilters(null, null, pageable);
     }
     
     @Test
@@ -302,7 +301,7 @@ class RequirementServiceImplTest {
         requirements.add(testRequirement);
         Page<TestRequirement> page = new PageImpl<>(requirements, pageable, 1);
         
-        when(requirementRepository.findAll(any(Specification.class), eq(pageable)))
+        when(requirementRepository.findWithFilters(requirementName, null, pageable))
             .thenReturn(page);
         
         // When
@@ -311,7 +310,7 @@ class RequirementServiceImplTest {
         // Then
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(requirementRepository, times(1)).findAll(any(Specification.class), eq(pageable));
+        verify(requirementRepository, times(1)).findWithFilters(requirementName, null, pageable);
     }
     
     @Test
@@ -369,4 +368,3 @@ class RequirementServiceImplTest {
         verify(requirementRepository, never()).deleteById(any());
     }
 }
-

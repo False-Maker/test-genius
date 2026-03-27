@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.entity.AlertRecord;
 import com.sinosoft.testdesign.entity.AlertRule;
 import com.sinosoft.testdesign.repository.AlertRuleRepository;
+import com.sinosoft.testdesign.repository.NotificationMessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,7 +42,16 @@ class NotificationServiceImplTest {
     private AlertRuleRepository alertRuleRepository;
 
     @Mock
+    private NotificationMessageRepository notificationMessageRepository;
+
+    @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private RestTemplate restTemplate;
+
+    @Mock
+    private ApplicationContext applicationContext;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;

@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 
 import { ElMessage, ElLoading } from 'element-plus'
 import type { LoadingInstance } from 'element-plus/es/components/loading/src/loading'
 import { useUserStore } from '@/store/user'
+import type { ApiResult } from './types'
 
 // 加载状态管理
 let loadingInstance: LoadingInstance | null = null
@@ -49,6 +50,13 @@ const service: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json'
   }
+})
+
+const wrapAsSuccessResult = <T>(data: T, message = 'Success'): ApiResult<T> => ({
+  code: 200,
+  message,
+  data,
+  timestamp: Date.now()
 })
 
 // 请求拦截器
@@ -104,15 +112,28 @@ service.interceptors.response.use(
     const requestKey = `${response.config.method}-${response.config.url}-${JSON.stringify(response.config.params || response.config.data)}`
     pendingRequests.delete(requestKey)
     
+    const responseMode = response.config.responseMode || (response.config.responseType === 'blob' ? 'blob' : 'result')
     const res = response.data
-    
-    // 如果返回的状态码不是200，则视为错误
-    if (res.code !== 200 && res.code !== 0) {
-      ElMessage.error(res.message || '请求失败')
-      return Promise.reject(new Error(res.message || '请求失败'))
+
+    if (responseMode === 'blob') {
+      return wrapAsSuccessResult(res)
     }
-    
-    return res
+
+    if (responseMode === 'plain') {
+      return wrapAsSuccessResult(res)
+    }
+
+    if (res && typeof res === 'object' && 'code' in res) {
+      // 如果返回的状态码不是200，则视为错误
+      if (res.code !== 200 && res.code !== 0) {
+        ElMessage.error(res.message || '请求失败')
+        return Promise.reject(new Error(res.message || '请求失败'))
+      }
+
+      return res
+    }
+
+    return wrapAsSuccessResult(res)
   },
   (error) => {
     // 隐藏加载状态
@@ -172,6 +193,7 @@ service.interceptors.response.use(
 declare module 'axios' {
   export interface AxiosRequestConfig {
     showLoading?: boolean
+    responseMode?: 'result' | 'plain' | 'blob'
   }
 }
 

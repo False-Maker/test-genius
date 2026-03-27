@@ -157,6 +157,10 @@ management:
         enabled: true
     tags:
       application: ${spring.application.name}
+  tracing:
+    enabled: false  # 默认关闭 tracing；需要 Zipkin 时通过环境变量显式开启
+    sampling:
+      probability: 1.0
   health:
     liveness-state:
       enabled: true
@@ -166,14 +170,9 @@ management:
       enabled: true
     redis:
       enabled: true
-  # Spring Cloud Sleuth配置（链路追踪）
-  tracing:
-    sampling:
-      probability: 1.0  # 采样率：100%（生产环境建议根据实际情况调整）
   zipkin:
     tracing:
-      enabled: false  # 禁用Zipkin（未部署Zipkin服务时避免Connection refused报错）
-      endpoint: http://localhost:9411/api/v2/spans  # Zipkin服务地址（启用时取消注释enabled）
+      endpoint: http://localhost:9411/api/v2/spans  # 启用 tracing 时使用的 Zipkin 服务地址
 
 # Resilience4j配置（限流和熔断）
 resilience4j:

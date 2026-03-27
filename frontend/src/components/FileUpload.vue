@@ -175,7 +175,7 @@ const customUpload = async (options: any) => {
   const response = await fileUploadApi.uploadFile(file)
 
     if (response.data) {
-      handleSuccess(response.data, file as UploadFile)
+      handleSuccess(response, file as UploadFile)
     } else {
       handleError(new Error(response.message || '上传失败'), file as UploadFile)
     }
@@ -521,6 +521,5 @@ watch(() => props.modelValue, () => {
 }
 
 </style>
-
 
 

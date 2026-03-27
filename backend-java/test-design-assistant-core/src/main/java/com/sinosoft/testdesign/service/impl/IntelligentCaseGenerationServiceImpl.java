@@ -14,6 +14,7 @@ import com.sinosoft.testdesign.service.SpecificationCheckService;
 import com.sinosoft.testdesign.service.TestCaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final BusinessMetricsCollector metricsCollector;
+    private final ApplicationContext applicationContext;
     
     @Value("${app.ai-service.url:http://localhost:8000}")
     private String aiServiceUrl;
@@ -114,7 +116,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
         metricsCollector.recordCaseGenerationTaskCreated();
         
         // 异步执行任务
-        executeGenerationTask(task.getId());
+        applicationContext.getBean(IntelligentCaseGenerationServiceImpl.class).executeGenerationTask(task.getId());
         
         // 返回结果
         CaseGenerationResult result = new CaseGenerationResult();
@@ -212,7 +214,7 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
                 taskIds.add(task.getId());
                 
                 // 异步执行任务
-                executeGenerationTask(task.getId());
+	                applicationContext.getBean(IntelligentCaseGenerationServiceImpl.class).executeGenerationTask(task.getId());
                 successCount++;
                 
             } catch (Exception e) {
@@ -729,4 +731,3 @@ public class IntelligentCaseGenerationServiceImpl implements IntelligentCaseGene
         return dto;
     }
 }
-

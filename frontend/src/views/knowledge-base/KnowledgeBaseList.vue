@@ -435,7 +435,7 @@ const viewDialogVisible = ref(false)
 const formRef = ref<FormInstance>()
 const uploadRef = ref()
 const fileList = ref<any[]>([])
-const currentKBId = ref<number>(1) // 默认知识库ID，实际应从配置或选择获取
+const currentKBId = ref<number | null>(null)
 
 const documentList = ref<KnowledgeDocument[]>([])
 const searchType = ref<'semantic' | 'keyword'>('semantic')
@@ -459,11 +459,47 @@ const viewData = ref<KnowledgeDocument>({
   docContent: ''
 })
 
+const ensureCurrentKnowledgeBase = async (createIfMissing = false) => {
+  if (currentKBId.value) {
+    return currentKBId.value
+  }
+
+  const kbListResponse = await knowledgeBaseApi.listKnowledgeBases()
+  const firstKb = kbListResponse.data?.[0]
+  if (firstKb?.id) {
+    currentKBId.value = firstKb.id
+    return currentKBId.value
+  }
+
+  if (!createIfMissing) {
+    return null
+  }
+
+  const codeResponse = await knowledgeBaseApi.generateKbCode()
+  const createResponse = await knowledgeBaseApi.createKnowledgeBase({
+    kbCode: codeResponse.data || `KB-AUTO-${Date.now()}`,
+    kbName: '默认知识库',
+    kbDescription: 'Auto-created for document upload in development.',
+    kbType: 'private',
+    creatorId: 1,
+    isActive: '1'
+  })
+
+  currentKBId.value = createResponse.data
+  return currentKBId.value
+}
+
 const loadDocuments = async () => {
   loading.value = true
   try {
-    const response = await knowledgeBaseApi.listDocuments(currentKBId.value, 20)
-      documentList.value = response.data?.data || []
+    const kbId = await ensureCurrentKnowledgeBase()
+    if (!kbId) {
+      documentList.value = []
+      return
+    }
+
+    const response = await knowledgeBaseApi.listDocuments(kbId, 20)
+    documentList.value = response.data || []
   } catch (error) {
     logger.error('加载文档失败', error)
   } finally {
@@ -515,9 +551,15 @@ const handleAdd = () => {
 }
 
 // 上传文档
-const handleUpload = () => {
-  resetUploadForm()
-  uploadDialogVisible.value = true
+const handleUpload = async () => {
+  try {
+    await ensureCurrentKnowledgeBase(true)
+    resetUploadForm()
+    uploadDialogVisible.value = true
+  } catch (error) {
+    logger.error('准备上传知识库失败', error)
+    ElMessage.error('准备上传失败')
+  }
 }
 
 // 文件选择
@@ -540,7 +582,12 @@ const handleUploadSubmit = async () => {
   
   uploadLoading.value = true
   try {
-    const response = await knowledgeBaseApi.uploadDocument(currentKBId.value, file)
+    const kbId = await ensureCurrentKnowledgeBase(true)
+    if (!kbId) {
+      throw new Error('知识库未就绪')
+    }
+
+    const response = await knowledgeBaseApi.uploadDocument(kbId, file)
     
     if (response.success) {
       ElMessage.success('文档上传成功')
@@ -623,19 +670,29 @@ const handleSubmit = async () => {
     if (valid) {
       submitLoading.value = true
       try {
+        const kbId = await ensureCurrentKnowledgeBase(true)
+        if (!kbId) {
+          throw new Error('知识库未就绪')
+        }
+
         await knowledgeBaseApi.addDocument({
+          kbId,
           docCode: formData.docCode!,
           docName: formData.docName!,
           docType: formData.docType!,
           docContent: formData.docContent!,
           docCategory: formData.docCategory,
-          docUrl: formData.docUrl
+          docUrl: formData.docUrl,
+          creatorId: 1
         })
         ElMessage.success('添加成功')
         addDialogVisible.value = false
+        resetForm()
         handleReset()
-} catch (error) {
+        await loadDocuments()
+      } catch (error: any) {
         logger.error('添加失败:', error)
+        ElMessage.error(error?.message || '添加失败')
       } finally {
         submitLoading.value = false
       }

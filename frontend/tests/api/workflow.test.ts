@@ -350,65 +350,71 @@ describe('WorkflowAPI', () => {
   describe('Workflow Execution', () => {
     describe('executeWorkflow', () => {
       it('should execute workflow successfully', async () => {
-        const workflowConfig = '{"nodes": [{"id": "1", "type": "start"}], "edges": []}'
         const inputData = { requirementId: 1 }
         
         const mockResponse = { 
           code: 200, 
           message: 'Execution started', 
           data: {
-            execution_id: 'exec-001',
-            status: 'RUNNING',
-            output: null,
-            error: null
+            executionId: 'exec-001',
+            workflowId: 1,
+            workflowCode: 'TEST-WORKFLOW-001',
+            workflowVersion: 1,
+            executionType: 'API',
+            status: 'PENDING',
+            progress: 0,
+            createTime: '2026-01-01T00:00:00'
           } 
         }
         vi.mocked(request.post).mockResolvedValue(mockResponse)
         
-        const result = await workflowApi.executeWorkflow(workflowConfig, inputData, 1)
+        const result = await workflowApi.executeWorkflow(1, inputData)
         
-        expect(request.post).toHaveBeenCalledWith('/api/v1/workflow/execute', {
-          workflow_config: workflowConfig,
-          input_data: inputData,
-          workflow_id: 1,
-          workflow_code: undefined,
-          workflow_version: undefined
+        expect(request.post).toHaveBeenCalledWith('/v1/workflow-executions/execute', inputData, {
+          params: {
+            workflowId: 1,
+            creatorId: undefined,
+            creatorName: undefined
+          }
         })
-        expect(result.data.execution_id).toBe('exec-001')
-        expect(result.data.status).toBe('RUNNING')
+        expect(result.data.executionId).toBe('exec-001')
+        expect(result.data.status).toBe('PENDING')
       })
 
-      it('should execute workflow with all parameters', async () => {
-        const workflowConfig = '{"nodes": [], "edges": []}'
+      it('should execute workflow with creator info', async () => {
         const inputData = { test: 'data' }
         
         const mockResponse = { 
           code: 200, 
           message: 'Execution started', 
           data: {
-            execution_id: 'exec-002',
-            status: 'COMPLETED',
-            output: { result: 'success' }
+            executionId: 'exec-002',
+            workflowId: 1,
+            workflowCode: 'TEST-WORKFLOW-001',
+            workflowVersion: 2,
+            executionType: 'API',
+            status: 'PENDING',
+            progress: 0,
+            createTime: '2026-01-01T00:00:00'
           } 
         }
         vi.mocked(request.post).mockResolvedValue(mockResponse)
         
         const result = await workflowApi.executeWorkflow(
-          workflowConfig, 
-          inputData, 
           1, 
-          'TEST-WORKFLOW-001', 
-          2
+          inputData,
+          1001,
+          'tester'
         )
         
-        expect(request.post).toHaveBeenCalledWith('/api/v1/workflow/execute', {
-          workflow_config: workflowConfig,
-          input_data: inputData,
-          workflow_id: 1,
-          workflow_code: 'TEST-WORKFLOW-001',
-          workflow_version: 2
+        expect(request.post).toHaveBeenCalledWith('/v1/workflow-executions/execute', inputData, {
+          params: {
+            workflowId: 1,
+            creatorId: 1001,
+            creatorName: 'tester'
+          }
         })
-        expect(result.data.status).toBe('COMPLETED')
+        expect(result.data.executionId).toBe('exec-002')
       })
 
       it('should handle workflow execution error', async () => {
@@ -423,13 +429,37 @@ describe('WorkflowAPI', () => {
         }
         vi.mocked(request.post).mockResolvedValue(mockResponse)
         
-        const result = await workflowApi.executeWorkflow(
-          'invalid-config', 
-          { test: 'data' }
-        )
+        const result = await workflowApi.executeWorkflow(1, { test: 'data' })
         
         expect(result.data.status).toBe('FAILED')
         expect(result.data.error).toBe('Invalid workflow configuration')
+      })
+    })
+
+    describe('getExecution', () => {
+      it('should fetch workflow execution detail', async () => {
+        const mockExecution = {
+          executionId: 'exec-001',
+          workflowId: 1,
+          workflowCode: 'TEST-WORKFLOW-001',
+          workflowVersion: 1,
+          executionType: 'API',
+          status: 'SUCCESS',
+          progress: 100,
+          outputData: '{"result":"ok"}',
+          createTime: '2026-01-01T00:00:00'
+        }
+
+        vi.mocked(request.get).mockResolvedValue({
+          code: 200,
+          message: 'Success',
+          data: mockExecution
+        })
+
+        const result = await workflowApi.getExecution('exec-001')
+
+        expect(request.get).toHaveBeenCalledWith('/v1/workflow-executions/exec-001')
+        expect(result.data).toEqual(mockExecution)
       })
     })
 

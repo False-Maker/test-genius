@@ -617,6 +617,18 @@ const taskDetailDialogVisible = ref(false)
 const taskDetailLoading = ref(false)
 const currentTaskDetail = ref<TaskDetail | null>(null)
 
+const parseWorkflowOutput = (outputData?: string) => {
+  if (!outputData) {
+    return undefined
+  }
+
+  try {
+    return JSON.parse(outputData)
+  } catch {
+    return outputData
+  }
+}
+
 
 let pollTimer: number | null = null
 
@@ -855,15 +867,13 @@ const handleGenerateWithWorkflow = async () => {
 
     }
 
-    const workflow = workflowResponse.data
-
     // 准备输入数据
 
     const inputData: Record<string, any> = {
 
       requirement_id: form.requirementId,
 
-      requirement_text: requirementList.value.find(r => r.id === form.requirementId)?.requirementDescription || '',
+      requirement_text: requirementList.value.find((r: { id?: number; requirementDescription?: string }) => r.id === form.requirementId)?.requirementDescription || '',
 
       layer_code: form.layerCode || undefined,
 
@@ -877,54 +887,19 @@ const handleGenerateWithWorkflow = async () => {
 
     // 执行工作流
 
-    const result = await workflowApi.executeWorkflow(
+    const result = await workflowApi.executeWorkflow(workflowResponse.data.id!, inputData)
 
-      workflow.workflowConfig,
-
-      inputData,
-
-      workflow.id,
-
-      workflow.workflowCode,
-
-      workflow.version
-
-    )
-
-    if (result.data.status === 'success') {
-
+    if (result.data) {
       generationResult.value = {
-
-        id: parseInt(result.data.execution_id || '0'),
-
+        id: 0,
         requirementId: form.requirementId!,
-
-        status: 'SUCCESS',
-
-        message: '用例生成成功（通过工作流）',
-
-        result: result.data.output
-
+        status: result.data.status,
+        progress: result.data.progress,
+        message: `工作流执行已提交：${result.data.executionId}`
       }
 
-      ElMessage.success('用例生成成功（通过工作流）')
-
-    } else {
-
-      generationResult.value = {
-
-        id: parseInt(result.data.execution_id || '0'),
-
-        requirementId: form.requirementId!,
-
-        status: 'FAILED',
-
-        message: result.data.error || '用例生成失败'
-
-      }
-
-      ElMessage.error('用例生成失败: ' + (result.data.error || '未知错误'))
-
+      pollWorkflowExecution(result.data.executionId, form.requirementId!)
+      ElMessage.success('工作流执行已提交')
     }
 
   } catch (error: any) {
@@ -947,10 +922,64 @@ const handleGenerateWithWorkflow = async () => {
 
   } finally {
 
-    generateLoading.value = false
+    if (!pollTimer) {
+      generateLoading.value = false
+    }
 
   }
 
+}
+
+const pollWorkflowExecution = (executionId: string, requirementId: number) => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+  }
+
+  pollTimer = window.setInterval(async () => {
+    try {
+      const response = await workflowApi.getExecution(executionId)
+
+      if (!response.data) {
+        return
+      }
+
+      const execution = response.data
+      const output = parseWorkflowOutput(execution.outputData)
+      generationResult.value = {
+        id: 0,
+        requirementId,
+        status: execution.status,
+        progress: execution.progress,
+        message: execution.errorMessage || `工作流执行状态：${execution.status}`,
+        result: output && typeof output === 'object' ? output as Record<string, unknown> : undefined
+      }
+
+      if (execution.status === 'SUCCESS' || execution.status === 'FAILED' || execution.status === 'CANCELLED') {
+        if (pollTimer) {
+          clearInterval(pollTimer)
+          pollTimer = null
+        }
+
+        generateLoading.value = false
+
+        if (execution.status === 'SUCCESS') {
+          ElMessage.success('用例生成成功（通过工作流）')
+        } else {
+          ElMessage.error(`用例生成失败: ${execution.errorMessage || '未知错误'}`)
+        }
+      }
+    } catch (error) {
+      console.error('查询工作流执行状态失败', error)
+
+      if (pollTimer) {
+        clearInterval(pollTimer)
+        pollTimer = null
+      }
+
+      generateLoading.value = false
+      ElMessage.error('查询工作流执行状态失败')
+    }
+  }, 2000)
 }
 
 // 轮询任务状态
@@ -979,7 +1008,7 @@ const pollTaskStatus = async (taskId: number) => {
 
         // 如果任务完成或失败，停止轮询
 
-        if (
+          if (
 
           response.data.status === 'SUCCESS' ||
 
@@ -994,6 +1023,8 @@ const pollTaskStatus = async (taskId: number) => {
             pollTimer = null
 
           }
+
+          generateLoading.value = false
 
         }
 
@@ -1010,6 +1041,8 @@ const pollTaskStatus = async (taskId: number) => {
         pollTimer = null
 
       }
+
+      generateLoading.value = false
 
     }
 
@@ -1101,11 +1134,13 @@ const handleGenerate = async () => {
 
         ElMessage.error('生成用例失败，请稍后重试')
 
-      } finally {
+  } finally {
 
-        generateLoading.value = false
+    if (!pollTimer) {
+      generateLoading.value = false
+    }
 
-      }
+  }
 
     }
 

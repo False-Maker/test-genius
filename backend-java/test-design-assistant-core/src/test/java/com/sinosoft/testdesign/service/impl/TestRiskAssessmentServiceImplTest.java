@@ -310,13 +310,7 @@ class TestRiskAssessmentServiceImplTest {
     @DisplayName("识别风险项-成功")
     void testIdentifyRiskItems_Success() {
         // Given
-        List<TestExecutionRecord> records = new ArrayList<>();
-        testRecord.setExecutionStatus("FAILED");
-        records.add(testRecord);
-        
         List<TestCase> cases = new ArrayList<>();
-        when(requirementRepository.findById(1L))
-            .thenReturn(Optional.of(testRequirement));
         when(testCaseRepository.findByRequirementId(1L))
             .thenReturn(cases);
         when(coverageRepository.findByRequirementId(1L))
@@ -333,4 +327,3 @@ class TestRiskAssessmentServiceImplTest {
         verify(recordRepository, never()).findAll(any(org.springframework.data.jpa.domain.Specification.class));
     }
 }
-

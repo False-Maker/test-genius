@@ -17,12 +17,12 @@ variables:
   IMAGE_TAG: "${CI_COMMIT_SHORT_SHA}"
 
 # 缓存配置
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .m2/repository/
-      - frontend/node_modules/
-      - backend-python/ai-service/.venv/
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository/
+    - frontend/node_modules/
+    - backend-python/ai-service/.venv/
 
 # ==================== 构建阶段 ====================
 
@@ -319,10 +319,63 @@ deploy:prod:
   environment:
     name: production
     url: https://test-design-assistant.example.com
-  only:
-    - main
-    - master
   when: manual
   only:
     - tags
 
+# 手动执行知识库历史文档 embedding 回填
+maintenance:kb-embedding-backfill:
+  stage: deploy
+  image: python:3.10-slim
+  variables:
+    KB_BACKFILL_ARGS: "--dry-run --fail-on-remaining"
+  script:
+    - set -o pipefail
+    - bash ./scripts/check-required-env.sh kb-backfill
+    - cd backend-python/ai-service
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - python scripts/backfill_knowledge_document_embeddings.py ${KB_BACKFILL_ARGS} --output-file kb-embedding-backfill-result.json
+  artifacts:
+    when: always
+    paths:
+      - backend-python/ai-service/kb-embedding-backfill-result.json
+    expire_in: 1 week
+  only:
+    - develop
+    - main
+    - master
+  when: manual
+  allow_failure: false
+
+# 手动执行项目级最终验收
+acceptance:final:
+  stage: deploy
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    FINAL_ACCEPTANCE_LOG_FILE: final-acceptance.log
+    FINAL_ACCEPTANCE_DOCKER_LOG_FILE: docker-compose-final-acceptance.log
+    FINAL_ACCEPTANCE_SUMMARY_FILE: final-acceptance-summary.json
+  before_script:
+    - apk add --no-cache bash curl
+  script:
+    - set -o pipefail
+    - bash ./scripts/check-required-env.sh final-acceptance
+    - ./scripts/run-final-acceptance.sh
+  after_script:
+    - docker compose --profile dev down -v || true
+  artifacts:
+    when: always
+    paths:
+      - final-acceptance.log
+      - docker-compose-final-acceptance.log
+      - final-acceptance-summary.json
+    expire_in: 1 week
+  only:
+    - develop
+    - main
+    - master
+  when: manual
+  allow_failure: false

@@ -35,11 +35,11 @@ export interface ParallelCallResponse {
 export const llmApi = {
   // 调用单个模型
   callModel(data: LLMRequest) {
-    return request.post<LLMResponse>('/api/v1/llm/call', data)
+    return request.post<LLMResponse>('/v1/llm/call', data)
   },
 
   // 并行调用多个模型（用于性能对比）
   parallelCall(data: ParallelCallRequest) {
-    return request.post<ParallelCallResponse>('/api/v1/llm/parallel-call', data)
+    return request.post<ParallelCallResponse>('/v1/llm/parallel-call', data)
   }
 }

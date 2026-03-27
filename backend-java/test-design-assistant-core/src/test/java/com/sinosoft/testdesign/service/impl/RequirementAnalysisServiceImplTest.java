@@ -3,12 +3,18 @@ package com.sinosoft.testdesign.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.common.TestDataBuilder;
+import com.sinosoft.testdesign.dto.BusinessRuleDTO;
+import com.sinosoft.testdesign.dto.RequirementAnalysisResult;
+import com.sinosoft.testdesign.dto.TestPointDTO;
+import com.sinosoft.testdesign.entity.ModelConfig;
 import com.sinosoft.testdesign.entity.TestRequirement;
 import com.sinosoft.testdesign.repository.RequirementRepository;
+import com.sinosoft.testdesign.service.ModelCallService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,18 +46,27 @@ class RequirementAnalysisServiceImplTest {
     
     @Mock
     private RestTemplate restTemplate;
+
+    @Mock
+    private ModelCallService modelCallService;
     
     @InjectMocks
     private RequirementAnalysisServiceImpl requirementAnalysisService;
     
     private ObjectMapper objectMapper;
     private TestRequirement requirement;
+
+    @TempDir
+    Path tempDir;
     
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         ReflectionTestUtils.setField(requirementAnalysisService, "objectMapper", objectMapper);
         ReflectionTestUtils.setField(requirementAnalysisService, "aiServiceUrl", "http://localhost:8000");
+        ReflectionTestUtils.setField(requirementAnalysisService, "uploadBasePath", tempDir.toString());
+        ReflectionTestUtils.setField(requirementAnalysisService, "uploadUrlPrefix", "/api/v1/files");
+        lenient().when(modelCallService.getBestModelForTask(anyString())).thenReturn(Optional.empty());
         
         requirement = TestDataBuilder.requirement()
             .withId(1L)
@@ -68,7 +85,7 @@ class RequirementAnalysisServiceImplTest {
             .thenReturn(Optional.of(requirement));
         
         // When
-        RequirementAnalysisServiceImpl.RequirementAnalysisResult result = 
+        RequirementAnalysisResult result =
             requirementAnalysisService.analyzeRequirement(requirementId);
         
         // Then
@@ -116,7 +133,7 @@ class RequirementAnalysisServiceImplTest {
             requirementAnalysisService.analyzeRequirement(requirementId);
         });
         
-        assertTrue(exception.getMessage().contains("需求描述或文档内容不能为空"));
+        assertTrue(exception.getMessage().contains("需求描述为空且未上传需求文档"));
     }
     
     @Test
@@ -124,7 +141,14 @@ class RequirementAnalysisServiceImplTest {
     void testAnalyzeRequirement_WithDocument() {
         // Given
         Long requirementId = 1L;
-        requirement.setRequirementDocUrl("/path/to/document.docx");
+        Path docPath = tempDir.resolve("docs/document.docx");
+        try {
+            Files.createDirectories(docPath.getParent());
+            Files.writeString(docPath, "test doc");
+        } catch (Exception e) {
+            fail("创建测试文档失败: " + e.getMessage());
+        }
+        requirement.setRequirementDocUrl("/api/v1/files/docs/document.docx");
         
         Map<String, Object> documentResponse = new HashMap<>();
         documentResponse.put("content", "这是从文档解析出的内容");
@@ -135,13 +159,13 @@ class RequirementAnalysisServiceImplTest {
             .thenReturn(new ResponseEntity<>(documentResponse, HttpStatus.OK));
         
         // When
-        RequirementAnalysisServiceImpl.RequirementAnalysisResult result = 
+        RequirementAnalysisResult result =
             requirementAnalysisService.analyzeRequirement(requirementId);
         
         // Then
         assertNotNull(result);
         assertTrue(result.getRequirementText().contains("这是从文档解析出的内容"));
-        verify(restTemplate, times(1)).exchange(anyString(), any(), any(), eq(Map.class));
+        verify(restTemplate, atLeastOnce()).exchange(anyString(), any(), any(), eq(Map.class));
     }
     
     @Test
@@ -154,7 +178,7 @@ class RequirementAnalysisServiceImplTest {
             .thenReturn(Optional.of(requirement));
         
         // When
-        List<RequirementAnalysisServiceImpl.TestPoint> testPoints = 
+        List<TestPointDTO> testPoints =
             requirementAnalysisService.extractTestPoints(requirementId);
         
         // Then
@@ -172,7 +196,7 @@ class RequirementAnalysisServiceImplTest {
             .thenReturn(Optional.of(requirement));
         
         // When
-        List<RequirementAnalysisServiceImpl.BusinessRule> businessRules = 
+        List<BusinessRuleDTO> businessRules =
             requirementAnalysisService.extractBusinessRules(requirementId);
         
         // Then
@@ -180,4 +204,3 @@ class RequirementAnalysisServiceImplTest {
         verify(requirementRepository, times(1)).findById(requirementId);
     }
 }
-

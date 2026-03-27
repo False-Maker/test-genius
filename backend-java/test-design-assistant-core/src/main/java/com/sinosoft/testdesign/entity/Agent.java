@@ -2,6 +2,8 @@ package com.sinosoft.testdesign.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -54,6 +56,7 @@ public class Agent {
      * Agent配置（JSON格式）
      * 包含：模型配置、提示词配置、工具列表等
      */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "agent_config", columnDefinition = "JSONB")
     private String agentConfig;
     
@@ -122,4 +125,3 @@ public class Agent {
         updateTime = LocalDateTime.now();
     }
 }
-

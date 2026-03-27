@@ -30,7 +30,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.callModel(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/call', requestData)
       expect(result.data).toEqual(responseData)
       expect(result.data.content).toBe('This is the AI response')
       expect(result.data.model_code).toBe('DEEPSEEK-001')
@@ -53,7 +53,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.callModel(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/call', requestData)
       expect(result.data).toEqual(responseData)
     })
 
@@ -74,7 +74,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.callModel(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/call', requestData)
       expect(result.code).toBe(400)
       expect(result.data.error).toBe('Model not found')
     })
@@ -90,7 +90,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.callModel(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/call', requestData)
       expect(result.code).toBe(500)
       expect(result.message).toBe('Internal server error')
     })
@@ -148,7 +148,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.parallelCall(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/parallel-call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/parallel-call', requestData)
       expect(result.data).toEqual(responseData)
       expect(result.data.results).toHaveLength(3)
       expect(result.data.success_count).toBe(3)
@@ -219,7 +219,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.parallelCall(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/parallel-call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/parallel-call', requestData)
       expect(result.data.results).toHaveLength(1)
       expect(result.data.success_count).toBe(1)
     })
@@ -242,7 +242,7 @@ describe('LLMApi', () => {
       
       const result = await llmApi.parallelCall(requestData)
       
-      expect(request.post).toHaveBeenCalledWith('/api/v1/llm/parallel-call', requestData)
+      expect(request.post).toHaveBeenCalledWith('/v1/llm/parallel-call', requestData)
       expect(result.data.results).toEqual([])
       expect(result.data.success_count).toBe(0)
       expect(result.data.fail_count).toBe(0)

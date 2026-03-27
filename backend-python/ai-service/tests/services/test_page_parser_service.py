@@ -102,7 +102,7 @@ class TestPageParserService:
         soup = BeautifulSoup(html, "html.parser")
         elements = page_parser._extract_elements(soup)
 
-        button_elements = [e for e in elements if e.get("type") == "BUTTON"]
+        button_elements = [e for e in elements if e.get("element_type") == "BUTTON"]
         assert len(button_elements) > 0
 
     def test_extract_elements_inputs(self, page_parser):
@@ -122,7 +122,7 @@ class TestPageParserService:
         soup = BeautifulSoup(html, "html.parser")
         elements = page_parser._extract_elements(soup)
 
-        input_elements = [e for e in elements if e.get("type") == "INPUT"]
+        input_elements = [e for e in elements if e.get("element_type") == "INPUT"]
         assert len(input_elements) > 0
 
     def test_extract_elements_links(self, page_parser):
@@ -141,7 +141,7 @@ class TestPageParserService:
         soup = BeautifulSoup(html, "html.parser")
         elements = page_parser._extract_elements(soup)
 
-        link_elements = [e for e in elements if e.get("type") == "LINK"]
+        link_elements = [e for e in elements if e.get("element_type") == "LINK"]
         assert len(link_elements) > 0
 
     def test_extract_elements_selects(self, page_parser):
@@ -162,7 +162,7 @@ class TestPageParserService:
         soup = BeautifulSoup(html, "html.parser")
         elements = page_parser._extract_elements(soup)
 
-        select_elements = [e for e in elements if e.get("type") == "SELECT"]
+        select_elements = [e for e in elements if e.get("element_type") == "SELECT"]
         assert len(select_elements) > 0
 
     def test_extract_elements_checkboxes_and_radios(self, page_parser):
@@ -182,8 +182,8 @@ class TestPageParserService:
         soup = BeautifulSoup(html, "html.parser")
         elements = page_parser._extract_elements(soup)
 
-        checkbox_elements = [e for e in elements if e.get("type") == "CHECKBOX"]
-        radio_elements = [e for e in elements if e.get("type") == "RADIO"]
+        checkbox_elements = [e for e in elements if e.get("element_type") == "CHECKBOX"]
+        radio_elements = [e for e in elements if e.get("element_type") == "RADIO"]
         assert len(checkbox_elements) > 0
         assert len(radio_elements) > 0
 
@@ -207,10 +207,7 @@ class TestPageParserService:
 
         assert isinstance(structure, dict)
 
-    @patch(
-        "builtins.open", new_callable=Mock, read_data="<html><body>测试</body></html>"
-    )
-    def test_parse_page_code_from_file(self, mock_open, page_parser, tmp_path):
+    def test_parse_page_code_from_file(self, page_parser, tmp_path):
         """测试从文件路径解析页面代码"""
         test_file = tmp_path / "test.html"
         test_file.write_text("<html><body>测试</body></html>", encoding="utf-8")

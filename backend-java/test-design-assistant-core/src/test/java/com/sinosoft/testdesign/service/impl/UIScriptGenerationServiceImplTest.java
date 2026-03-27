@@ -79,8 +79,16 @@ class UIScriptGenerationServiceImplTest {
     
     @Test
     @DisplayName("生成UI脚本-成功")
-    void testGenerateScript_Success() {
+    void testGenerateScript_Success() throws Exception {
         // Given
+        Map<String, Object> response = new HashMap<>();
+        response.put("script_content", "from selenium import webdriver");
+        response.put("script_type", "SELENIUM");
+        response.put("script_language", "PYTHON");
+        response.put("elements_used", new ArrayList<>());
+        response.put("steps", new ArrayList<>());
+        response.put("page_url", "http://example.com/page.html");
+
         when(taskRepository.findByTaskCodeStartingWithOrderByIdDesc(anyString()))
             .thenReturn(new ArrayList<>());
         when(taskRepository.save(any(TestExecutionTask.class)))
@@ -91,6 +99,10 @@ class UIScriptGenerationServiceImplTest {
             });
         when(taskRepository.findById(1L))
             .thenReturn(Optional.of(testTask));
+        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+            .thenReturn(response);
+        when(objectMapper.writeValueAsString(any()))
+            .thenReturn("{}");
         
         // When
         String result = scriptGenerationService.generateScript(testRequest);
@@ -98,7 +110,7 @@ class UIScriptGenerationServiceImplTest {
         // Then
         assertNotNull(result);
         assertTrue(result.startsWith("TASK-"));
-        verify(taskRepository, times(1)).save(any(TestExecutionTask.class));
+        verify(taskRepository, atLeastOnce()).save(any(TestExecutionTask.class));
     }
     
     @Test
@@ -182,4 +194,3 @@ class UIScriptGenerationServiceImplTest {
         verify(restTemplate, never()).postForObject(anyString(), any(), any());
     }
 }
-

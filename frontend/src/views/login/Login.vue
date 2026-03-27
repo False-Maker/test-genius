@@ -11,7 +11,7 @@
           <span class="logo-text-inner">TG</span>
         </div>
         <h1 class="login-title">Test Genius</h1>
-        <p class="login-subtitle">测试设计助手系统</p>
+        <p class="login-subtitle">当前环境未启用服务端认证，直接进入系统</p>
       </div>
 
       <el-form
@@ -50,7 +50,7 @@
             class="login-button"
             @click="handleLogin"
           >
-            {{ loading ? '登录中...' : '登录' }}
+            {{ loading ? '进入中...' : '进入系统' }}
           </el-button>
         </el-form-item>
       </el-form>
@@ -68,7 +68,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
-import { login } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -100,15 +99,16 @@ const handleLogin = async () => {
 
     loading.value = true
     try {
-      const res = await login({
-        username: loginForm.username,
-        password: loginForm.password
-      })
+      userStore.login(
+        {
+          id: 1,
+          username: loginForm.username,
+          nickname: loginForm.username
+        },
+        'dev-bypass-token'
+      )
 
-      // 保存登录信息到 store
-      userStore.login(res.userInfo, res.token)
-
-      ElMessage.success('登录成功')
+      ElMessage.info('当前环境未启用服务端认证，已直接进入系统')
 
       // 跳转到目标页面或首页
       const redirect = route.query.redirect as string

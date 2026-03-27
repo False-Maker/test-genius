@@ -629,6 +629,19 @@ const generationResult = ref<UIScriptGenerationResult | null>(null)
 
 let pollTimer: number | null = null
 
+const parseWorkflowOutput = (outputData?: string): Record<string, any> => {
+  if (!outputData) {
+    return {}
+  }
+
+  try {
+    const parsed = JSON.parse(outputData)
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
 
 
 
@@ -807,7 +820,6 @@ const handleGenerateWithWorkflow = async () => {
       generateLoading.value = false
       return
     }
-    const workflow = workflowResponse.data
     const inputData: Record<string, any> = {
       natural_language_desc: form.naturalLanguageDesc,
       page_code_url: form.pageCodeUrl || undefined,
@@ -817,33 +829,15 @@ const handleGenerateWithWorkflow = async () => {
       use_llm: form.useLlm,
       requirement_id: form.requirementId
     }
-    const result = await workflowApi.executeWorkflow(
-      workflow.workflowConfig,
-      inputData,
-      workflow.id,
-      workflow.workflowCode,
-      workflow.version
-    )
-    if (result.data.status === 'success') {
+    const result = await workflowApi.executeWorkflow(workflowResponse.data.id!, inputData)
+    if (result.data) {
       generationResult.value = {
-        taskCode: result.data.execution_id || '',
-        taskStatus: 'SUCCESS',
-        progress: 100,
-        scriptContent: result.data.output?.script_content || '',
-        scriptType: result.data.output?.script_type || form.scriptType,
-        scriptLanguage: result.data.output?.script_language || form.scriptLanguage,
-        elementsUsed: result.data.output?.elements_used || [],
-        steps: result.data.output?.steps || []
+        taskCode: result.data.executionId,
+        taskStatus: result.data.status,
+        progress: result.data.progress
       }
-      ElMessage.success('脚本生成成功（通过工作流）')
-    } else {
-      generationResult.value = {
-        taskCode: result.data.execution_id || '',
-        taskStatus: 'FAILED',
-        progress: 0,
-        errorMessage: result.data.error || '脚本生成失败'
-      }
-      ElMessage.error('脚本生成失败: ' + (result.data.error || '未知错误'))
+      pollWorkflowExecution(result.data.executionId)
+      ElMessage.success('工作流执行已提交')
     }
   } catch (error: any) {
     console.error('使用工作流生成脚本失败:', error)
@@ -855,8 +849,65 @@ const handleGenerateWithWorkflow = async () => {
       errorMessage: error.message || '使用工作流生成脚本失败'
     }
   } finally {
-    generateLoading.value = false
+    if (!pollTimer) {
+      generateLoading.value = false
+    }
   }
+}
+
+const pollWorkflowExecution = (executionId: string) => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+  }
+
+  pollTimer = window.setInterval(async () => {
+    try {
+      const response = await workflowApi.getExecution(executionId)
+
+      if (!response.data) {
+        return
+      }
+
+      const execution = response.data
+      const output = parseWorkflowOutput(execution.outputData)
+      generationResult.value = {
+        taskCode: execution.executionId,
+        taskStatus: execution.status,
+        progress: execution.progress,
+        scriptContent: output.script_content || '',
+        scriptType: output.script_type || form.scriptType,
+        scriptLanguage: output.script_language || form.scriptLanguage,
+        elementsUsed: output.elements_used || [],
+        steps: output.steps || [],
+        errorMessage: execution.errorMessage
+      }
+
+      if (execution.status === 'SUCCESS' || execution.status === 'FAILED' || execution.status === 'CANCELLED') {
+        if (pollTimer) {
+          clearInterval(pollTimer)
+          pollTimer = null
+        }
+
+        generateLoading.value = false
+
+        if (execution.status === 'SUCCESS') {
+          ElMessage.success('脚本生成成功（通过工作流）')
+        } else {
+          ElMessage.error(`脚本生成失败: ${execution.errorMessage || '未知错误'}`)
+        }
+      }
+    } catch (error) {
+      console.error('查询工作流执行状态失败', error)
+
+      if (pollTimer) {
+        clearInterval(pollTimer)
+        pollTimer = null
+      }
+
+      generateLoading.value = false
+      ElMessage.error('查询工作流执行状态失败')
+    }
+  }, 2000)
 }
 
 
@@ -983,7 +1034,7 @@ const handleGenerate = async () => {
           if (uploadResponse.data) {
 
 
-            form.pageCodeUrl = uploadResponse.data?.data?.fileUrl
+            form.pageCodeUrl = uploadResponse.data?.fileUrl
 
 
           }
@@ -1371,5 +1422,3 @@ onUnmounted(() => {
 
 
 </style>
-
-

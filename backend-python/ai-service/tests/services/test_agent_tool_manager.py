@@ -230,7 +230,7 @@ class TestCheckToolPermissionDecorator:
         db_session.execute.return_value = mock_result
 
         @check_tool_permission("test_tool")
-        def test_function(arguments, context):
+        def test_function(arguments, context=None, **kwargs):
             return "执行成功"
 
         result = test_function({}, db=db_session)
@@ -240,10 +240,10 @@ class TestCheckToolPermissionDecorator:
         """测试装饰器（无db会话，直接执行）"""
 
         @check_tool_permission("test_tool")
-        def test_function(arguments, context):
+        def test_function(arguments, context=None, **kwargs):
             return "执行成功"
 
-        result = test_function({})
+        result = test_function({}, {})
         assert result == "执行成功"
 
     def test_decorator_without_permission(self, db_session):
@@ -253,7 +253,7 @@ class TestCheckToolPermissionDecorator:
         db_session.execute.return_value = mock_result
 
         @check_tool_permission("test_tool")
-        def test_function(arguments, context):
+        def test_function(arguments, context=None, **kwargs):
             return "执行成功"
 
         with pytest.raises(ToolPermissionDeniedException):

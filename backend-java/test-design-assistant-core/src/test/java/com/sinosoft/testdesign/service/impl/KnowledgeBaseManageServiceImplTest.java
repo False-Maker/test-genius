@@ -186,6 +186,7 @@ class KnowledgeBaseManageServiceImplTest {
     void getKnowledgeBaseById_Success_WithStatistics() {
         when(knowledgeBaseRepository.findById(1L)).thenReturn(Optional.of(kb));
         Map<String, Object> stats = new HashMap<>();
+        stats.put("success", true);
         stats.put("document_count", 10);
         stats.put("chunk_count", 100);
         stats.put("last_sync_time", LocalDateTime.now().toString());
@@ -218,7 +219,7 @@ class KnowledgeBaseManageServiceImplTest {
         when(knowledgeBaseRepository.findByIsActive("1")).thenReturn(List.of(kb));
         when(restTemplate.postForObject(
                 ArgumentMatchers.contains("/knowledge/statistics"),
-                any(), eq(Map.class))).thenReturn(Map.of("document_count", 0, "chunk_count", 0));
+                any(), eq(Map.class))).thenReturn(Map.of("success", true, "document_count", 0, "chunk_count", 0));
 
         List<KnowledgeBaseResponseDTO> list = knowledgeBaseManageService.getKnowledgeBaseList();
 

@@ -91,6 +91,8 @@ async def chat(
             session_id=request.session_id,
             user_message=request.message
         )
+        if response.get("error"):
+            raise HTTPException(status_code=500, detail=response["error"])
         return ChatResponse(**response)
     except ValueError as e:
         logger.error(f"对话失败: {str(e)}", exc_info=True)
@@ -129,4 +131,3 @@ async def get_conversation_history(
     except Exception as e:
         logger.error(f"获取对话历史失败: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
-

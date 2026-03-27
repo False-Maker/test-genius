@@ -8,6 +8,7 @@ import uuid
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from app.config import JAVA_API_BASE_URL
 from app.services.agent_engine import AgentEngine
 from app.services.agent_context_service import AgentContextService
 from app.services.agent_tool_registry import get_registry
@@ -216,7 +217,7 @@ class AgentService:
             )
             
             # 注册工具
-            java_api_url = agent_config.get("java_api_base_url", "http://localhost:8080")
+            java_api_url = agent_config.get("java_api_base_url", JAVA_API_BASE_URL)
             engine.register_tool(SearchTestCasesTool(java_api_url))
             engine.register_tool(GetRequirementDetailsTool(java_api_url))
             engine.register_tool(ValidateTestCaseTool(java_api_url))
@@ -295,10 +296,10 @@ class AgentService:
                 "tool_calls": tool_calls,
                 "iterations": response.get("iterations", 1),
                 "tokens_used": response.get("tokens_used", 0),
-                "response_time": response.get("response_time", 0)
+                "response_time": response.get("response_time", 0),
+                "error": response.get("error")
             }
         except Exception as e:
             logger.error(f"Agent对话失败: {str(e)}", exc_info=True)
             self.db.rollback()
             raise
-

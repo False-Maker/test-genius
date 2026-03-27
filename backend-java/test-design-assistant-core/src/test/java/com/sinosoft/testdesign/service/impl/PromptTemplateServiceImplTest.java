@@ -2,7 +2,9 @@ package com.sinosoft.testdesign.service.impl;
 
 import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.entity.PromptTemplate;
+import com.sinosoft.testdesign.repository.PromptTemplateAbTestRepository;
 import com.sinosoft.testdesign.repository.PromptTemplateRepository;
+import com.sinosoft.testdesign.repository.PromptTemplateVersionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,12 @@ class PromptTemplateServiceImplTest {
     
     @Mock
     private PromptTemplateRepository templateRepository;
+
+    @Mock
+    private PromptTemplateAbTestRepository abTestRepository;
+
+    @Mock
+    private PromptTemplateVersionRepository versionRepository;
     
     @InjectMocks
     private PromptTemplateServiceImpl templateService;
@@ -396,4 +404,3 @@ class PromptTemplateServiceImplTest {
         assertTrue(result.contains("{var2}") || result.contains("")); // 未提供的变量会被替换为空字符串
     }
 }
-

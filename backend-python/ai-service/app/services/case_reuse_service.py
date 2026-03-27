@@ -32,19 +32,42 @@ class CaseReuseService:
             是否初始化成功
         """
         try:
+            dimension = self.embedding_service.embedding_dimension
+
             # 检查并安装pgvector扩展
             if not self.embedding_service.install_pgvector_extension():
                 logger.warning("pgvector扩展未安装，将使用关系型数据库存储")
                 return False
             
             # 在test_case表上添加向量列（如果不存在）
-            # 注意：这里假设test_case表已存在，只添加向量列
             try:
-                add_column_sql = """
-                ALTER TABLE test_case 
-                ADD COLUMN IF NOT EXISTS embedding vector(512);  -- BAAI/bge-small-zh-v1.5
-                """
-                self.db.execute(text(add_column_sql))
+                self.db.execute(text(f"""
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1
+                        FROM information_schema.columns
+                        WHERE table_name = 'test_case'
+                          AND column_name = 'embedding'
+                          AND udt_name <> 'vector'
+                    ) THEN
+                        ALTER TABLE test_case
+                        ALTER COLUMN embedding TYPE vector({dimension})
+                        USING CASE
+                            WHEN embedding IS NULL OR btrim(embedding::text) = '' THEN NULL
+                            ELSE embedding::vector
+                        END;
+                    ELSIF NOT EXISTS (
+                        SELECT 1
+                        FROM information_schema.columns
+                        WHERE table_name = 'test_case'
+                          AND column_name = 'embedding'
+                    ) THEN
+                        ALTER TABLE test_case
+                        ADD COLUMN embedding vector({dimension});
+                    END IF;
+                END $$;
+                """))
                 self.db.commit()
                 
                 # 创建向量索引
@@ -57,7 +80,7 @@ class CaseReuseService:
                 self.db.execute(text(create_index_sql))
                 self.db.commit()
                 
-                logger.info("用例向量表初始化成功")
+                logger.info(f"用例向量表初始化成功，embedding维度: {dimension}")
                 return True
                 
             except Exception as e:
@@ -109,7 +132,7 @@ class CaseReuseService:
             # 更新用例向量
             update_sql = """
             UPDATE test_case
-            SET embedding = :embedding::vector
+            SET embedding = CAST(:embedding AS vector)
             WHERE id = :case_id
             """
             self.db.execute(
@@ -164,7 +187,7 @@ class CaseReuseService:
                 id, case_code, case_name, requirement_id, layer_id, method_id,
                 case_type, case_priority, pre_condition, test_step, expected_result,
                 case_status, create_time,
-                1 - (embedding <=> :query_embedding::vector) as similarity
+                1 - (embedding <=> CAST(:query_embedding AS vector)) as similarity
             FROM test_case
             WHERE case_status IN ('已审核', '待审核')
             AND embedding IS NOT NULL
@@ -185,8 +208,8 @@ class CaseReuseService:
                 params["method_id"] = method_id
             
             search_sql += """
-            AND (1 - (embedding <=> :query_embedding::vector)) >= :similarity_threshold
-            ORDER BY embedding <=> :query_embedding::vector
+            AND (1 - (embedding <=> CAST(:query_embedding AS vector))) >= :similarity_threshold
+            ORDER BY embedding <=> CAST(:query_embedding AS vector)
             LIMIT :top_k
             """
             
@@ -364,7 +387,12 @@ class CaseReuseService:
         try:
             # 生成套件编码
             from datetime import datetime
-            suite_code = f"SUITE-{datetime.now().strftime('%Y%m%d')}-{len(case_ids)}"
+            from uuid import uuid4
+
+            suite_code = (
+                f"SUITE-{datetime.now().strftime('%Y%m%d%H%M%S')}-"
+                f"{len(case_ids)}-{uuid4().hex[:6].upper()}"
+            )
             
             # 创建套件表（如果不存在）
             create_table_sql = """
@@ -433,4 +461,3 @@ class CaseReuseService:
             logger.error(f"创建用例套件失败: {str(e)}")
             self.db.rollback()
             return None
-

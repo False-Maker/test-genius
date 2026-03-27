@@ -309,7 +309,7 @@ describe('AgentAPI', () => {
         
         const result = await agentApi.chatWithAgent(1, 'Hello, how are you?')
         
-        expect(request.post).toHaveBeenCalledWith('/api/v1/agent/chat', chatData)
+        expect(request.post).toHaveBeenCalledWith('/v1/agent/chat', chatData)
         expect(result.data).toEqual({ reply: 'I am doing well, thank you!' })
       })
 
@@ -353,90 +353,8 @@ describe('AgentAPI', () => {
         
         const result = await agentApi.getSessionHistory(1)
         
-        expect(request.get).toHaveBeenCalledWith('/api/v1/agent/sessions/1/history')
+        expect(request.get).toHaveBeenCalledWith('/v1/agent/sessions/1/history')
         expect(result.data).toEqual(mockHistory)
-      })
-    })
-  })
-
-  describe('Agent Tool Management', () => {
-    describe('getAllTools', () => {
-      it('should fetch all available tools', async () => {
-        const mockTools = [
-          {
-            id: 1,
-            toolCode: 'TEST-TOOL-001',
-            toolName: 'Test Tool',
-            toolType: 'TEST_RELATED',
-            toolDescription: 'A test tool'
-          },
-          {
-            id: 2,
-            toolCode: 'GENERAL-TOOL-001',
-            toolName: 'General Tool',
-            toolType: 'GENERAL',
-            toolDescription: 'A general tool'
-          }
-        ]
-        
-        vi.mocked(request.get).mockResolvedValue({ 
-          code: 200, 
-          message: 'Success', 
-          data: mockTools 
-        })
-        
-        const result = await agentApi.getAllTools()
-        
-        expect(request.get).toHaveBeenCalledWith('/api/v1/agent/tools')
-        expect(result.data).toEqual(mockTools)
-      })
-    })
-
-    describe('getAgentTools', () => {
-      it('should fetch agent tools', async () => {
-        const mockTools = [
-          {
-            id: 1,
-            toolCode: 'AGENT-TOOL-001',
-            toolName: 'Agent Specific Tool',
-            toolType: 'TEST_RELATED'
-          }
-        ]
-        
-        vi.mocked(request.get).mockResolvedValue({ 
-          code: 200, 
-          message: 'Success', 
-          data: mockTools 
-        })
-        
-        const result = await agentApi.getAgentTools(1)
-        
-        expect(request.get).toHaveBeenCalledWith('/v1/agent-tools/1')
-        expect(result.data).toEqual(mockTools)
-      })
-    })
-
-    describe('addAgentTool', () => {
-      it('should add tool to agent', async () => {
-        const mockResponse = { code: 200, message: 'Tool added', data: null }
-        vi.mocked(request.post).mockResolvedValue(mockResponse)
-        
-        const result = await agentApi.addAgentTool(1, 2)
-        
-        expect(request.post).toHaveBeenCalledWith('/v1/agent-tools/1/2')
-        expect(result.message).toBe('Tool added')
-      })
-    })
-
-    describe('removeAgentTool', () => {
-      it('should remove tool from agent', async () => {
-        const mockResponse = { code: 200, message: 'Tool removed', data: null }
-        vi.mocked(request.delete).mockResolvedValue(mockResponse)
-        
-        const result = await agentApi.removeAgentTool(1, 2)
-        
-        expect(request.delete).toHaveBeenCalledWith('/v1/agent-tools/1/2')
-        expect(result.message).toBe('Tool removed')
       })
     })
   })

@@ -300,7 +300,7 @@ const handleSendMessage = async () => {
       tokensUsed: data.tokens_used,
       responseTime: data.response_time,
       modelCode: data.model_code,
-      iterationNumber: data.iteration_number,
+      iterationNumber: data.iteration_number ?? data.iterations,
       createTime: new Date().toISOString()
     }
     messageList.value.push(assistantMessage)

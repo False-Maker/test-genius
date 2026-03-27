@@ -2,7 +2,7 @@
 用例生成API路由
 """
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from sqlalchemy.orm import Session
 import logging
@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 class CaseGenerationRequest(BaseModel):
     """用例生成请求"""
+    model_config = ConfigDict(protected_namespaces=())
+
     requirement_id: Optional[int] = None
     requirement_text: Optional[str] = None
     layer_code: str

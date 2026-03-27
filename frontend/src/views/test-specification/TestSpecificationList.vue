@@ -1104,7 +1104,7 @@ const handleSubmit = async () => {
 
           } catch (e) {
 
-                logger.error(e)
+                logger.error('保存规约失败', e)
 
 
             } finally {

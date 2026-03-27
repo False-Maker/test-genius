@@ -103,14 +103,29 @@ class ModelConfigServiceImplTest {
         // Given
         ModelConfig newConfig = new ModelConfig();
         newConfig.setModelName("测试模型");
+        newConfig.setModelType("LLM");
         
-        // When & Then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            modelConfigService.createModelConfig(newConfig);
-        });
+        when(modelConfigRepository.findByModelCodeStartingWithOrderByIdDesc(anyString()))
+            .thenReturn(new ArrayList<>());
+        when(modelConfigRepository.findAll())
+            .thenReturn(new ArrayList<>());
+        when(modelConfigRepository.save(any(ModelConfig.class)))
+            .thenAnswer(invocation -> {
+                ModelConfig config = invocation.getArgument(0);
+                config.setId(2L);
+                return config;
+            });
+        doNothing().when(cacheService).delete(anyString());
+        doNothing().when(cacheService).deleteByPattern(anyString());
         
-        assertEquals("模型编码不能为空", exception.getMessage());
-        verify(modelConfigRepository, never()).save(any());
+        // When
+        ModelConfig result = modelConfigService.createModelConfig(newConfig);
+        
+        // Then
+        assertNotNull(result);
+        assertNotNull(result.getModelCode());
+        assertTrue(result.getModelCode().startsWith("MODEL-"));
+        verify(modelConfigRepository, times(1)).save(any(ModelConfig.class));
     }
     
     @Test
@@ -158,9 +173,6 @@ class ModelConfigServiceImplTest {
         newConfig.setModelName("测试模型");
         newConfig.setApiEndpoint("invalid-url"); // 无效的URL格式
         
-        when(modelConfigRepository.findByModelCode("TEST-001"))
-            .thenReturn(Optional.empty());
-        
         // When & Then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             modelConfigService.createModelConfig(newConfig);
@@ -179,9 +191,6 @@ class ModelConfigServiceImplTest {
         newConfig.setModelName("测试模型");
         newConfig.setApiEndpoint("https://api.test.com");
         newConfig.setTemperature(new BigDecimal("3.0")); // 超出0-2范围
-        
-        when(modelConfigRepository.findByModelCode("TEST-001"))
-            .thenReturn(Optional.empty());
         
         // When & Then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
@@ -285,7 +294,6 @@ class ModelConfigServiceImplTest {
             .thenReturn(null);
         when(modelConfigRepository.findById(id))
             .thenReturn(Optional.of(modelConfig));
-        doNothing().when(cacheService).set(anyString(), any(), anyInt());
         
         // When
         ModelConfig result = modelConfigService.getModelConfigById(id);
@@ -295,7 +303,7 @@ class ModelConfigServiceImplTest {
         assertEquals(id, result.getId());
         verify(cacheService, times(1)).get(anyString(), eq(ModelConfig.class));
         verify(modelConfigRepository, times(1)).findById(id);
-        verify(cacheService, times(1)).set(anyString(), any(), eq(3600));
+        verify(cacheService, times(1)).set(anyString(), any(), eq(3600L));
     }
     
     @Test
@@ -307,7 +315,6 @@ class ModelConfigServiceImplTest {
             .thenReturn(null);
         when(modelConfigRepository.findByModelCode(modelCode))
             .thenReturn(Optional.of(modelConfig));
-        doNothing().when(cacheService).set(anyString(), any(), anyInt());
         
         // When
         ModelConfig result = modelConfigService.getModelConfigByCode(modelCode);
@@ -350,7 +357,6 @@ class ModelConfigServiceImplTest {
             .thenReturn(null);
         when(modelConfigRepository.findByIsActiveOrderByPriorityAsc("1"))
             .thenReturn(configs);
-        doNothing().when(cacheService).set(anyString(), any(), anyInt());
         
         // When
         List<ModelConfig> result = modelConfigService.getActiveModelConfigs();
@@ -359,7 +365,7 @@ class ModelConfigServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         verify(modelConfigRepository, times(1)).findByIsActiveOrderByPriorityAsc("1");
-        verify(cacheService, times(1)).set(anyString(), any(), eq(1800));
+        verify(cacheService, times(1)).set(anyString(), any(), eq(1800L));
     }
     
     @Test
@@ -425,4 +431,3 @@ class ModelConfigServiceImplTest {
         verify(modelConfigRepository, never()).save(any());
     }
 }
-

@@ -786,14 +786,14 @@ const handleView = async (row: TestReportTemplateResponseDTO) => {
         const res = await testReportTemplateApi.getTemplateById(row.id)
 
 
-        viewData.value = res
+        viewData.value = res.data
 
 
         viewDialogVisible.value = true
 
 
   } catch(e) {
-        logger.error(e)
+        logger.error('查看模板详情失败', e)
     }
 
 
@@ -853,7 +853,7 @@ const handleStatusChange = async (row: TestReportTemplateResponseDTO) => {
 
       // revert
         row.isActive = row.isActive === '1' ? '0' : '1'
-        logger.error(e)
+        logger.error('更新模板状态失败', e)
 
 
     }
@@ -943,7 +943,7 @@ const handleSubmit = async () => {
             } catch (e) {
 
 
-      logger.error(e)
+      logger.error('保存模板失败', e)
 
 
             } finally {

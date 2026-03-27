@@ -596,16 +596,18 @@ const handleExecute = async () => {
       return
     }
 
+    if (!currentWorkflowId.value) {
+      ElMessage.warning('请先保存工作流后再执行')
+      return
+    }
+
     const result = await workflowApi.executeWorkflow(
-      JSON.stringify(config),
-      { requirement_text: '测试需求' },
-      currentWorkflowId.value || undefined
+      currentWorkflowId.value,
+      { requirement_text: '测试需求' }
     )
 
-    if (result.data.status === 'success') {
-      ElMessage.success('工作流执行成功')
-    } else {
-      ElMessage.error('工作流执行失败: ' + (result.data.error || '未知错误'))
+    if (result.data) {
+      ElMessage.success(`工作流已提交执行：${result.data.executionId}`)
     }
   } catch (error: any) {
     ElMessage.error('执行失败: ' + (error.message || '未知错误'))

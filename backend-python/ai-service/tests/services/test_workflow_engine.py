@@ -62,8 +62,10 @@ class TestWorkflowEngine:
 
     def test_execute_workflow_invalid_config(self, workflow_engine):
         """测试无效的工作流配置"""
-        with pytest.raises(Exception):
-            workflow_engine.execute_workflow("invalid json", {})
+        result = workflow_engine.execute_workflow("invalid json", {})
+
+        assert result["status"] == "failed"
+        assert "Expecting value" in result["error"]
 
     def test_execute_workflow_no_nodes(self, workflow_engine):
         """测试没有节点的工作流"""
@@ -117,14 +119,15 @@ class TestWorkflowEngine:
 
     def test_execute_nodes_max_depth(self, workflow_engine):
         """测试达到最大递归深度"""
-        node_map = {"node1": {"id": "node1"}}
+        node_map = {"node1": {"id": "node1", "type": "input", "config": {}}}
         edge_map = {"node1": ["node1"]}  # 自环，会导致无限递归
-        context = {}
+        context = {"node_outputs": {}, "current_node": None}
 
-        with pytest.raises(ValueError, match="执行深度超过限制"):
-            workflow_engine._execute_nodes(
-                ["node1"], node_map, edge_map, context, max_depth=1
-            )
+        with patch.object(workflow_engine, "_execute_single_node", return_value={"result": "ok"}):
+            with pytest.raises(ValueError, match="执行深度超过限制"):
+                workflow_engine._execute_nodes(
+                    ["node1"], node_map, edge_map, context, max_depth=1
+                )
 
     def test_execute_workflow_with_edges(self, workflow_engine):
         """测试执行带连接的工作流"""
@@ -215,9 +218,9 @@ class TestWorkflowEngine:
         """测试节点执行器注册"""
         # 验证默认节点执行器已注册
         assert "input" in workflow_engine.node_executors
-        assert "output" in workflow_engine.node_executors
+        assert "file_export" in workflow_engine.node_executors
         assert (
-            "process" in workflow_engine.node_executors
+            "prompt_generate" in workflow_engine.node_executors
             or "llm_call" in workflow_engine.node_executors
         )
 

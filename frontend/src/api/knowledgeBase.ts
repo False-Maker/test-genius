@@ -14,6 +14,24 @@ export interface KnowledgeDocument {
   [key: string]: unknown
 }
 
+type KnowledgeDocumentResponse = {
+  id?: number
+  doc_code?: string
+  docCode?: string
+  doc_name?: string
+  docName?: string
+  doc_type?: string
+  docType?: string
+  doc_content?: string
+  docContent?: string
+  doc_category?: string
+  docCategory?: string
+  doc_url?: string | null
+  docUrl?: string | null
+  similarity?: number
+  [key: string]: unknown
+}
+
 // 知识库类型
 export interface KnowledgeBase {
   id?: number
@@ -53,8 +71,41 @@ export interface KBPermissionParams {
   permissionType: 'read' | 'write' | 'admin'
 }
 
+const normalizeKnowledgeDocument = (item: KnowledgeDocumentResponse): KnowledgeDocument => ({
+  ...item,
+  docCode: item.docCode ?? item.doc_code ?? '',
+  docName: item.docName ?? item.doc_name ?? '',
+  docType: item.docType ?? item.doc_type ?? '',
+  docContent: item.docContent ?? item.doc_content ?? '',
+  docCategory: item.docCategory ?? item.doc_category,
+  docUrl: item.docUrl ?? item.doc_url ?? undefined,
+  similarity: item.similarity
+})
+
+const normalizeKnowledgeDocumentList = (
+  response: ApiResult<KnowledgeDocumentResponse[]>
+): ApiResult<KnowledgeDocument[]> => ({
+  ...response,
+  data: (response.data || []).map(normalizeKnowledgeDocument)
+})
+
 // 知识库API（统一走 Java 后端 /api/v1/knowledge-base）
 export const knowledgeBaseApi = {
+  // 获取知识库列表
+  listKnowledgeBases() {
+    return request.get<any, ApiResult<KnowledgeBase[]>>('/v1/knowledge-base')
+  },
+
+  // 获取知识库详情
+  getKnowledgeBaseById(id: number) {
+    return request.get<any, ApiResult<KnowledgeBase>>(`/v1/knowledge-base/${id}`)
+  },
+
+  // 生成知识库编码
+  generateKbCode() {
+    return request.get<any, ApiResult<string>>('/v1/knowledge-base/generate-code')
+  },
+
   // 初始化知识库（代理到 Python）
   initKnowledgeBase() {
     return request.post<any, ApiResult<boolean>>('/v1/knowledge-base/init')
@@ -62,6 +113,7 @@ export const knowledgeBaseApi = {
 
   // 添加知识库文档（代理到 Python）
   addDocument(params: {
+    kbId?: number
     docCode: string
     docName: string
     docType: string
@@ -90,27 +142,30 @@ export const knowledgeBaseApi = {
   },
 
   // 语义检索知识库文档（代理到 Python）
-  searchDocuments(params: SearchDocumentsParams) {
-    return request.post<any, ApiResult<KnowledgeDocument[]>>('/v1/knowledge-base/documents/search', {
+  async searchDocuments(params: SearchDocumentsParams) {
+    const response = await request.post<any, ApiResult<KnowledgeDocumentResponse[]>>('/v1/knowledge-base/documents/search', {
       queryText: params.queryText,
       docType: params.docType,
       topK: params.topK ?? 10,
       similarityThreshold: params.similarityThreshold ?? 0.7
     })
+    return normalizeKnowledgeDocumentList(response)
   },
 
   // 关键词检索知识库文档（代理到 Python）
-  searchDocumentsByKeyword(keyword: string, params?: { docType?: string; topK?: number }) {
-    return request.get<any, ApiResult<KnowledgeDocument[]>>(
+  async searchDocumentsByKeyword(keyword: string, params?: { docType?: string; topK?: number }) {
+    const response = await request.get<any, ApiResult<KnowledgeDocumentResponse[]>>(
       `/v1/knowledge-base/documents/keyword/${encodeURIComponent(keyword)}`,
       { params: { docType: params?.docType, topK: params?.topK ?? 10 } }
     )
+    return normalizeKnowledgeDocumentList(response)
   },
 
-listDocuments(kbId: number, limit = 20) {
-    return request.get<ApiResult<KnowledgeDocument[]>>(`/v1/knowledge-base/${kbId}/documents`, {
+  async listDocuments(kbId: number, limit = 20) {
+    const response = await request.get<any, ApiResult<KnowledgeDocumentResponse[]>>(`/v1/knowledge-base/${kbId}/documents`, {
       params: { limit }
     })
+    return normalizeKnowledgeDocumentList(response)
   },
 
 // 获取知识库统计信息（通过详情接口，已包含 documentCount/chunkCount/lastSyncTime）
@@ -129,12 +184,12 @@ listDocuments(kbId: number, limit = 20) {
   },
 
   // 同步知识库
-  syncKnowledgeBase(params: KBSyncParams) {
-    return request.post<ApiResult<Record<string, unknown>>>(
+  syncKnowledgeBase(params: KBSyncParams): Promise<ApiResult<Record<string, unknown>>> {
+    return request.post<Record<string, unknown>>(
       `/v1/knowledge-base/${params.kbId}/sync`,
       null,
       { params: { syncType: params.syncType, sourcePath: params.sourcePath } }
-    )
+    ) as unknown as Promise<ApiResult<Record<string, unknown>>>
   },
 
   // 获取同步日志

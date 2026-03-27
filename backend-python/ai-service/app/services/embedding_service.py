@@ -169,10 +169,7 @@ class EmbeddingService:
         使用 OpenAI API 获取向量
         """
         client = _get_openai_client()
-        response = client.embeddings.create(
-            model=self.embedding_model,
-            input=text
-        )
+        response = client.embeddings.create(**self._build_openai_embedding_request(text))
         return response.data[0].embedding
     
     def batch_get_embeddings(self, texts: List[str]) -> List[Optional[List[float]]]:
@@ -218,15 +215,24 @@ class EmbeddingService:
         批量使用 OpenAI API 获取向量
         """
         client = _get_openai_client()
-        response = client.embeddings.create(
-            model=self.embedding_model,
-            input=texts
-        )
+        response = client.embeddings.create(**self._build_openai_embedding_request(texts))
         # 按照输入顺序排列结果
         embeddings = [None] * len(texts)
         for item in response.data:
             embeddings[item.index] = item.embedding
         return embeddings
+
+    def _build_openai_embedding_request(self, input_data):
+        """构建 OpenAI 兼容嵌入请求，支持自定义维度。"""
+        request = {
+            "model": self.embedding_model,
+            "input": input_data
+        }
+
+        if self.embedding_model in {"embedding-3", "text-embedding-3-small", "text-embedding-3-large"}:
+            request["dimensions"] = self.embedding_dimension
+
+        return request
     
     def check_pgvector_extension(self) -> bool:
         """

@@ -8,6 +8,7 @@ import lombok.Data;
  */
 @Data
 public class DocumentAddRequestDTO {
+    private Long kbId;
     private String docCode;
     @NotBlank(message = "文档名称不能为空")
     private String docName;

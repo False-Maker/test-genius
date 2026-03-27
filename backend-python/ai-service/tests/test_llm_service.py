@@ -41,7 +41,7 @@ class TestLLMService:
         assert llm == mock_llm_instance
         mock_get_by_code.assert_called_once_with("TEST_MODEL")
         mock_create_llm.assert_called_once()
-        assert "TEST_MODEL_2000_0.7" in service._llm_cache
+        assert "TEST_MODEL_2000_0.7_120" in service._llm_cache
     
     @patch('app.services.llm_service.ModelConfigService.get_by_code')
     def test_get_llm_instance_not_found(self, mock_get_by_code, test_db: Session):
@@ -184,4 +184,3 @@ class TestLLMService:
         
         assert len(results) == 2
         assert "error" in results[1]
-

@@ -904,7 +904,7 @@ const handleEdit = (row: TestReportResponseDTO) => {
   formData.reportName = row.reportName
 
 
-  formData.reportType = row.reportType
+  formData.reportType = row.reportType as 'EXECUTION' | 'COVERAGE' | 'QUALITY' | 'RISK'
 
 
   formData.requirementId = row.requirementId
@@ -1025,7 +1025,8 @@ const handleExport = async (row: TestReportResponseDTO, format: 'WORD' | 'PDF' |
     try {
 
 
-        const url = await testReportApi.exportReport(row.reportCode, format)
+        const response = await testReportApi.exportReport(row.reportCode, format)
+        const url = response.data
 
 
         if (url) {

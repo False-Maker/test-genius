@@ -72,28 +72,32 @@ export const dataDocumentApi = {
   // 导出等价类表到Excel
   exportEquivalenceTableToExcel(data: EquivalenceTableResponse) {
     return request.post<Blob>('/v1/data-documents/equivalence-tables/export/excel', data, {
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   },
 
   // 导出等价类表到Word
   exportEquivalenceTableToWord(data: EquivalenceTableResponse) {
     return request.post<Blob>('/v1/data-documents/equivalence-tables/export/word', data, {
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   },
 
   // 导出正交表到Excel
   exportOrthogonalTableToExcel(data: OrthogonalTableResponse) {
     return request.post<Blob>('/v1/data-documents/orthogonal-tables/export/excel', data, {
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   },
 
   // 导出正交表到Word
   exportOrthogonalTableToWord(data: OrthogonalTableResponse) {
     return request.post<Blob>('/v1/data-documents/orthogonal-tables/export/word', data, {
-      responseType: 'blob'
+      responseType: 'blob',
+      responseMode: 'blob'
     })
   }
 }

@@ -2,62 +2,58 @@
 嵌入服务测试
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from app.services.embedding_service import EmbeddingService
 
 
 @pytest.fixture
 def db_session():
-    """数据库会话fixture"""
     return Mock()
 
 
 @pytest.fixture
 def embedding_service(db_session):
-    """嵌入服务fixture"""
     return EmbeddingService(db_session)
 
 
 class TestEmbeddingService:
-    """测试EmbeddingService"""
+    def test_get_embedding_local_success(self, embedding_service):
+        embedding_service.provider = "local"
 
-    @patch("app.services.embedding_service SentenceTransformer")
-    def test_generate_embedding(self, mock_transformer, embedding_service):
-        """测试生成嵌入向量"""
-        mock_model = Mock()
-        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
-        mock_transformer.return_value = mock_model
+        with patch("app.services.embedding_service._get_local_model") as mock_get_local_model:
+            mock_model = Mock()
+            mock_embedding = Mock()
+            mock_embedding.tolist.return_value = [0.1, 0.2, 0.3]
+            mock_model.encode.return_value = mock_embedding
+            mock_get_local_model.return_value = (mock_model, "sentence-transformers")
 
-        result = embedding_service.generate_embedding("测试文本")
+            result = embedding_service.get_embedding("测试文本")
 
-        assert len(result) > 0
-        assert result[0] == 0.1
+        assert result == [0.1, 0.2, 0.3]
 
-    @patch("app.services.embedding_service SentenceTransformer")
-    def test_batch_generate_embeddings(self, mock_transformer, embedding_service):
-        """测试批量生成嵌入向量"""
-        mock_model = Mock()
-        mock_model.encode.return_value = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
-        mock_transformer.return_value = mock_model
+    def test_batch_get_embeddings_local_success(self, embedding_service):
+        embedding_service.provider = "local"
 
-        texts = ["文本1", "文本2"]
-        results = embedding_service.batch_generate_embeddings(texts)
+        with patch("app.services.embedding_service._get_local_model") as mock_get_local_model:
+            mock_model = Mock()
+            emb1 = Mock()
+            emb1.tolist.return_value = [0.1, 0.2]
+            emb2 = Mock()
+            emb2.tolist.return_value = [0.3, 0.4]
+            mock_model.encode.return_value = [emb1, emb2]
+            mock_get_local_model.return_value = (mock_model, "sentence-transformers")
 
-        assert len(results) == 2
+            results = embedding_service.batch_get_embeddings(["文本1", "文本2"])
 
-    @patch("app.services.embedding_service SentenceTransformer")
-    def test_compute_similarity(self, mock_transformer, embedding_service):
-        """测试计算相似度"""
-        mock_model = Mock()
-        mock_transformer.return_value = mock_model
+        assert results == [[0.1, 0.2], [0.3, 0.4]]
 
-        # 模拟余弦相似度计算
-        with patch("app.services.embedding_service cosine_similarity") as mock_cosine:
-            mock_cosine.return_value = [[0.85]]
+    def test_cosine_similarity(self, embedding_service):
+        similarity = embedding_service.cosine_similarity(
+            [1.0, 0.0],
+            [1.0, 0.0]
+        )
 
-            similarity = embedding_service.compute_similarity(
-                [0.1, 0.2, 0.3], [0.2, 0.3, 0.4]
-            )
-
-            assert similarity > 0.8
+        assert similarity == pytest.approx(1.0)

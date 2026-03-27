@@ -2,6 +2,7 @@ package com.sinosoft.testdesign.service.impl;
 
 import com.sinosoft.testdesign.common.BusinessException;
 import com.sinosoft.testdesign.entity.TestReportTemplate;
+import com.sinosoft.testdesign.repository.TestReportRepository;
 import com.sinosoft.testdesign.repository.TestReportTemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +36,9 @@ class TestReportTemplateServiceImplTest {
     
     @Mock
     private TestReportTemplateRepository templateRepository;
+
+    @Mock
+    private TestReportRepository testReportRepository;
     
     @InjectMocks
     private TestReportTemplateServiceImpl templateService;
@@ -194,6 +198,8 @@ class TestReportTemplateServiceImplTest {
         // Given
         when(templateRepository.findById(1L))
             .thenReturn(Optional.of(testTemplate));
+        when(testReportRepository.findByTemplateId(1L))
+            .thenReturn(new ArrayList<>());
         doNothing().when(templateRepository).delete(any(TestReportTemplate.class));
         
         // When
@@ -277,4 +283,3 @@ class TestReportTemplateServiceImplTest {
         assertEquals("1", result.getIsDefault());
     }
 }
-

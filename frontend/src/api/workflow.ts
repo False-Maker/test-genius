@@ -55,6 +55,15 @@ export interface WorkflowExecution {
   createTime: string
 }
 
+export interface WorkflowExecutionProgress {
+  executionId: string
+  status: string
+  progress: number
+  currentNodeId?: string
+  startTime?: string
+  duration?: number
+}
+
 // 工作流节点配置类型
 export interface WorkflowNode {
   id: string
@@ -160,24 +169,27 @@ export const workflowApi = {
 
   // 执行工作流
   executeWorkflow(
-    workflowConfig: string,
+    workflowId: number,
     inputData: Record<string, unknown>,
-    workflowId?: number,
-    workflowCode?: string,
-    workflowVersion?: number
+    creatorId?: number,
+    creatorName?: string
   ) {
-    return request.post<{
-      execution_id: string
-      status: string
-      output?: unknown
-      error?: string
-      error_node?: string
-    }>('/api/v1/workflow/execute', {
-      workflow_config: workflowConfig,
-      input_data: inputData,
-      workflow_id: workflowId,
-      workflow_code: workflowCode,
-      workflow_version: workflowVersion
+    return request.post<WorkflowExecution>('/v1/workflow-executions/execute', inputData, {
+      params: {
+        workflowId,
+        creatorId,
+        creatorName
+      }
     })
+  },
+
+  // 查询工作流执行详情
+  getExecution(executionId: string) {
+    return request.get<WorkflowExecution>(`/v1/workflow-executions/${executionId}`)
+  },
+
+  // 查询工作流执行进度
+  getExecutionProgress(executionId: string) {
+    return request.get<WorkflowExecutionProgress>(`/v1/workflow-executions/${executionId}/progress`)
   }
 }

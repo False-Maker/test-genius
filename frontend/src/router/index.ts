@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/store/user'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -329,7 +328,7 @@ const router = createRouter({
 })
 
 // 全局前置守卫（临时禁用登录和权限检查）
-router.beforeEach((to, from, next) => {
+router.beforeEach((_to, _from, next) => {
   // TODO: 正式环境需要恢复登录和权限检查
   // const userStore = useUserStore()
 
@@ -377,5 +376,4 @@ router.afterEach((to) => {
 })
 
 export default router
-
 

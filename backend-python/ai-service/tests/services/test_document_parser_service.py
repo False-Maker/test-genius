@@ -72,7 +72,7 @@ class TestDocumentParserService:
         assert "Alice" in result["content"]
 
     @patch("app.services.document_parser_service.DOCX_AVAILABLE", True)
-    @patch("docx.Document")
+    @patch("app.services.document_parser_service.Document")
     def test_parse_word_success(self, mock_document_class, document_parser, tmp_path):
         """测试解析Word文档（成功）"""
         test_file = tmp_path / "test.docx"
@@ -141,19 +141,16 @@ class TestDocumentParserService:
             document_parser.parse_document(str(test_file))
 
     @patch("app.services.document_parser_service.MARKDOWN_AVAILABLE", True)
-    @patch("markdown.markdown")
-    def test_parse_markdown(self, mock_markdown, document_parser, tmp_path):
+    def test_parse_markdown(self, document_parser, tmp_path):
         """测试解析Markdown文档"""
         test_file = tmp_path / "test.md"
         test_content = "# 标题\n\n内容"
         test_file.write_text(test_content, encoding="utf-8")
 
-        mock_markdown.return_value = "<h1>标题</h1><p>内容</p>"
-
         result = document_parser.parse_document(str(test_file))
 
         assert "content" in result
-        mock_markdown.assert_called_once()
+        assert result["content"] == test_content
 
     @patch("app.services.document_parser_service.HTML_AVAILABLE", True)
     def test_parse_html(self, document_parser, tmp_path):

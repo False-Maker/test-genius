@@ -197,16 +197,13 @@ class TestAgentEngine:
         assert result["success"] is False
         assert "工具执行失败" in result["error"]
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_function_calling_with_tool_call(
-        self, mock_llm_service_class, agent_engine, mock_tool
-    ):
+    def test_execute_function_calling_with_tool_call(self, agent_engine, mock_tool):
         """测试Function Calling模式（带工具调用）"""
         agent_engine.register_tool(mock_tool)
 
         # 模拟LLM响应（第一轮返回函数调用，第二轮返回最终答案）
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         mock_llm_service.call_model.side_effect = [
             {
@@ -222,13 +219,10 @@ class TestAgentEngine:
         assert len(result["tool_calls"]) == 1
         assert result["tool_calls"][0]["tool"] == "test_tool"
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_function_calling_without_tool(
-        self, mock_llm_service_class, agent_engine
-    ):
+    def test_execute_function_calling_without_tool(self, agent_engine):
         """测试Function Calling模式（无需工具调用）"""
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         mock_llm_service.call_model.return_value = {
             "content": "这是一个简单的回答，不需要工具",
@@ -240,16 +234,13 @@ class TestAgentEngine:
         assert "简单的回答" in result["content"]
         assert len(result["tool_calls"]) == 0
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_function_calling_max_iterations(
-        self, mock_llm_service_class, agent_engine, mock_tool
-    ):
+    def test_execute_function_calling_max_iterations(self, agent_engine, mock_tool):
         """测试Function Calling模式（达到最大迭代次数）"""
         agent_engine.register_tool(mock_tool)
         agent_engine.max_iterations = 2
 
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         # 一直要求调用工具，不返回最终答案
         mock_llm_service.call_model.return_value = {
@@ -262,14 +253,13 @@ class TestAgentEngine:
         assert "最大迭代次数" in result["content"]
         assert result["error"] == "max_iterations_exceeded"
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_react_mode(self, mock_llm_service_class, agent_engine, mock_tool):
+    def test_execute_react_mode(self, agent_engine, mock_tool):
         """测试ReAct模式"""
         agent_engine.mode = "react"
         agent_engine.register_tool(mock_tool)
 
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         # 模拟ReAct响应
         mock_llm_service.call_model.side_effect = [
@@ -285,14 +275,13 @@ class TestAgentEngine:
         assert "任务完成" in result["content"]
         assert len(result["tool_calls"]) == 1
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_react_max_iterations(self, mock_llm_service_class, agent_engine):
+    def test_execute_react_max_iterations(self, agent_engine):
         """测试ReAct模式（达到最大迭代次数）"""
         agent_engine.mode = "react"
         agent_engine.max_iterations = 2
 
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         # 一直思考，不返回Final Answer
         mock_llm_service.call_model.return_value = {
@@ -305,13 +294,10 @@ class TestAgentEngine:
         assert "最大迭代次数" in result["content"]
         assert result["error"] == "max_iterations_exceeded"
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_with_function_calling_mode(
-        self, mock_llm_service_class, agent_engine
-    ):
+    def test_execute_with_function_calling_mode(self, agent_engine):
         """测试execute方法（function_calling模式）"""
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         mock_llm_service.call_model.return_value = {
             "content": "直接回答",
@@ -321,13 +307,12 @@ class TestAgentEngine:
         result = agent_engine.execute("测试消息")
         assert "直接回答" in result["content"]
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_with_react_mode(self, mock_llm_service_class, agent_engine):
+    def test_execute_with_react_mode(self, agent_engine):
         """测试execute方法（react模式）"""
         agent_engine.mode = "react"
 
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         mock_llm_service.call_model.return_value = {
             "content": "Final Answer: 完成",
@@ -337,13 +322,10 @@ class TestAgentEngine:
         result = agent_engine.execute("测试消息")
         assert "完成" in result["content"]
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_with_conversation_history(
-        self, mock_llm_service_class, agent_engine
-    ):
+    def test_execute_with_conversation_history(self, agent_engine):
         """测试带对话历史的执行"""
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         mock_llm_service.call_model.return_value = {
             "content": "回复",
@@ -360,11 +342,10 @@ class TestAgentEngine:
         result = agent_engine.execute("新消息", context)
         assert "回复" in result["content"]
 
-    @patch("app.services.agent_engine.LLMService")
-    def test_execute_with_exception(self, mock_llm_service_class, agent_engine):
+    def test_execute_with_exception(self, agent_engine):
         """测试执行时的异常处理"""
         mock_llm_service = Mock()
-        mock_llm_service_class.return_value = mock_llm_service
+        agent_engine.llm_service = mock_llm_service
 
         mock_llm_service.call_model.side_effect = Exception("LLM调用失败")
 

@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class ModelConfigData(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     model_code: Optional[str] = None
     model_name: Optional[str] = None
     model_type: Optional[str] = None
@@ -24,21 +26,15 @@ class ModelConfigData(BaseModel):
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
 
-
+class RequirementAnalyzeRequest(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
-
-
-class RequirementAnalyzeRequest(BaseModel):
     requirement_text: str = Field(..., min_length=1, description="需求文本")
     prompt: Optional[str] = None
     model_code: Optional[str] = None
     max_tokens: Optional[int] = None
     temperature: Optional[float] = None
     model_cfg: Optional[ModelConfigData] = Field(None, alias="model_config")
-
-
-
 
 @router.post("/requirement/analyze")
 async def analyze_requirement(
@@ -64,7 +60,7 @@ async def analyze_requirement(
             llm_service.call_model_with_config,
             model_code=effective_model_code,
             prompt=prompt,
-            model_config=request.model_cfg.dict() if request.model_cfg else None
+            model_config=request.model_cfg.model_dump() if request.model_cfg else None
         )
         content = result.get("content", "")
         parsed = _parse_analysis_output(content)

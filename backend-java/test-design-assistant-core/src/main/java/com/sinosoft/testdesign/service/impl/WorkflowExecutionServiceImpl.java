@@ -9,6 +9,7 @@ import com.sinosoft.testdesign.service.WorkflowExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -34,6 +35,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     private final WorkflowExecutionRepository executionRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final ApplicationContext applicationContext;
     
     @Value("${app.ai-service.url:http://localhost:8000}")
     private String aiServiceUrl;
@@ -82,7 +84,8 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         execution = executionRepository.save(execution);
         
         // 异步执行工作流
-        executeWorkflowAsync(execution, workflow, inputData);
+        applicationContext.getBean(WorkflowExecutionServiceImpl.class)
+                .executeWorkflowAsync(execution, workflow, inputData);
         
         return execution;
     }

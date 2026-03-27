@@ -50,10 +50,14 @@ class LLMService:
         model_config = self.model_config_service.get_by_code(model_code)
         if not model_config:
             raise ValueError(f"模型配置不存在: {model_code}")
-        
+
         if model_config.is_active != "1":
             raise ValueError(f"模型配置未启用: {model_code}")
-        
+
+        api_key = (model_config.api_key or "").strip()
+        if not api_key:
+            raise ValueError(f"模型配置缺少 API Key: {model_code}")
+
         # 使用配置中的参数，如果提供了参数则覆盖
         max_tokens = max_tokens or model_config.max_tokens or 2000
         temperature = temperature if temperature is not None else (
@@ -72,7 +76,7 @@ class LLMService:
         try:
             llm = ModelAdapterFactory.create_llm(
                 model_type=model_config.model_type or "DEEPSEEK",
-                api_key=model_config.api_key or "",
+                api_key=api_key,
                 api_endpoint=model_config.api_endpoint or "",
                 model_version=model_config.model_version or "",
                 max_tokens=max_tokens,

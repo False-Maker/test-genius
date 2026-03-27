@@ -369,7 +369,7 @@ const handleCreate = () => {
 const handleView = async (row: TestCoverageAnalysisResponseDTO) => {
     try {
         const res = await testCoverageApi.getAnalysisById(row.id)
-        viewData.value = res
+        viewData.value = res.data
         viewDialogVisible.value = true
     } catch(e) {
         console.error(e)

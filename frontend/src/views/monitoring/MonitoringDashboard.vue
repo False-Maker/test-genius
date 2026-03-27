@@ -271,13 +271,13 @@ const loadTimeSeriesData = async () => {
     updateResponseTimeChart(responseTimeRes.data.data)
 
     // 成功率趋势
-    const successRateRes = await monitoringApi.getTimeSeriesData(
+    await monitoringApi.getTimeSeriesData(
       timeRange.value[0],
       timeRange.value[1],
       'DAY',
       'SUCCESS_RATE'
     )
-    updateSuccessRateChart(successRateRes.data.data)
+    updateSuccessRateChart()
 
     // Token使用量
     const tokenRes = await monitoringApi.getTimeSeriesData(

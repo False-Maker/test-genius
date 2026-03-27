@@ -19,6 +19,12 @@ public interface KnowledgeBaseService {
     /**
      * 添加知识库文档
      */
+    Long addDocument(Long kbId, String docCode, String docName, String docType, String docContent,
+                     String docCategory, String docUrl, Long creatorId);
+
+    /**
+     * 添加知识库文档
+     */
     Long addDocument(String docCode, String docName, String docType, String docContent, 
                      String docCategory, String docUrl, Long creatorId);
     
@@ -35,4 +41,3 @@ public interface KnowledgeBaseService {
 
     List<Map<String, Object>> listDocumentsByKb(Long kbId, int limit);
 }
-

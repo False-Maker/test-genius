@@ -12,14 +12,14 @@ export interface FileUploadResponse {
 // 文件上传API
 export const fileUploadApi = {
 // 上传文件
-  uploadFile(file: File) {
+  uploadFile(file: File): Promise<ApiResult<FileUploadResponse>> {
     const formData = new FormData()
     formData.append('file', file)
-    return request.post<ApiResult<FileUploadResponse>>('/v1/files/upload', formData, {
+    return request.post<FileUploadResponse>('/v1/files/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    })
+    }) as unknown as Promise<ApiResult<FileUploadResponse>>
   },
 
   // 删除文件
@@ -29,4 +29,3 @@ export const fileUploadApi = {
     return request.delete(`/v1/files/${encodedPath}`)
   }
 }
-

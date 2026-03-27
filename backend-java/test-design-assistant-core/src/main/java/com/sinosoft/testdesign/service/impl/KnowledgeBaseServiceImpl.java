@@ -46,10 +46,17 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
     @Override
     public Long addDocument(String docCode, String docName, String docType, String docContent,
                            String docCategory, String docUrl, Long creatorId) {
+        return addDocument(null, docCode, docName, docType, docContent, docCategory, docUrl, creatorId);
+    }
+
+    @Override
+    public Long addDocument(Long kbId, String docCode, String docName, String docType, String docContent,
+                           String docCategory, String docUrl, Long creatorId) {
         try {
             String url = aiServiceUrl + "/api/v1/knowledge/documents";
             
             Map<String, Object> request = new HashMap<>();
+            request.put("kb_id", kbId);
             request.put("doc_code", docCode);
             request.put("doc_name", docName);
             request.put("doc_type", docType);
@@ -141,4 +148,3 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
         }
     }
 }
-

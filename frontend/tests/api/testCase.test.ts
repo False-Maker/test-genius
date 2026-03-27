@@ -108,7 +108,8 @@ describe('TestCaseAPI', () => {
       expect(result.data).toEqual(mockBlob)
       expect(request.get).toHaveBeenCalledWith('/v1/test-cases/export', {
         params: { caseName: '测试' },
-        responseType: 'blob'
+        responseType: 'blob',
+        responseMode: 'blob'
       })
     })
   })
@@ -122,7 +123,8 @@ describe('TestCaseAPI', () => {
 
       expect(result.data).toEqual(mockBlob)
       expect(request.get).toHaveBeenCalledWith('/v1/test-cases/export-template', {
-        responseType: 'blob'
+        responseType: 'blob',
+        responseMode: 'blob'
       })
     })
   })

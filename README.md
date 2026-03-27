@@ -146,6 +146,90 @@ docker compose down -v
 docker compose build
 ```
 
+### 项目级最终验收
+
+可直接运行根脚本串行执行当前项目级关键验收项：
+
+```bash
+./scripts/run-final-acceptance.sh
+```
+
+默认会依次检查：
+- 若 dev 栈未启动，会先执行 `docker compose --profile dev up -d`
+- dev 容器状态
+- Java / Python 健康接口
+- 前端登录页可访问
+- 前端 `lint:check`
+- 前端 `type-check`
+- 前端 `vitest`
+- 前端生产构建
+- Playwright smoke
+- Java 全量 `mvn test`
+- Python 全量 `pytest tests/ -q --no-cov --capture=no`
+- Python 知识库回填与服务定向回归
+- 知识库回填 dry-run
+- `knowledge_document.embedding IS NULL` 计数
+
+脚本位置：
+- `scripts/run-final-acceptance.sh`
+
+平台手动入口：
+- GitLab manual job：`acceptance:final`
+- GitHub workflow：`Final Acceptance`
+
+这两个入口都会执行同一份根脚本，并保留：
+- `final-acceptance.log`
+- `docker-compose-final-acceptance.log`
+- `final-acceptance-summary.json`
+
+平台变量校验脚本：
+- `bash scripts/check-required-env.sh final-acceptance`
+- `bash scripts/check-required-env.sh kb-backfill`
+- `bash scripts/check-required-env.sh list final-acceptance`
+- `bash scripts/check-required-env.sh list kb-backfill`
+
+平台手动执行说明：
+- `docs/platform-manual-runbook.md`
+
+### 知识库历史文档 embedding 回填
+
+当历史知识库文档是在旧逻辑下写入、`knowledge_document.embedding` 为空时，可以先 dry-run 统计，再执行一次性回填：
+
+```bash
+./scripts/run-kb-embedding-backfill.sh --dry-run --kb-id 2
+```
+
+```bash
+./scripts/run-kb-embedding-backfill.sh --kb-id 2 --batch-size 100
+```
+
+如果希望把它接到发布后步骤里，在仍有未回填文档时返回非 0 退出码：
+
+```bash
+./scripts/run-kb-embedding-backfill.sh --kb-id 2 --fail-on-remaining
+```
+
+脚本位置：
+- `scripts/run-kb-embedding-backfill.sh`
+- `backend-python/ai-service/scripts/backfill_knowledge_document_embeddings.py`
+
+CI / 工作流入口：
+- GitLab manual job: `maintenance:kb-embedding-backfill`
+- GitHub Actions workflow: `Knowledge Base Embedding Backfill`
+
+默认行为：
+- GitLab job 默认使用 `KB_BACKFILL_ARGS="--dry-run --fail-on-remaining"`，需要实际回填时可在运行前覆盖这个变量
+- GitHub workflow 默认 `dry_run=true`、`fail_on_remaining=true`
+- 两个入口都会产出一份 JSON 结果；GitLab 作为 job artifact 保存，GitHub 会同时写入 workflow summary 并上传 artifact `kb-embedding-backfill-result`
+
+手动工作流需要预先配置运行环境变量或 Secrets，至少包括：
+- `DATABASE_URL`
+- `EMBEDDING_PROVIDER`
+
+按 provider 区分：
+- `local`：通常不需要额外 Secret，未显式配置时默认使用 `EMBEDDING_MODEL_NAME=BAAI/bge-m3`
+- `openai`：至少需要 `EMBEDDING_API_KEY`、`OPENAI_EMBEDDING_MODEL`，如有自建兼容网关再补 `EMBEDDING_API_BASE`
+
 ## API文档
 
 启动服务后，访问以下地址查看API文档：
@@ -185,4 +269,3 @@ docker compose build
 ## 许可证
 
 内部项目，仅供公司内部使用。
-

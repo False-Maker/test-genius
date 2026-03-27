@@ -158,6 +158,7 @@ public class KnowledgeBaseController {
     @PostMapping("/documents")
     public Result<Long> addDocument(@Valid @RequestBody DocumentAddRequestDTO request) {
         Long docId = knowledgeBaseService.addDocument(
+                request.getKbId(),
                 request.getDocCode(),
                 request.getDocName(),
                 request.getDocType(),

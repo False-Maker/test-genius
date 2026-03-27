@@ -18,6 +18,7 @@ router = APIRouter(prefix="/knowledge", tags=["知识库"])
 
 class DocumentCreateRequest(BaseModel):
     """文档创建请求"""
+    kb_id: Optional[int] = None
     doc_code: str
     doc_name: str
     doc_type: str
@@ -62,6 +63,7 @@ async def add_document(
     try:
         service = KnowledgeBaseService(db)
         doc_id = service.add_document(
+            kb_id=request.kb_id,
             doc_code=request.doc_code,
             doc_name=request.doc_name,
             doc_type=request.doc_type,
@@ -556,4 +558,3 @@ async def upload_document(
     except Exception as e:
         logger.error(f"上传文档失败: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"上传文档失败: {str(e)}")
-

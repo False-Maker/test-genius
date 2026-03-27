@@ -651,7 +651,7 @@ const handleView = async (row: TestRiskAssessmentResponseDTO) => {
         const res = await testRiskAssessmentApi.getAssessmentById(row.id)
 
 
-        viewData.value = res
+        viewData.value = res.data
 
 
         viewDialogVisible.value = true

@@ -32,43 +32,84 @@ class KnowledgeBaseService:
             是否初始化成功
         """
         try:
+            dimension = self.embedding_service.embedding_dimension
+
             # 检查并安装pgvector扩展
             if not self.embedding_service.install_pgvector_extension():
                 logger.warning("pgvector扩展未安装，将使用关系型数据库存储")
                 return False
             
             # 创建知识库文档表（带向量列）
-            create_table_sql = """
+            create_table_sql = f"""
             CREATE TABLE IF NOT EXISTS knowledge_document (
                 id BIGSERIAL PRIMARY KEY,
+                kb_id BIGINT,
                 doc_code VARCHAR(100) UNIQUE NOT NULL,
                 doc_name VARCHAR(500) NOT NULL,
                 doc_type VARCHAR(50), -- 文档类型：规范/业务规则/用例模板/历史用例
                 doc_category VARCHAR(100), -- 文档分类
                 doc_content TEXT, -- 文档内容
                 doc_url VARCHAR(1000), -- 文档URL
-                embedding vector(1024), -- 向量列 (BAAI/bge-m3)
+                embedding vector({dimension}), -- 向量列
                 is_active CHAR(1) DEFAULT '1',
                 creator_id BIGINT,
                 create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- 创建向量索引（用于快速相似度搜索）
-            CREATE INDEX IF NOT EXISTS idx_knowledge_document_embedding 
-            ON knowledge_document 
-            USING ivfflat (embedding vector_cosine_ops)
-            WITH (lists = 100);
-            
+
             -- 创建其他索引
+            CREATE INDEX IF NOT EXISTS idx_knowledge_doc_kb_id ON knowledge_document(kb_id);
             CREATE INDEX IF NOT EXISTS idx_knowledge_doc_code ON knowledge_document(doc_code);
             CREATE INDEX IF NOT EXISTS idx_knowledge_doc_type ON knowledge_document(doc_type, is_active);
             CREATE INDEX IF NOT EXISTS idx_knowledge_doc_category ON knowledge_document(doc_category);
             """
             
             self.db.execute(text(create_table_sql))
+            self.db.execute(text(f"""
+            DO $$
+            BEGIN
+                IF EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'knowledge_document'
+                      AND column_name = 'embedding'
+                      AND udt_name <> 'vector'
+                ) THEN
+                    ALTER TABLE knowledge_document
+                    ALTER COLUMN embedding TYPE vector({dimension})
+                    USING CASE
+                        WHEN embedding IS NULL OR btrim(embedding::text) = '' THEN NULL
+                        ELSE embedding::vector
+                    END;
+                ELSIF NOT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'knowledge_document'
+                      AND column_name = 'embedding'
+                ) THEN
+                    ALTER TABLE knowledge_document
+                    ADD COLUMN embedding vector({dimension});
+                END IF;
+
+                IF NOT EXISTS (
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_name = 'knowledge_document'
+                      AND column_name = 'kb_id'
+                ) THEN
+                    ALTER TABLE knowledge_document
+                    ADD COLUMN kb_id BIGINT;
+                END IF;
+            END $$;
+            """))
+            self.db.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_knowledge_document_embedding
+            ON knowledge_document
+            USING ivfflat (embedding vector_cosine_ops)
+            WITH (lists = 100);
+            """))
             self.db.commit()
-            logger.info("知识库表结构初始化成功")
+            logger.info(f"知识库表结构初始化成功，embedding维度: {dimension}")
             return True
             
         except Exception as e:
@@ -78,6 +119,7 @@ class KnowledgeBaseService:
     
     def add_document(
         self,
+        kb_id: Optional[int],
         doc_code: str,
         doc_name: str,
         doc_type: str,
@@ -115,16 +157,17 @@ class KnowledgeBaseService:
             # 插入文档
             insert_sql = """
             INSERT INTO knowledge_document 
-            (doc_code, doc_name, doc_type, doc_category, doc_content, doc_url, embedding, creator_id)
+            (kb_id, doc_code, doc_name, doc_type, doc_category, doc_content, doc_url, embedding, creator_id)
             VALUES 
-            (:doc_code, :doc_name, :doc_type, :doc_category, :doc_content, :doc_url, 
-             :embedding::vector, :creator_id)
+            (:kb_id, :doc_code, :doc_name, :doc_type, :doc_category, :doc_content, :doc_url,
+             CAST(:embedding AS vector), :creator_id)
             RETURNING id
             """
             
             result = self.db.execute(
                 text(insert_sql),
                 {
+                    "kb_id": kb_id,
                     "doc_code": doc_code,
                     "doc_name": doc_name,
                     "doc_type": doc_type,
@@ -145,6 +188,132 @@ class KnowledgeBaseService:
             logger.error(f"添加知识库文档失败: {str(e)}")
             self.db.rollback()
             return None
+
+    def count_documents_missing_embeddings(self, kb_id: Optional[int] = None) -> int:
+        """统计缺失 embedding 的文档数量。"""
+        try:
+            count_sql = """
+            SELECT COUNT(*)
+            FROM knowledge_document
+            WHERE is_active = '1'
+            AND embedding IS NULL
+            AND doc_content IS NOT NULL
+            AND btrim(doc_content) <> ''
+            """
+            params: Dict[str, object] = {}
+
+            if kb_id is not None:
+                count_sql += " AND kb_id = :kb_id"
+                params["kb_id"] = kb_id
+
+            result = self.db.execute(text(count_sql), params)
+            return int(result.scalar() or 0)
+        except Exception as e:
+            logger.warning(f"统计缺失 embedding 文档失败: {str(e)}")
+            return 0
+
+    def _backfill_missing_embeddings(self, limit: int = 20, kb_id: Optional[int] = None) -> int:
+        """限量回填历史文档的缺失 embedding，避免旧文档长期无法参与语义检索。"""
+        try:
+            query_sql = """
+            SELECT id, doc_content
+            FROM knowledge_document
+            WHERE is_active = '1'
+            AND embedding IS NULL
+            AND doc_content IS NOT NULL
+            AND btrim(doc_content) <> ''
+            """
+            params: Dict[str, object] = {"limit": limit}
+
+            if kb_id is not None:
+                query_sql += " AND kb_id = :kb_id"
+                params["kb_id"] = kb_id
+
+            query_sql += """
+            ORDER BY create_time DESC, id DESC
+            LIMIT :limit
+            """
+
+            rows = self.db.execute(text(query_sql), params).fetchall()
+            if not rows:
+                return 0
+
+            embeddings = self.embedding_service.batch_get_embeddings([row[1] for row in rows])
+            updated_count = 0
+
+            update_sql = """
+            UPDATE knowledge_document
+            SET embedding = CAST(:embedding AS vector),
+                update_time = CURRENT_TIMESTAMP
+            WHERE id = :doc_id
+            """
+
+            for row, embedding in zip(rows, embeddings):
+                if embedding is None:
+                    continue
+                self.db.execute(
+                    text(update_sql),
+                    {
+                        "doc_id": row[0],
+                        "embedding": str(embedding)
+                    }
+                )
+                updated_count += 1
+
+            if updated_count > 0:
+                self.db.commit()
+                logger.info(
+                    "历史知识库文档 embedding 回填完成: kb_id=%s, 更新=%s, 扫描=%s",
+                    kb_id,
+                    updated_count,
+                    len(rows)
+                )
+
+            return updated_count
+        except Exception as e:
+            logger.warning(f"历史知识库文档 embedding 回填失败: {str(e)}")
+            self.db.rollback()
+            return 0
+
+    def backfill_missing_embeddings(
+        self,
+        batch_size: int = 100,
+        max_batches: Optional[int] = None,
+        kb_id: Optional[int] = None
+    ) -> Dict[str, int]:
+        """批量回填历史知识库文档的 embedding，适合一次性修复脚本调用。"""
+        if batch_size <= 0:
+            raise ValueError("batch_size 必须大于 0")
+        if max_batches is not None and max_batches <= 0:
+            raise ValueError("max_batches 必须大于 0")
+
+        before_count = self.count_documents_missing_embeddings(kb_id=kb_id)
+        updated_count = 0
+        batches = 0
+
+        while before_count > 0:
+            if max_batches is not None and batches >= max_batches:
+                break
+
+            current_updated = self._backfill_missing_embeddings(limit=batch_size, kb_id=kb_id)
+            batches += 1
+
+            if current_updated <= 0:
+                break
+
+            updated_count += current_updated
+
+            if current_updated < batch_size:
+                break
+
+        remaining_count = self.count_documents_missing_embeddings(kb_id=kb_id)
+
+        return {
+            "before_count": before_count,
+            "updated_count": updated_count,
+            "remaining_count": remaining_count,
+            "batches": batches
+        }
     
     def search_by_semantic(
         self,
@@ -172,13 +341,15 @@ class KnowledgeBaseService:
             if query_embedding is None:
                 logger.warning("查询文本向量化失败，使用关键词检索")
                 return self.search_by_keyword(query_text, doc_type, top_k)
+
+            self._backfill_missing_embeddings(limit=max(top_k * 2, 20))
             
             # 构建SQL查询（使用pgvector的余弦相似度函数）
             search_sql = """
             SELECT 
                 id, doc_code, doc_name, doc_type, doc_category, 
                 doc_content, doc_url, create_time,
-                1 - (embedding <=> :query_embedding::vector) as similarity
+                1 - (embedding <=> CAST(:query_embedding AS vector)) as similarity
             FROM knowledge_document
             WHERE is_active = '1'
             AND embedding IS NOT NULL
@@ -195,8 +366,8 @@ class KnowledgeBaseService:
                 params["doc_type"] = doc_type
             
             search_sql += """
-            AND (1 - (embedding <=> :query_embedding::vector)) >= :similarity_threshold
-            ORDER BY embedding <=> :query_embedding::vector
+            AND (1 - (embedding <=> CAST(:query_embedding AS vector))) >= :similarity_threshold
+            ORDER BY embedding <=> CAST(:query_embedding AS vector)
             LIMIT :top_k
             """
             
@@ -398,7 +569,7 @@ class KnowledgeBaseService:
             SELECT 
                 id, doc_code, doc_name, doc_type, doc_category, 
                 doc_content, doc_url, create_time,
-                1 - (embedding <=> :query_embedding::vector) as similarity
+                1 - (embedding <=> CAST(:query_embedding AS vector)) as similarity
             FROM knowledge_document
             WHERE is_active = '1'
             AND kb_id = :kb_id
@@ -411,6 +582,8 @@ class KnowledgeBaseService:
                 logger.warning(f"查询文本向量化失败，使用关键词检索: kb_id={kb_id}")
                 # 降级到关键词检索
                 return self._search_by_kb_id_keyword(query_text, kb_id, top_k, doc_type)
+
+            self._backfill_missing_embeddings(limit=max(top_k * 2, 20), kb_id=kb_id)
             
             params = {
                 "kb_id": kb_id,
@@ -424,8 +597,8 @@ class KnowledgeBaseService:
                 params["doc_type"] = doc_type
             
             search_sql += """
-            AND (1 - (embedding <=> :query_embedding::vector)) >= :similarity_threshold
-            ORDER BY embedding <=> :query_embedding::vector
+            AND (1 - (embedding <=> CAST(:query_embedding AS vector))) >= :similarity_threshold
+            ORDER BY embedding <=> CAST(:query_embedding AS vector)
             LIMIT :top_k
             """
             
@@ -707,4 +880,3 @@ class KnowledgeBaseService:
             merged_results.append(result)
         
         return merged_results
-

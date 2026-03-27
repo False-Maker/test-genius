@@ -53,6 +53,9 @@ Thumbs.db
 # Logs
 logs/
 *.log
+final-acceptance.log
+docker-compose-final-acceptance.log
+final-acceptance-summary.json
 
 # Environment
 .env
@@ -66,3 +69,8 @@ docker-compose.override.yml
 .cursor/
 
 .aider*
+
+# Test artifacts
+frontend/test-results/
+frontend/playwright-report/
+backend-python/ai-service/kb-embedding-backfill-result.json

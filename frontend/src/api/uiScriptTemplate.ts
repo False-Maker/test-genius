@@ -1,5 +1,4 @@
 import request from './request'
-import type { ApiResult } from './types'
 import type { PageResult } from './testReport'
 
 export interface UIScriptTemplateRequestDTO {
@@ -39,7 +38,7 @@ export const uiScriptTemplateApi = {
 
     // Get template list
     getTemplateList(page: number = 0, size: number = 10, templateName?: string, templateType?: string, scriptLanguage?: string, isActive?: string) {
-        return request.get<ApiResult<PageResult<UIScriptTemplateResponseDTO>>>('/v1/ui-script-templates', {
+        return request.get<PageResult<UIScriptTemplateResponseDTO>>('/v1/ui-script-templates', {
             params: { page, size, templateName, templateType, scriptLanguage, isActive }
         })
     },

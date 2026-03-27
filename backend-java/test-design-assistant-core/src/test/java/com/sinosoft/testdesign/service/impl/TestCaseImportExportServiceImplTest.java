@@ -103,10 +103,6 @@ class TestCaseImportExportServiceImplTest {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             when(requirementRepository.findById(1L))
                 .thenReturn(Optional.of(requirement));
-            when(testLayerRepository.findById(1L))
-                .thenReturn(Optional.of(testLayer));
-            when(testMethodRepository.findById(1L))
-                .thenReturn(Optional.of(testMethod));
             
             // When
             importExportService.exportToExcel(testCases, outputStream);
@@ -195,10 +191,6 @@ class TestCaseImportExportServiceImplTest {
         // 实际导入成功需要mock Repository的调用
         when(requirementRepository.findByRequirementCode(anyString()))
             .thenReturn(Optional.empty());
-        when(testLayerRepository.findByLayerName(anyString()))
-            .thenReturn(Optional.empty());
-        when(testMethodRepository.findByMethodName(anyString()))
-            .thenReturn(Optional.empty());
         
         // When
         // importFromExcel方法不会抛出异常，而是返回ImportResult，包含成功和失败的数量
@@ -247,4 +239,3 @@ class TestCaseImportExportServiceImplTest {
         }
     }
 }
-

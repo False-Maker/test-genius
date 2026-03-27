@@ -78,6 +78,9 @@ class ModelConfigService:
             默认模型配置，如果不存在返回None
         """
         return self.db.query(ModelConfig).filter(
-            ModelConfig.is_active == "1"
+            and_(
+                ModelConfig.is_active == "1",
+                ModelConfig.api_key.is_not(None),
+                ModelConfig.api_key != ""
+            )
         ).order_by(ModelConfig.priority.asc()).first()
-
