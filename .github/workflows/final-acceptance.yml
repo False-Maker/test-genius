@@ -22,6 +22,7 @@ jobs:
 
       - name: Run final acceptance
         env:
+          FRONTEND_DEV_PORT: "3300"
           FINAL_ACCEPTANCE_LOG_FILE: final-acceptance.log
           FINAL_ACCEPTANCE_DOCKER_LOG_FILE: docker-compose-final-acceptance.log
           FINAL_ACCEPTANCE_SUMMARY_FILE: final-acceptance-summary.json
