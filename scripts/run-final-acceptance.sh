@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KB_ID="${KB_ID:-2}"
 START_DEV_STACK="${START_DEV_STACK:-1}"
+FRONTEND_DEV_PORT="${FRONTEND_DEV_PORT:-3000}"
 WAIT_TIMEOUT_SECONDS="${WAIT_TIMEOUT_SECONDS:-300}"
 WAIT_INTERVAL_SECONDS="${WAIT_INTERVAL_SECONDS:-5}"
 FINAL_ACCEPTANCE_SUMMARY_FILE="${FINAL_ACCEPTANCE_SUMMARY_FILE:-final-acceptance-summary.json}"
@@ -145,10 +146,10 @@ fi
 run_step "Check dev containers" docker compose ps
 wait_for_http "Java liveness" http://127.0.0.1:8081/api/actuator/health/liveness
 wait_for_http "Python health" http://127.0.0.1:8001/health
-wait_for_http "Frontend login shell" http://127.0.0.1:3000/login
+wait_for_http "Frontend login shell" http://127.0.0.1:${FRONTEND_DEV_PORT}/login
 run_step "Java liveness" curl -fsS http://127.0.0.1:8081/api/actuator/health/liveness
 run_step "Python health" curl -fsS http://127.0.0.1:8001/health
-run_step "Frontend login shell" bash -lc "curl -fsS http://127.0.0.1:3000/login | sed -n '1,12p'"
+run_step "Frontend login shell" bash -lc "curl -fsS http://127.0.0.1:${FRONTEND_DEV_PORT}/login | sed -n '1,12p'"
 run_step "Frontend lint check" bash -lc "cd frontend && npm run lint:check"
 run_step "Frontend type-check" bash -lc "cd frontend && npm run type-check"
 run_step "Frontend unit tests" bash -lc "cd frontend && npm run test:run"
