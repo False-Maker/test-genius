@@ -1,0 +1,65 @@
+name: Final Acceptance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  final-acceptance:
+    name: Run Final Acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      BIGMODEL_API_KEY: ${{ secrets.BIGMODEL_API_KEY }}
+      BIGMODEL_API_BASE: ${{ secrets.BIGMODEL_API_BASE }}
+      BIGMODEL_EMBEDDING_MODEL: ${{ secrets.BIGMODEL_EMBEDDING_MODEL }}
+      BIGMODEL_EMBEDDING_DIMENSION: ${{ secrets.BIGMODEL_EMBEDDING_DIMENSION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: bash ./scripts/check-required-env.sh final-acceptance
+
+      - name: Run final acceptance
+        env:
+          FINAL_ACCEPTANCE_LOG_FILE: final-acceptance.log
+          FINAL_ACCEPTANCE_DOCKER_LOG_FILE: docker-compose-final-acceptance.log
+          FINAL_ACCEPTANCE_SUMMARY_FILE: final-acceptance-summary.json
+        run: |
+          set -euo pipefail
+          ./scripts/run-final-acceptance.sh
+
+      - name: Append workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Final Acceptance"
+            echo
+            echo "- Script: \`./scripts/run-final-acceptance.sh\`"
+            echo "- Log artifact: \`final-acceptance.log\`"
+            echo "- Docker log artifact: \`docker-compose-final-acceptance.log\`"
+            echo "- Summary artifact: \`final-acceptance-summary.json\`"
+            echo
+            if [ -f final-acceptance-summary.json ]; then
+              echo '```json'
+              cat final-acceptance-summary.json
+              echo
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload final acceptance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-acceptance-artifacts
+          path: |
+            final-acceptance.log
+            docker-compose-final-acceptance.log
+            final-acceptance-summary.json
+          retention-days: 7
+
+      - name: Tear down dev stack
+        if: always()
+        run: |
+          docker compose --profile dev down -v || true
